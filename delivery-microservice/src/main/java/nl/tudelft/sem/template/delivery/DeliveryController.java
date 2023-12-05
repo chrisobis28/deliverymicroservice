@@ -1,38 +1,62 @@
 package nl.tudelft.sem.template.delivery;
 
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
+//import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.model.Delivery;
-import org.hibernate.annotations.Parameter;
+//import org.hibernate.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+//import java.util.Optional;
 import java.util.UUID;
 
 //Mock of the User repository
 @Component
 interface UserRepository {
-  String getUserEmail();
   String getUserType(String email);
 }
 
+//Mock of the order repository
+@Component
+interface OrderRepository {
+  String getUserEmail(UUID orderId);
+}
+
 @RestController
-@RequestMapping("/deliveries")
+//@RequestMapping("/deliveries")
 public class DeliveryController implements DeliveriesApi {
   private final DeliveryRepository repo;
-  private final UserRepository repoMock;
+  private final UserRepository userMockRepo;
+  private final OrderRepository orderMockRepo;
   /**
    * Constructor for DeliveryController class
    * @param repo - repository where delivery objects are stored
    */
-  public DeliveryController(DeliveryRepository repo, UserRepository repoMock) {
+  public DeliveryController(DeliveryRepository repo, UserRepository userMockRepo, OrderRepository orderMockRepo) {
     this.repo = repo;
-    this.repoMock = repoMock;
+    this.userMockRepo = userMockRepo;
+    this.orderMockRepo = orderMockRepo;
   }
 
+  /**
+   * Checks if a string is null or empty
+   * @param str string to check
+   * @return boolean value indicating whether string is empty or not
+   */
+  public boolean isNullOrEmpty(String str) {
+    return str == null || str.isEmpty() || str.equals(" ");
+  }
+
+  /**
+   * Allows the customer to update a courier's rating
+   * @param deliveryId ID of the Delivery entity (required)
+   * @param userId User ID for authorization (required)
+   * @param body Update rating of delivery (required)
+   * @return Response entity containing the updated Delivery object
+   */
   @Override
   @RequestMapping(
       method = {RequestMethod.PUT},
@@ -41,7 +65,24 @@ public class DeliveryController implements DeliveriesApi {
       consumes = {"application/json"}
   )
   public ResponseEntity<Delivery> deliveriesDeliveryIdRatingCourierPut(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader @NotNull String userId, @RequestBody @Valid Integer body) {
-    return ResponseEntity.ok(new Delivery());
+    if (isNullOrEmpty(userId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
+      return ResponseEntity.notFound().build();
+    } else {
+      Delivery delivery = repo.findById(deliveryId).get();
+      //Call user endpoint that verifies the role of user path:"/account/type"
+      String type = userMockRepo.getUserType(userId);
+      String email = orderMockRepo.getUserEmail(deliveryId);
+      if ((!userId.equals(email) || !type.equals("customer")) && !type.equals("admin")) {
+        return ResponseEntity.badRequest().build();
+      } else {
+        delivery.setRatingCourier(body);
+        repo.save(delivery);
+        return ResponseEntity.ok(delivery);
+      }
+    }
   }
 }
 
