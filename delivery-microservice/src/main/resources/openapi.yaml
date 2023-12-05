@@ -1328,7 +1328,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /couriers/{courierId}/accepted:
+  /deliveries/all/accepted:
     get:
       summary: Get a list of orders that have been accepted
       description: Returns a list of orders that have been accepted.
@@ -1336,13 +1336,6 @@ paths:
         - Delivery
       parameters:
         - $ref: '#/components/parameters/UserId'
-        - name: courierId
-          in: path
-          description: The id of a courier we get the available orders for
-          schema:
-            type: string
-            format: email
-          required: true
       responses:
         '200':
           description: Successful response
@@ -1652,7 +1645,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /restaurants/{restaurantId}/delivery-zone:
+  /restaurants/{restaurantId}/deliver-zone:
     put:
       tags:
         - Restaurant
@@ -2294,7 +2287,7 @@ components:
     Error:
       type: object
       properties:
-        errorID:
+        errorId:
           type: string
           format: uuid
           description: Unique identifier for the problem associated with the Delivery (will be the same as deliveryID)
@@ -2312,6 +2305,7 @@ components:
       enum:
         - DELAYED
         - CANCELLED
+        - NONE
         - OTHER
     Restaurant:
       type: object
