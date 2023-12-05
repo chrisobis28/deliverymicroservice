@@ -1279,6 +1279,68 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
+  /deliveries/{deliveryId}/pickup-location:
+    get:
+      summary: Given an order tells the courier where to pick it up from
+      description: Given an order tells the courier where to pick it up from
+      tags:
+        - Delivery
+      parameters:
+        - $ref: '#/components/parameters/DeliveryId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                minItems: 2
+                maxItems: 2
+                items:
+                  type: number
+                  format: double
+                description: restaurant coordinates
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "BAD_REQUEST"
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "UNAUTHORIZED"
+        '403':
+          description: Forbidden. User lacks necessary permissions.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "FORBIDDEN"
+        '404':
+          description: Order not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating delivery not found
+                example: "DELIVERY_NOT_FOUND"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating server error
+                example: "SERVER_ERROR"
   /customers/{customerId}/orders:
     get:
       summary: Get a list of orders of a customer
