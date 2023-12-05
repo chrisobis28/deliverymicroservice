@@ -35,8 +35,13 @@ paths:
                   type: string
                   description: Status of the delivery
                 deliveryAddress:
-                  type: string
-                  description: Address for the delivery
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  items:
+                    type: number
+                    format: double
+                  description: delivery address coordinates
                 vendorId:
                   type: string
                   description: ID of the vendor associated with the delivery
@@ -682,66 +687,6 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-    put:
-      tags:
-        - Delivery
-      summary: Update the delivered time for Delivery entity
-      description: Update the delivered time of Delivery entity visible to your user role.
-      parameters:
-        - $ref: '#/components/parameters/DeliveryId'
-        - $ref: '#/components/parameters/UserId'
-      requestBody:
-        description: Update delivered time
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              format: date-time
-              description: delivered time
-      responses:
-        '200':
-          description: Update successful
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
-        '401':
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
-        '403':
-          description: Forbidden. User lacks necessary permissions. Only admins, vendors and couriers are allowed to update the assigned courier of an order.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
-        '404':
-          description: Delivery not found
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
   /deliveries/{deliveryId}/estimated-delivery-time:
     get:
       summary: Retrieve the estimated delivery time of a specific Delivery entity
@@ -867,7 +812,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Address'
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+                format: double
+              description: delivery address coordinates
       responses:
         '200':
           description: Update successful
@@ -1377,7 +1328,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/all/accepted:
+  /couriers/{courierId}/accepted:
     get:
       summary: Get a list of orders that have been accepted
       description: Returns a list of orders that have been accepted.
@@ -1385,6 +1336,13 @@ paths:
         - Delivery
       parameters:
         - $ref: '#/components/parameters/UserId'
+        - name: courierId
+          in: path
+          description: The id of a courier we get the available orders for
+          schema:
+            type: string
+            format: email
+          required: true
       responses:
         '200':
           description: Successful response
@@ -1655,7 +1613,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Address'
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+                format: double
+              description: delivery address coordinates
         required: true
       responses:
         '200':
@@ -1688,7 +1652,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /restaurants/{restaurantId}/deliver-zone:
+  /restaurants/{restaurantId}/delivery-zone:
     put:
       tags:
         - Restaurant
@@ -2310,14 +2274,6 @@ components:
             type: number
             format: double
           description: Latitude and longitude of the location the delivery is going to
-        currentLocation:
-          type: array
-          minItems: 2
-          maxItems: 2
-          items:
-            type: number
-            format: double
-          description: Latitude and longitude of the current location of the delivery
         ratingCourier:
           type: integer
           description: Rating of the delivery from 1 - 5 provided by the customer.
@@ -2381,21 +2337,6 @@ components:
           type: number
           format: double
           description: Radius of the delivery zone
-    Address:
-      type: object
-      properties:
-        countryCode:
-          type: string
-          example: NL
-        zipcode:
-          type: string
-          example: 4321AB
-        city:
-          type: string
-        streetName:
-          type: string
-        houseNumber:
-          type: string
     Statistics:
       type: object
       description: The average delay ratio for the specified courier and time period.
