@@ -10,6 +10,6 @@ class ApplicationTest {
 
     @Test
     void main() {
-        assertTrue(0==0);
+        assertTrue(true);
     }
 }

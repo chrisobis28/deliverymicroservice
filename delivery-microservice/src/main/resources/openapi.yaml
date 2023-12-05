@@ -3,8 +3,8 @@ info:
   title: YumYumNow Delivery Microservice API
   description: APIs for managing deliveries.
   version: "1.0"
-#servers:
-#  - url: https://api.server.test/delivery-microservice
+servers:
+  - url: https://api.server.test/delivery-microservice
 
 tags:
   - name: Delivery
@@ -35,8 +35,13 @@ paths:
                   type: string
                   description: Status of the delivery
                 deliveryAddress:
-                  type: string
-                  description: Address for the delivery
+                  type: array
+                  minItems: 2
+                  maxItems: 2
+                  items:
+                    type: number
+                    format: double
+                  description: delivery address coordinates
                 vendorId:
                   type: string
                   description: ID of the vendor associated with the delivery
@@ -48,6 +53,7 @@ paths:
                 - status
                 - deliveryAddress
                 - vendorID
+              additionalProperties: false
       description: Create a new Delivery entity and persist in the database
       responses:
         '201':
@@ -74,7 +80,7 @@ paths:
                 example: "NOT_FOUND"
         '500':
           description: Server error
-  /deliveries/get/{deliveryId}:
+  /deliveries/{deliveryId}:
     get:
       summary: Retrieve a specific Delivery entity
       description: Returns fields of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
@@ -137,12 +143,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  courierId:
-                    type: string
-                    format: email
-                    description: The ID of the courier
+                type: string
+                format: email
+                description: The ID of the courier
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -197,11 +200,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                courierId:
-                  type: string
-                  description: The ID of the courier to be updated
+              type: string
+              description: The ID of the courier to be updated
       responses:
         '200':
           description: Update successful
@@ -264,12 +264,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  restaurantId:
-                    type: string
-                    format: email
-                    description: The ID of the restaurant
+                type: string
+                format: email
+                description: The ID of the restaurant
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -318,12 +315,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  customerId:
-                    type: string
-                    format: email
-                    description: The ID of the customer
+                type: string
+                format: email
+                description: The ID of the customer
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -379,11 +373,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  estimatedPrepTime:
-                    type: integer
-                    description: The estimated preparation time
+                type: integer
+                description: The estimated preparation time
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -430,11 +421,8 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                estimatedPrepTime:
-                  type: integer
-                  description: The estimated time to be updated
+              type: integer
+              description: The estimated time to be updated
       responses:
         '200':
           description: Update successful
@@ -553,7 +541,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Time'
+                type: string
+                format: date-time
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -600,7 +589,8 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Time'
+              type: string
+              format: date-time
       responses:
         '200':
           description: Update successful
@@ -648,10 +638,10 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/{deliveryId}/delivery-time:
+  /deliveries/{deliveryId}/delivered-time:
     get:
-      summary: Retrieve the delivery time of a specific Delivery entity
-      description: Returns the delivery time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
+      summary: Retrieve the delivered time of a specific Delivery entity
+      description: Returns the delivered time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
       parameters:
@@ -663,7 +653,57 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Time'
+                type: string
+                format: date-time
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "BAD_REQUEST"
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "UNAUTHORIZED"
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating delivery not found
+                example: "DELIVERY_NOT_FOUND"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating server error
+                example: "SERVER_ERROR"
+  /deliveries/{deliveryId}/estimated-delivery-time:
+    get:
+      summary: Retrieve the estimated delivery time of a specific Delivery entity
+      description: Returns the estimated delivery time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
+      tags:
+        - Delivery
+      parameters:
+        - $ref: '#/components/parameters/DeliveryId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: string
+                format: date-time
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -711,16 +751,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  location:
-                    type: array
-                    minItems: 2
-                    maxItems: 2
-                    items:
-                      type: number
-                      format: double
-                    description: location (delivery address)
+                type: array
+                minItems: 2
+                maxItems: 2
+                items:
+                  type: number
+                  format: double
+                description: location (delivery address)
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -775,7 +812,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Address'
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+                format: double
+              description: delivery address coordinates
       responses:
         '200':
           description: Update successful
@@ -830,16 +873,13 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  currentLocation:
-                    type: array
-                    minItems: 2
-                    maxItems: 2
-                    items:
-                      type: number
-                      format: double
-                    description: current location (during transit)
+                type: array
+                minItems: 2
+                maxItems: 2
+                items:
+                  type: number
+                  format: double
+                description: current location (during transit)
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -880,7 +920,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/{deliveryId}/rating:
+  /deliveries/{deliveryId}/rating-courier:
     get:
       summary: Retrieve the rating of a specific Delivery entity
       description: Returns the rating of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
@@ -895,11 +935,8 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rating:
-                    type: integer
-                    description: rating
+                type: integer
+                description: rating of courier
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -954,11 +991,128 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                rating:
-                  type: integer
-                  description: The rating for the delivered order
+              type: integer
+              description: The rating of courier for the delivered order
+      responses:
+        '200':
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "BAD_REQUEST"
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "UNAUTHORIZED"
+        '403':
+          description: Forbidden. User lacks necessary permissions. Only admins and customers are allowed to update the rating of an order.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "FORBIDDEN"
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating delivery not found
+                example: "DELIVERY_NOT_FOUND"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating server error
+                example: "SERVER_ERROR"
+  /deliveries/{deliveryId}/rating-restaurant:
+    get:
+      summary: Retrieve the rating of restaurant for a specific Delivery entity
+      description: Returns the rating of restaurant for Delivery entity visible to your User role. You must specify the Delivery id and your User id.
+      tags:
+        - Delivery
+      parameters:
+        - $ref: '#/components/parameters/DeliveryId'
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: integer
+                description: rating of restaurant
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "BAD_REQUEST"
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "UNAUTHORIZED"
+        '403':
+          description: Forbidden. User lacks necessary permissions.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "FORBIDDEN"
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating delivery not found
+                example: "DELIVERY_NOT_FOUND"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating server error
+                example: "SERVER_ERROR"
+    put:
+      tags:
+        - Delivery
+      summary: Update rating for Delivery entity
+      description: Update rating of Delivery entity visible to your user role. For example, a Customer can give a rating to a delivered order.
+      parameters:
+        - $ref: '#/components/parameters/DeliveryId'
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        description: Update rating of restaurant for delivery
+        required: true
+        content:
+          application/json:
+            schema:
+              type: integer
+              description: The rating of restaurant for the delivered order
       responses:
         '200':
           description: Update successful
@@ -1021,12 +1175,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  rating:
-                    type: string
-                    description: status
-                    example: "DELIVERED"
+                type: string
+                description: status
+                example: "DELIVERED"
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -1128,7 +1279,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/orders-of-customer:
+  /customers/{customerId}/orders:
     get:
       summary: Get a list of orders of a customer
       description: Returns a list of order ids given a customer id
@@ -1136,10 +1287,11 @@ paths:
         - Delivery
       parameters:
         - name: customerId
-          in: query
+          in: path
           description: The id of a customer we want to get the orders of
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Successful response
@@ -1176,7 +1328,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/accepted-orders:
+  /deliveries/all/accepted:
     get:
       summary: Get a list of orders that have been accepted
       description: Returns a list of orders that have been accepted.
@@ -1210,7 +1362,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/ratings:
+  /couriers/{courierId}/ratings:
     get:
       summary: Get the ratings of a courier
       description: Returns a list of ratings by given courier id
@@ -1218,10 +1370,11 @@ paths:
         - Delivery
       parameters:
         - name: courierId
-          in: query
+          in: path
           description: The id of a courier we want to see the ratings of
           schema:
             type: string
+          required: true
       responses:
         '200':
           description: Successful response
@@ -1257,14 +1410,19 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /deliveries/orders-of-courier:
+  /couriers/{courierId}/orders:
     get:
       summary: Retrieve a list of delivery Ids for a specific courier Id
       description: Returns a list of delivery Ids for a specific courier Id. You must specify the courier id.
       tags:
         - Delivery
       parameters:
-        - $ref: '#/components/parameters/CourierId'
+        - name: courierId
+          in: path
+          description: The id of a courier we want to see the ratings of
+          schema:
+            type: string
+          required: true
       responses:
         '200':
           description: Successful response
@@ -1448,7 +1606,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Address'
+              type: array
+              minItems: 2
+              maxItems: 2
+              items:
+                type: number
+                format: double
+              description: delivery address coordinates
         required: true
       responses:
         '200':
@@ -1654,10 +1818,6 @@ paths:
       responses:
         '200':
           description: Delivery zone update successful
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Restaurant'
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -1799,36 +1959,25 @@ paths:
       tags:
         - Analytics
       description: For the specified period get the driver efficiency in terms of delay, success rate and average rating. Those 3 statistics are expressed as a Statistics object.
-
       parameters:
         - $ref: "#/components/parameters/UserId"
         - name: startTime
           in: query
           schema:
-            $ref: "#/components/schemas/Time"
+            type: string
+            format: date-time
         - name: endTime
           in: query
           schema:
-            $ref: "#/components/schemas/Time"
+            type: string
+            format: date-time
       responses:
         '200':
           description: Successfully computed statistic
           content:
             application/json:
               schema:
-                type: object
-                description: The average delay ratio for the specified courier and time period.
-                properties:
-                  deliveryTimeRatio:
-                    type: number
-                    description: Average actual time of delivery versus the expected time
-                  successRate:
-                    type: number
-                    description: Ratio of successful deliveries among all deliveries
-                  averageRating:
-                    type: number
-                    description: Average user rating of deliveries
-
+                $ref: '#/components/schemas/Statistics'
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -2118,17 +2267,12 @@ components:
             type: number
             format: double
           description: Latitude and longitude of the location the delivery is going to
-        currentLocation:
-          type: array
-          minItems: 2
-          maxItems: 2
-          items:
-            type: number
-            format: double
-          description: Latitude and longitude of the current location of the delivery
-        rating:
+        ratingCourier:
           type: integer
           description: Rating of the delivery from 1 - 5 provided by the customer.
+        ratingRestaurant:
+          type: integer
+          description: Rating of the food from 1 - 5 provided by the customer.
     DeliveryStatus:
       type: string
       description: Updates on where the order is on its journey
@@ -2143,13 +2287,16 @@ components:
     Error:
       type: object
       properties:
-        errorID:
+        errorId:
           type: string
           format: uuid
           description: Unique identifier for the problem associated with the Delivery (will be the same as deliveryID)
         reason:
           type: string
           description: Reason (provided by courier) for problems with delivery
+        value:
+          type: integer
+          description: optional field to indicate delay in minutes
         type:
           $ref: "#/components/schemas/ErrorType"
     ErrorType:
@@ -2158,6 +2305,7 @@ components:
       enum:
         - DELAYED
         - CANCELLED
+        - NONE
         - OTHER
     Restaurant:
       type: object
@@ -2177,27 +2325,25 @@ components:
           maxItems: 2
           items:
             type: number
+            format: double
           description: Longitude and latitude of the restaurant
         deliveryZone:
           type: number
+          format: double
           description: Radius of the delivery zone
-    Time:
-      type: string
-      description: Date and time
-      format: YYYY-MM-DD HH:mm
-      example: "2023-11-19 18:20"
-    Address:
+    Statistics:
       type: object
+      description: The average delay ratio for the specified courier and time period.
       properties:
-        countryCode:
-          type: string
-          example: NL
-        zipcode:
-          type: string
-          example: 4321AB
-        city:
-          type: string
-        streetName:
-          type: string
-        houseNumber:
-          type: string
+        deliveryTimeRatio:
+          type: number
+          format: double
+          description: Average actual time of delivery versus the expected time
+        successRate:
+          type: number
+          format: double
+          description: Ratio of successful deliveries among all deliveries
+        averageRating:
+          type: number
+          format: double
+          description: Average user rating of deliveries
