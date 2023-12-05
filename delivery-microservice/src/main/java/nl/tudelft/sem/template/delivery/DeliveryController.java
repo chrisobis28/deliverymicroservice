@@ -84,7 +84,36 @@ public class DeliveryController implements DeliveriesApi {
       }
     }
   }
-}
+
+  @Override
+  @RequestMapping(
+      method = {RequestMethod.PUT},
+      value = {"/deliveries/{deliveryId}/rating-restaurant"},
+      produces = {"application/json"},
+      consumes = {"application/json"}
+  )
+  public ResponseEntity<Delivery> deliveriesDeliveryIdRatingRestaurantPut(/*@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) */@PathVariable("deliveryId") UUID deliveryId, /*@Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER)*/ @RequestHeader @NotNull String userId, /*@Parameter(name = "body",description = "Update rating of restaurant for delivery",required = true) */@RequestBody @Valid Integer body) {
+    if (isNullOrEmpty(userId)) {
+      return ResponseEntity.badRequest().build();
+    }
+    if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
+      return ResponseEntity.notFound().build();
+    } else {
+      Delivery delivery = repo.findById(deliveryId).get();
+      //Call user endpoint that verifies the role of user path:"/account/type"
+      String type = userMockRepo.getUserType(userId);
+      String email = orderMockRepo.getUserEmail(deliveryId);
+      if ((!userId.equals(email) || !type.equals("customer")) && !type.equals("admin")) {
+        return ResponseEntity.badRequest().build();
+      } else {
+        delivery.setRatingRestaurant(body);
+        repo.save(delivery);
+        return ResponseEntity.ok(delivery);
+      }
+    }
+  }
+
+  }
 
 /*
 * @RequestMapping(
