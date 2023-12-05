@@ -111,7 +111,7 @@ task customCheckstyle(type: Checkstyle) {
 }
 
 checkstyle {
-	toolVersion "8.37"
+	toolVersion "10.12.5"
 	// Link Checkstyle task to customCheckstyle
 	configFile = customCheckstyle.configFile
 	ignoreFailures = false // Set to true if you want the build to ignore Checkstyle failures
