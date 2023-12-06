@@ -1,17 +1,14 @@
 package nl.tudelft.sem.template.delivery;
 
-//import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.model.Delivery;
-//import org.hibernate.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
 import static org.mockito.Mockito.*;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-//import java.util.Optional;
 import java.util.UUID;
 
 //Mock of the User repository
