@@ -14,8 +14,19 @@ public class DeliveryDao {
         this.deliveryRepository = deliveryRepository;
     }
 
-    public Optional<DeliveryStatus> getDeliveryStatus(UUID deliveryId) {
+    public DeliveryStatus getDeliveryStatus(UUID deliveryId) {
         Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(Delivery::getStatus);
+        return delivery.map(Delivery::getStatus).orElseThrow(DeliveryNotFoundException::new);
     }
+
+    public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
+        Optional<Delivery> deliveryOptional = deliveryRepository.findById(deliveryId);
+        if (deliveryOptional.isEmpty()) throw new DeliveryNotFoundException();
+
+        Delivery delivery = deliveryOptional.get();
+        delivery.setStatus(deliveryStatus);
+        deliveryRepository.save(delivery);
+    }
+
+    public static class DeliveryNotFoundException extends RuntimeException {}
 }

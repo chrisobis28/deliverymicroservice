@@ -24,21 +24,33 @@ class DeliveryStatusTest {
     public DeliveryDao deliveryDao;
 
     @Test
-    void Returns_delivery_status_when_findById_called() {
+    void Returns_delivery_status_when_getDeliveryStatus_called() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
         delivery.setStatus(DeliveryStatus.ACCEPTED);
 
         when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
-        assertThat(deliveryDao.getDeliveryStatus(deliveryId)).isEqualTo(Optional.of(DeliveryStatus.ACCEPTED));
+        assertThat(deliveryDao.getDeliveryStatus(deliveryId)).isEqualTo(DeliveryStatus.ACCEPTED);
     }
 
     @Test
-    void Returns_empty_when_deliveryId_not_found() {
-        UUID incorrectDeliveryId = UUID.randomUUID();
+    void Throws_deliveryNotFound_when_deliveryId_is_invalid() {
+        UUID invalidDeliveryId = UUID.randomUUID();
         when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThat(deliveryDao.getDeliveryStatus(incorrectDeliveryId)).isEqualTo(Optional.empty());
+        assertThatExceptionOfType(DeliveryDao.DeliveryNotFoundException.class)
+                .isThrownBy(() -> deliveryDao.getDeliveryStatus(invalidDeliveryId));
+    }
 
+    @Test
+    void Updates_status_when_updateDeliveryStatus_called() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+
+        when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
+        deliveryDao.updateDeliveryStatus(deliveryId, DeliveryStatus.DELIVERED);
+        verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
+                x.getDeliveryID().equals(deliveryId) && x.getStatus().equals(DeliveryStatus.DELIVERED)));
     }
 }
