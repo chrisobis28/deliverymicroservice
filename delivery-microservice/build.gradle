@@ -77,7 +77,7 @@ test {
 	jacoco {
 		enabled = true
 		includes = ['nl.tudelft.sem.template.*']
-		excludes = []
+		excludes = ['**/generated/.*']
 	}
 }
 
@@ -92,6 +92,7 @@ jacocoTestCoverageVerification() {
 			enabled = true
 			element = 'CLASS'
 			includes = ['nl.tudelft.sem.template.*']
+			excludes = ['**/generated/.*']
 
 			limit {
 				counter = 'BRANCH'
