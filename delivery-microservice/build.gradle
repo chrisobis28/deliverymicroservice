@@ -125,9 +125,19 @@ checkstyle {
 pmd {
 	incrementalAnalysis = true
 	ignoreFailures = true
-	sourceSets = [sourceSets.main]
 	// Exclude specific rules or files/directories
 	pmdMain {
+		source = project.sourceSets.main.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('generated') // Example condition, modify as per your generated code path
+		}
+		excludes = ['**/generated/.*']
+	}
+	pmdTest {
+		source = project.sourceSets.test.allJava.filter { file ->
+			// Exclude directories or files associated with generated code
+			!file.path.contains('generated') // Example condition, modify as per your generated code path
+		}
 		excludes = ['**/generated/.*']
 	}
 }
