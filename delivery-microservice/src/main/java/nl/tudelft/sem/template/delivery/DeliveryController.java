@@ -7,16 +7,15 @@ import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.model.Delivery;
 //import org.hibernate.annotations.Parameter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import static org.mockito.Mockito.*;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 //import java.util.Optional;
 import java.util.UUID;
 
 //Mock of the User repository
-@Component
+//@Component
 interface UserRepository {
   String getUserType(String email);
 }
@@ -28,19 +27,18 @@ interface OrderRepository {
 }*/
 
 @RestController
-//@RequestMapping("/deliveries")
+@RequestMapping("/deliveries")
 public class DeliveryController implements DeliveriesApi {
   private final DeliveryRepository repo;
-  private final UserRepository userMockRepo;
+  //@Mock
+  UserRepository userMockRepo = mock(UserRepository.class);
   //private final OrderRepository orderMockRepo;
   /**
    * Constructor for DeliveryController class
    * @param repo - repository where delivery objects are stored
    */
-  public DeliveryController(DeliveryRepository repo, UserRepository userMockRepo/*, OrderRepository orderMockRepo*/) {
+  public DeliveryController(DeliveryRepository repo/*, UserRepository userMockRepo, OrderRepository orderMockRepo*/) {
     this.repo = repo;
-    this.userMockRepo = userMockRepo;
-    //this.orderMockRepo = orderMockRepo;
   }
 
   /**
@@ -62,7 +60,7 @@ public class DeliveryController implements DeliveriesApi {
   @Override
   @RequestMapping(
       method = {RequestMethod.PUT},
-      value = {"/deliveries/{deliveryId}/rating-courier"},
+      value = {"/{deliveryId}/rating-courier"},
       produces = {"application/json"},
       consumes = {"application/json"}
   )
@@ -91,7 +89,7 @@ public class DeliveryController implements DeliveriesApi {
   @Override
   @RequestMapping(
       method = {RequestMethod.PUT},
-      value = {"/deliveries/{deliveryId}/rating-restaurant"},
+      value = {"/{deliveryId}/rating-restaurant"},
       produces = {"application/json"},
       consumes = {"application/json"}
   )
@@ -120,7 +118,7 @@ public class DeliveryController implements DeliveriesApi {
   @Override
   @RequestMapping(
       method = {RequestMethod.GET},
-      value = {"/deliveries/{deliveryId}/rating-restaurant"},
+      value = {"/{deliveryId}/rating-restaurant"},
       produces = {"application/json"}
   )
   public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
@@ -147,7 +145,7 @@ public class DeliveryController implements DeliveriesApi {
   @Override
   @RequestMapping(
       method = {RequestMethod.GET},
-      value = {"/deliveries/{deliveryId}/rating-courier"},
+      value = {"/{deliveryId}/rating-courier"},
       produces = {"application/json"}
   )
   public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
