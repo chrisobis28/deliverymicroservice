@@ -1,6 +1,8 @@
 package nl.tudelft.sem.template.delivery;
 
 //import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.model.Delivery;
 //import org.hibernate.annotations.Parameter;
@@ -19,26 +21,26 @@ interface UserRepository {
   String getUserType(String email);
 }
 
-//Mock of the order repository
-@Component
+//Mock of the order repository - we'll need it later, so I'm keeping it in delivery controller, even though I don't need it atm
+/*@Component
 interface OrderRepository {
   String getUserEmail(UUID orderId);
-}
+}*/
 
 @RestController
 //@RequestMapping("/deliveries")
 public class DeliveryController implements DeliveriesApi {
   private final DeliveryRepository repo;
   private final UserRepository userMockRepo;
-  private final OrderRepository orderMockRepo;
+  //private final OrderRepository orderMockRepo;
   /**
    * Constructor for DeliveryController class
    * @param repo - repository where delivery objects are stored
    */
-  public DeliveryController(DeliveryRepository repo, UserRepository userMockRepo, OrderRepository orderMockRepo) {
+  public DeliveryController(DeliveryRepository repo, UserRepository userMockRepo/*, OrderRepository orderMockRepo*/) {
     this.repo = repo;
     this.userMockRepo = userMockRepo;
-    this.orderMockRepo = orderMockRepo;
+    //this.orderMockRepo = orderMockRepo;
   }
 
   /**
@@ -74,9 +76,10 @@ public class DeliveryController implements DeliveriesApi {
       Delivery delivery = repo.findById(deliveryId).get();
       //Call user endpoint that verifies the role of user path:"/account/type"
       String type = userMockRepo.getUserType(userId);
-      String email = orderMockRepo.getUserEmail(deliveryId);
-      if ((!userId.equals(email) || !type.equals("customer")) && !type.equals("admin")) {
-        return ResponseEntity.badRequest().build();
+      String email = delivery.getCustomerID();
+      boolean isCustomer = userId.equals(email) && type.equals("customer");
+      if (!isCustomer && !type.equals("admin")) {
+        return ResponseEntity.status(403).build();
       } else {
         delivery.setRatingCourier(body);
         repo.save(delivery);
@@ -102,9 +105,10 @@ public class DeliveryController implements DeliveriesApi {
       Delivery delivery = repo.findById(deliveryId).get();
       //Call user endpoint that verifies the role of user path:"/account/type"
       String type = userMockRepo.getUserType(userId);
-      String email = orderMockRepo.getUserEmail(deliveryId);
-      if ((!userId.equals(email) || !type.equals("customer")) && !type.equals("admin")) {
-        return ResponseEntity.badRequest().build();
+      String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
+      boolean isCustomer = userId.equals(email) && type.equals("customer");
+      if (!isCustomer && !type.equals("admin")) {
+        return ResponseEntity.status(403).build();
       } else {
         delivery.setRatingRestaurant(body);
         repo.save(delivery);
@@ -113,6 +117,59 @@ public class DeliveryController implements DeliveriesApi {
     }
   }
 
+  @Override
+  @RequestMapping(
+      method = {RequestMethod.GET},
+      value = {"/deliveries/{deliveryId}/rating-restaurant"},
+      produces = {"application/json"}
+  )
+  public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
+    //Only people that can see rating is the customer who left the rating, the vendor and the admin
+    if (isNullOrEmpty(userId)) {
+      return ResponseEntity.badRequest().build();
+    }if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
+      return ResponseEntity.notFound().build();
+    } else {
+      Delivery delivery = repo.findById(deliveryId).get();
+      String type = userMockRepo.getUserType(userId);
+      String restaurantEmail = delivery.getRestaurantID();
+      String customerEmail = delivery.getRestaurantID();
+      boolean isVendor = type.equals("vendor") && restaurantEmail.equals(userId);
+      boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
+      if (!type.equals("admin") && !isVendor && !isCustomer) {
+        return ResponseEntity.status(403).build();
+      } else {
+        return ResponseEntity.ok(delivery.getRatingRestaurant());
+      }
+    }
+  }
+
+  @Override
+  @RequestMapping(
+      method = {RequestMethod.GET},
+      value = {"/deliveries/{deliveryId}/rating-courier"},
+      produces = {"application/json"}
+  )
+  public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
+    //Only people that can see rating is the customer who left the rating, the courier and the admin
+    if (isNullOrEmpty(userId)) {
+      return ResponseEntity.badRequest().build();
+    }if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
+      return ResponseEntity.notFound().build();
+    } else {
+      Delivery delivery = repo.findById(deliveryId).get();
+      String type = userMockRepo.getUserType(userId);
+      String courierEmail = delivery.getCourierID();
+      String customerEmail = delivery.getRestaurantID();
+      boolean isCourier = type.equals("courier") && courierEmail.equals(userId);
+      boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
+      if (!type.equals("admin") && !isCourier && !isCustomer) {
+        return ResponseEntity.status(403).build();
+      } else {
+        return ResponseEntity.ok(delivery.getRatingCourier());
+      }
+    }
+  }
   }
 
 /*

@@ -31,6 +31,39 @@ plugins {
 	id 'org.openapi.generator' version '4.0.1'
 }
 
+buildscript {
+	repositories {
+		mavenCentral()
+		mavenLocal()
+		//Needed only for SNAPSHOT versions
+		//maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+	}
+	dependencies {
+		classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.5.2'
+		classpath "org.openapitools:openapi-generator-gradle-plugin:6.6.0"
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.3.5.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'java'
+	// Test coverage
+	id 'jacoco'
+
+	// Code style
+	id 'checkstyle'
+
+	// PMD
+	id 'pmd'
+
+	// PITest
+	id 'info.solidsoft.pitest' version '1.5.2'
+
+	// OpenAPI
+	id 'org.openapi.generator' version '4.0.1'
+}
+
 group = 'nl.tudelft.cse.sem.template'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = 15
