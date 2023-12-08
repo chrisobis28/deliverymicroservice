@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-@RestController("/deliveries")
+@RestController
 public class DeliveryController implements DeliveriesApi {
 
     private final DeliveryDao deliveryDao;
@@ -18,15 +18,13 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     @Override
-    @GetMapping("/{deliveryId}/status")
-    public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestParam String userId) {
+    public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         DeliveryStatus status = deliveryDao.getDeliveryStatus(deliveryId);
         return ResponseEntity.ok(status.toString());
     }
 
     @Override
-    @PutMapping("/{deliveryId}/status")
-    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestParam String userId, @RequestBody String statusString) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
         DeliveryStatus status = DeliveryStatus.fromValue(statusString);
         deliveryDao.updateDeliveryStatus(deliveryId, status);
         Delivery updatedDelivery = deliveryDao.getDelivery(deliveryId);
