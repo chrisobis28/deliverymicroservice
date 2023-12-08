@@ -31,14 +31,14 @@ public class DeliveryDao {
     }
 
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
-        Optional<Delivery> deliveryOptional = deliveryRepository.findById(deliveryId);
-        if (deliveryOptional.isEmpty()) throw new DeliveryNotFoundException();
-
-        Delivery delivery = deliveryOptional.get();
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
         deliveryRepository.save(delivery);
     }
 
+    /**
+     * Exception to be used when a Delivery entity with a given ID is not found.
+     */
     static public class DeliveryNotFoundException extends ResponseStatusException {
         public DeliveryNotFoundException() {
             super(HttpStatus.NOT_FOUND, "Delivery with specified id not found");
