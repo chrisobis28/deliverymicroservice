@@ -4,7 +4,7 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +39,9 @@ public class DeliveryDao {
         deliveryRepository.save(delivery);
     }
 
-    @ResponseStatus(code = HttpStatus.NOT_FOUND, reason = "Delivery entity with specified id not found")
-    public static class DeliveryNotFoundException extends RuntimeException {}
+    static public class DeliveryNotFoundException extends ResponseStatusException {
+        public DeliveryNotFoundException() {
+            super(HttpStatus.NOT_FOUND, "Delivery with specified id not found");
+        }
+    }
 }
