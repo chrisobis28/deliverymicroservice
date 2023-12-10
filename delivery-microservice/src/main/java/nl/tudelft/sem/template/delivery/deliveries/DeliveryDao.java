@@ -36,6 +36,11 @@ public class DeliveryDao {
         deliveryRepository.save(delivery);
     }
 
+    public Integer getOrderRating(UUID deliveryId) {
+        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
+        return delivery.map(x -> x.getRatingRestaurant()).orElseThrow(DeliveryNotFoundException::new);
+    }
+
     /**
      * Exception to be used when a Delivery entity with a given ID is not found.
      */

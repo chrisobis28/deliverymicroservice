@@ -2022,6 +2022,11 @@ paths:
         - Analytics
       description: For the specified period get the driver efficiency in terms of delay, success rate and average rating. Those 3 statistics are expressed as a Statistics object.
       parameters:
+        - name: userID
+          in: header
+          description: User ID for authorization
+          schema:
+            type: string
         - $ref: "#/components/parameters/UserId"
         - name: startTime
           in: query
@@ -2122,28 +2127,28 @@ paths:
       description: For the specified period, gets the deliveries having a specified unexpected event enum type and finds their ratio with all deliveries.
       parameters:
         - name: userID
-          in: query
+          in: header
           description: User ID for authorization
-          required: false
+          required: true
           schema:
             type: string
         - name: startTime
           in: query
-          required: false
+          required: true
           description: Start time with format YYYY-MM-DD HH:mm
           schema:
             type: string
             example: "2023-11-19 18:20"
         - name: endTime
           in: query
-          required: false
+          required: true
           description: End time with format YYYY-MM-DD HH:mm
           schema:
             type: string
             example: "2023-11-19 18:20"
         - name: unexpectedEvent
           in: query
-          required: false
+          required: true
           description: Enum type of the unexpected event
           schema:
             $ref: '#/components/schemas/ErrorType'
@@ -2203,15 +2208,22 @@ paths:
       tags:
         - Analytics
       parameters:
-        - name: orderIds
+        - name: userID
           in: header
-          description: Array of order ids
+          description: User ID for authorization
           required: true
           schema:
-            type: array
-            items:
-              type: string
-              format: uuid
+            type: string
+      requestBody:
+        description: Array of order ids
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+        required: true
       responses:
         '200':
           description: Successfully returned ratings
