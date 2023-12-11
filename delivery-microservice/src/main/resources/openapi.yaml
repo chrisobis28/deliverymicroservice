@@ -2298,9 +2298,11 @@ components:
   schemas:
     Delivery:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
         deliveryID:
           type: string
+          x-field-extra-annotation: "@javax.persistence.Id"
           format: uuid
           description: Unique identifier for the Delivery (will be the same as orderID)
         courierID:
@@ -2360,10 +2362,12 @@ components:
         - DELIVERED
     Error:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
         errorId:
           type: string
           format: uuid
+          x-field-extra-annotation: "@javax.persistence.Id"
           description: Unique identifier for the problem associated with the Delivery (will be the same as deliveryID)
         reason:
           type: string
@@ -2383,9 +2387,11 @@ components:
         - OTHER
     Restaurant:
       type: object
+      x-class-extra-annotation: "@javax.persistence.Entity"
       properties:
         restaurantID:
           type: string
+          x-field-extra-annotation: "@javax.persistence.Id"
           format: email
           description: Unique identifier for the restaurant
         couriers:
