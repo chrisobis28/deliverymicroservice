@@ -2022,6 +2022,11 @@ paths:
         - Analytics
       description: For the specified period get the driver efficiency in terms of delay, success rate and average rating. Those 3 statistics are expressed as a Statistics object.
       parameters:
+        - name: userID
+          in: header
+          description: User ID for authorization
+          schema:
+            type: string
         - $ref: "#/components/parameters/UserId"
         - name: startTime
           in: query
@@ -2122,28 +2127,28 @@ paths:
       description: For the specified period, gets the deliveries having a specified unexpected event enum type and finds their ratio with all deliveries.
       parameters:
         - name: userID
-          in: query
+          in: header
           description: User ID for authorization
-          required: false
+          required: true
           schema:
             type: string
         - name: startTime
           in: query
-          required: false
+          required: true
           description: Start time with format YYYY-MM-DD HH:mm
           schema:
             type: string
             example: "2023-11-19 18:20"
         - name: endTime
           in: query
-          required: false
+          required: true
           description: End time with format YYYY-MM-DD HH:mm
           schema:
             type: string
             example: "2023-11-19 18:20"
         - name: unexpectedEvent
           in: query
-          required: false
+          required: true
           description: Enum type of the unexpected event
           schema:
             $ref: '#/components/schemas/ErrorType'
@@ -2203,15 +2208,22 @@ paths:
       tags:
         - Analytics
       parameters:
-        - name: orderIds
+        - name: userID
           in: header
-          description: Array of order ids
+          description: User ID for authorization
           required: true
           schema:
-            type: array
-            items:
-              type: string
-              format: uuid
+            type: string
+      requestBody:
+        description: Array of order ids
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+                format: uuid
+        required: true
       responses:
         '200':
           description: Successfully returned ratings
@@ -2286,7 +2298,7 @@ components:
   schemas:
     Delivery:
       type: object
-      x-class-extra-annotation: "@javax.persistence.Entity"
+      x-class-extra-annotation: "@javax.persistence.Entity @javax.persistence.Table(name = \"deliveries\")"
       properties:
         deliveryID:
           type: string
@@ -2294,36 +2306,43 @@ components:
           format: uuid
           description: Unique identifier for the Delivery (will be the same as orderID)
         courierID:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"courierId\")"
           type: string
           format: email
           description: Unique identifier for the Courier assigned to the Delivery (will be taken from the Courier entity)
         restaurantID:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"restaurantId\")"
           type: string
           format: email
           description: Unique identifier for the restaurant making the Delivery.
         customerID:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"customerId\")"
           type: string
           format: email
           description: Unique identifier for the customer ordering the Delivery.
         estimatedPrepTime:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"estimatedPrepTime\")"
           type: integer
           format: minutes
           description: Estimated time to cook/prepare the order
-        unexpectedEvent:
+        error:
           $ref: '#/components/schemas/Error'
         status:
           $ref: "#/components/schemas/DeliveryStatus"
         pickup_time:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"pickupTime\")"
           type: string
           format: date-time
           description: Pick-up time in YYYY-MM-DD HH:mm format
           example: "2023-11-19 18:20"
         delivered_time:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"deliveredTime\")"
           type: string
           format: date-time
           description: Delivered time in YYYY-MM-DD HH:mm format
           example: "2023-11-19 18:20"
         deliveryAddress:
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"deliveryAddress\")"
           type: array
           minItems: 2
           maxItems: 2
@@ -2332,9 +2351,11 @@ components:
             format: double
           description: Latitude and longitude of the location the delivery is going to
         ratingCourier:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"ratingCourier\")"
           type: integer
           description: Rating of the delivery from 1 - 5 provided by the customer.
         ratingRestaurant:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"ratingRestaurant\")"
           type: integer
           description: Rating of the food from 1 - 5 provided by the customer.
     DeliveryStatus:
@@ -2350,7 +2371,8 @@ components:
         - DELIVERED
     Error:
       type: object
-      x-class-extra-annotation: "@javax.persistence.Entity"
+      x-class-extra-annotation: "@javax.persistence.Entity @javax.persistence.Table(name = \"errors\")"
+      x-field-extra-annotation: '@javax.persistence.OneToOne @javax.persistence.JoinColumn(name = "error_id")'
       properties:
         errorId:
           type: string
@@ -2359,9 +2381,11 @@ components:
           description: Unique identifier for the problem associated with the Delivery (will be the same as deliveryID)
         reason:
           type: string
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"reason\")"
           description: Reason (provided by courier) for problems with delivery
         value:
           type: integer
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"value\")"
           description: optional field to indicate delay in minutes
         type:
           $ref: "#/components/schemas/ErrorType"
@@ -2383,11 +2407,13 @@ components:
           format: email
           description: Unique identifier for the restaurant
         couriers:
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"couriers\")"
           type: array
           items:
             type: string
             description: List of couriers the restaurant prefers
         location:
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"location\")"
           type: array
           minItems: 2
           maxItems: 2
@@ -2396,6 +2422,7 @@ components:
             format: double
           description: Longitude and latitude of the restaurant
         deliveryZone:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"deliveryZone\")"
           type: number
           format: double
           description: Radius of the delivery zone
