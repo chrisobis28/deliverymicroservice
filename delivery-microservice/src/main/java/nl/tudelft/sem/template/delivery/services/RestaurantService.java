@@ -15,6 +15,10 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
+    /**
+     * Constructor
+     * @param restaurantRepository
+     */
     public RestaurantService(RestaurantRepository restaurantRepository) {
         this.restaurantRepository = restaurantRepository;
     }
@@ -23,6 +27,11 @@ public class RestaurantService {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
     }
 
+    /**
+     * Inserts the restaurant into the repo
+     * @param restaurant
+     * @return the entity
+     */
     public Restaurant insert(Restaurant restaurant) {
         if (restaurant == null) {
             throw new IllegalArgumentException();
