@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.delivery.deliveries;
 
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.Test;
@@ -21,7 +23,7 @@ class DeliveryStatusTest {
     public DeliveryRepository deliveryRepositoryMock;
 
     @InjectMocks
-    public DeliveryDao deliveryDao;
+    public DeliveryService deliveryService;
 
     @Test
     void Returns_delivery_status_when_getDeliveryStatus_called() {
@@ -31,15 +33,15 @@ class DeliveryStatusTest {
         delivery.setStatus(DeliveryStatus.ACCEPTED);
 
         when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
-        assertThat(deliveryDao.getDeliveryStatus(deliveryId)).isEqualTo(DeliveryStatus.ACCEPTED);
+        assertThat(deliveryService.getDeliveryStatus(deliveryId)).isEqualTo(DeliveryStatus.ACCEPTED);
     }
 
     @Test
     void Throws_deliveryNotFound_when_deliveryId_is_invalid() {
         UUID invalidDeliveryId = UUID.randomUUID();
         when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThatExceptionOfType(DeliveryDao.DeliveryNotFoundException.class)
-                .isThrownBy(() -> deliveryDao.getDeliveryStatus(invalidDeliveryId));
+        assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
+                .isThrownBy(() -> deliveryService.getDeliveryStatus(invalidDeliveryId));
     }
 
     @Test
@@ -49,7 +51,7 @@ class DeliveryStatusTest {
         delivery.setDeliveryID(deliveryId);
 
         when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
-        deliveryDao.updateDeliveryStatus(deliveryId, DeliveryStatus.DELIVERED);
+        deliveryService.updateDeliveryStatus(deliveryId, DeliveryStatus.DELIVERED);
         verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
                 x.getDeliveryID().equals(deliveryId) && x.getStatus().equals(DeliveryStatus.DELIVERED)));
     }
