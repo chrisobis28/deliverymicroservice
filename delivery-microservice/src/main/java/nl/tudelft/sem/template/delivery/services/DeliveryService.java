@@ -1,5 +1,6 @@
-package nl.tudelft.sem.template.delivery.deliveries;
+package nl.tudelft.sem.template.delivery.services;
 
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,7 @@ import java.util.UUID;
  * This class is a Service for accessing and modifying Delivery entities.
  */
 @Service
-public class DeliveryDao {
+public class DeliveryService {
 
     @Autowired
     private DeliveryRepository deliveryRepository;
@@ -32,11 +33,6 @@ public class DeliveryDao {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
         deliveryRepository.save(delivery);
-    }
-
-    public Integer getOrderRating(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(x -> x.getRatingRestaurant()).orElseThrow(DeliveryNotFoundException::new);
     }
 
     /**

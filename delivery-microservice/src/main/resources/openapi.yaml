@@ -2326,9 +2326,7 @@ components:
           format: minutes
           description: Estimated time to cook/prepare the order
         error:
-          anyOf:
-            - $ref: '#/components/schemas/Error'
-          x-field-extra-annotation: '@javax.persistence.OneToOne'
+          $ref: '#/components/schemas/Error'
         status:
           $ref: "#/components/schemas/DeliveryStatus"
         pickup_time:
@@ -2344,7 +2342,7 @@ components:
           description: Delivered time in YYYY-MM-DD HH:mm format
           example: "2023-11-19 18:20"
         deliveryAddress:
-          x-field-extra-annotation: "@javax.persistence.Column(name = \"deliveryAddress\")"
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"deliveryAddress\")"
           type: array
           minItems: 2
           maxItems: 2
@@ -2374,6 +2372,7 @@ components:
     Error:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity @javax.persistence.Table(name = \"errors\")"
+      x-field-extra-annotation: '@javax.persistence.OneToOne @javax.persistence.JoinColumn(name = "error_id")'
       properties:
         errorId:
           type: string
@@ -2408,13 +2407,13 @@ components:
           format: email
           description: Unique identifier for the restaurant
         couriers:
-          x-field-extra-annotation: "@javax.persistence.Column(name = \"couriers\")"
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"couriers\")"
           type: array
           items:
             type: string
             description: List of couriers the restaurant prefers
         location:
-          x-field-extra-annotation: "@javax.persistence.Column(name = \"location\")"
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"location\")"
           type: array
           minItems: 2
           maxItems: 2

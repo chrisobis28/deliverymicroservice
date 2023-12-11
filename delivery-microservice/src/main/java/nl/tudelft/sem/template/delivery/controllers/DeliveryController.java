@@ -1,6 +1,7 @@
-package nl.tudelft.sem.template.delivery.deliveries;
+package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.api.DeliveriesApi;
+import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +15,16 @@ import java.util.UUID;
 @RestController
 public class DeliveryController implements DeliveriesApi {
 
-    private final DeliveryDao deliveryDao;
+    private final DeliveryService deliveryService;
 
-    public DeliveryController(DeliveryDao deliveryDao) {
-        this.deliveryDao = deliveryDao;
+    public DeliveryController(DeliveryService deliveryService) {
+        this.deliveryService = deliveryService;
     }
 
     // TODO: Authenticate user id
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        DeliveryStatus status = deliveryDao.getDeliveryStatus(deliveryId);
+        DeliveryStatus status = deliveryService.getDeliveryStatus(deliveryId);
         return ResponseEntity.ok(status.toString());
     }
 
@@ -31,8 +32,8 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
         DeliveryStatus status = DeliveryStatus.fromValue(statusString);
-        deliveryDao.updateDeliveryStatus(deliveryId, status);
-        Delivery updatedDelivery = deliveryDao.getDelivery(deliveryId);
+        deliveryService.updateDeliveryStatus(deliveryId, status);
+        Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
         return ResponseEntity.ok(updatedDelivery);
     }
 }

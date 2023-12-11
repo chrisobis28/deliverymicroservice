@@ -1,7 +1,8 @@
-package nl.tudelft.sem.template.delivery.deliveries;
+package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.api.StatisticsApi;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.delivery.services.StatisticsService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,11 +14,8 @@ import java.util.UUID;
 @RestController
 public class StatisticsController implements StatisticsApi {
 
-    private final DeliveryDao deliveryDao;
-
-    public StatisticsController(DeliveryDao deliveryDao) {
-        this.deliveryDao = deliveryDao;
-    }
+    @Autowired
+    private StatisticsService statisticsService;
 
     @GetMapping("/ratings-for-orders")
     @Override
@@ -27,7 +25,7 @@ public class StatisticsController implements StatisticsApi {
 
         List<Integer> ratings = new ArrayList<>();
         for (UUID orderId : orderIds) {
-            ratings.add(deliveryDao.getOrderRating(orderId));
+            ratings.add(statisticsService.getOrderRating(orderId));
         }
         return ResponseEntity.ok(ratings);
     }

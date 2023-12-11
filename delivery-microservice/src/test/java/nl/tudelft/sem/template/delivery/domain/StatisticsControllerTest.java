@@ -1,5 +1,8 @@
-package nl.tudelft.sem.template.delivery.deliveries;
+package nl.tudelft.sem.template.delivery.domain;
 
+import nl.tudelft.sem.template.delivery.controllers.StatisticsController;
+import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,7 +20,7 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class StatisticsControllerTest {
     @Mock
-    private DeliveryDao deliveryDao;
+    private StatisticsService statisticsService;
 
     @InjectMocks
     private StatisticsController statisticsController;
@@ -31,8 +34,8 @@ class StatisticsControllerTest {
         List<UUID> orderIds = List.of(orderId1, orderId2);
 
         // Mock ratings
-        when(deliveryDao.getOrderRating(orderId1)).thenReturn(4);
-        when(deliveryDao.getOrderRating(orderId2)).thenReturn(null); // Simulate no rating for orderId2
+        when(statisticsService.getOrderRating(orderId1)).thenReturn(4);
+        when(statisticsService.getOrderRating(orderId2)).thenReturn(null); // Simulate no rating for orderId2
 
         // Call the method
         ResponseEntity<List<Integer>> responseEntity = statisticsController.statisticsRatingsForOrdersGet("user123", orderIds);
@@ -47,7 +50,7 @@ class StatisticsControllerTest {
         assertEquals(null, ratings.get(1)); // No rating for orderId2
 
         // Verify that getOrderRating was called for each orderId
-        verify(deliveryDao, times(1)).getOrderRating(orderId1);
-        verify(deliveryDao, times(1)).getOrderRating(orderId2);
+        verify(statisticsService, times(1)).getOrderRating(orderId1);
+        verify(statisticsService, times(1)).getOrderRating(orderId2);
     }
 }
