@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.util.*;
 
@@ -42,6 +43,7 @@ class DeliveryAddressTest {
         sut1.insert(delivery);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), null).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),null).getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
 
@@ -53,7 +55,6 @@ class DeliveryAddressTest {
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         sut1.insert(delivery);
         UUID invalidDeliveryId = UUID.randomUUID();
-        assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
-                .isThrownBy(() -> sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId,null));
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId,null).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 }
