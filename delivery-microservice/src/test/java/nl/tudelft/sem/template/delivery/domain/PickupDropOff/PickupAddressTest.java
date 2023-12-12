@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.domain.PickupDropOff;
 
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.domain.TestRepos.TestDeliveryRepository;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 @ExtendWith(MockitoExtension.class)
 class PickupAddressTest {
 
+    private UsersCommunication usersCommunication;
     private TestDeliveryRepository repo1;
 
     private DeliveryController sut1;
@@ -35,7 +37,8 @@ class PickupAddressTest {
         repo2 = new TestRestaurantRepository();
         sut2 = new RestaurantController(new RestaurantService(repo2));
         repo1 = new TestDeliveryRepository();
-        sut1 = new DeliveryController(new DeliveryService(repo1,repo2));
+        usersCommunication = new UsersCommunication();
+        sut1 = new DeliveryController(new DeliveryService(repo1,repo2), usersCommunication);
     }
     @Test
     void Returns_delivery_status_when_getDeliveryStatus_called() {
