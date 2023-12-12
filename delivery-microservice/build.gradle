@@ -55,6 +55,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.mockito:mockito-core:3.12.4'
 
+	// Mocking components in app
+	implementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
+
 	// Local test database (in-memory)
 	implementation 'com.h2database:h2'
 	developmentOnly 'org.hibernate:hibernate-entitymanager'
