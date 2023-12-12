@@ -19,7 +19,7 @@ public class StatisticsController implements StatisticsApi {
 
     @GetMapping("/ratings-for-orders")
     @Override
-    public ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(/*@RequestHeader String userId,*/ @RequestBody List<UUID> orderIds) {
+    public ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId, @RequestBody List<UUID> orderIds) {
 
         // TODO: Authorize user id
 

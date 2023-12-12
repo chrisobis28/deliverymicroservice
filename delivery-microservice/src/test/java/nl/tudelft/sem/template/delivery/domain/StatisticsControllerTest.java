@@ -38,7 +38,7 @@ class StatisticsControllerTest {
         when(statisticsService.getOrderRating(orderId2)).thenReturn(null); // Simulate no rating for orderId2
 
         // Call the method
-        ResponseEntity<List<Integer>> responseEntity = statisticsController.statisticsRatingsForOrdersGet(/*"user123"*/ orderIds);
+        ResponseEntity<List<Integer>> responseEntity = statisticsController.statisticsRatingsForOrdersGet("user123", orderIds);
 
         // Verify the response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
