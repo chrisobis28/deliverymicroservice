@@ -35,6 +35,18 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
 
+    public void updateCourierRating(UUID deliveryId, Integer rating) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setRatingCourier(rating);
+        deliveryRepository.save(delivery);
+    }
+
+    public void updateRestaurantRating(UUID deliveryId, Integer rating) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setRatingRestaurant(rating);
+        deliveryRepository.save(delivery);
+    }
+
     /**
      * Exception to be used when a Delivery entity with a given ID is not found.
      */

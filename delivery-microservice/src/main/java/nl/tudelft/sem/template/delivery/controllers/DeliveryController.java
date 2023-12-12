@@ -4,10 +4,11 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 //import nl.tudelft.sem.template.delivery.UserRepository;
-import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,25 +17,23 @@ import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
-
+//@Autowired
 interface UserRepository {
     String getUserType(String email);
 }
-
 @RestController
 public class DeliveryController implements DeliveriesApi {
 
     private final DeliveryService deliveryService;
-    private final DeliveryRepository repo;
+    private final UserRepository userMockRepo;
 
     /**
      * Constructor for delivery controller
-     * @param deliveryService
-     * @param repo
+     * @param deliveryService external service that handles repository interactions
      */
-    public DeliveryController(DeliveryService deliveryService, DeliveryRepository repo) {
+    public DeliveryController(DeliveryService deliveryService) {
         this.deliveryService = deliveryService;
-        this.repo = repo;
+        this.userMockRepo = mock(UserRepository.class);
     }
 
     // TODO: Authenticate user id
@@ -55,7 +54,7 @@ public class DeliveryController implements DeliveriesApi {
 
 
     //@Mock
-    UserRepository userMockRepo = mock(UserRepository.class);
+    //UserRepository userMockRepo = mock(UserRepository.class);
 
     /**
      * Checks if a string is null or empty
@@ -83,11 +82,8 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdRatingCourierPut(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader @NotNull String userId, @RequestBody @Valid Integer body) {
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
-        }
-        if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
-            return ResponseEntity.notFound().build();
         } else {
-            Delivery delivery = repo.findById(deliveryId).get();
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
             String type = userMockRepo.getUserType(userId);
             String email = delivery.getCustomerID();
@@ -95,8 +91,8 @@ public class DeliveryController implements DeliveriesApi {
             if (!isCustomer && !type.equals("admin")) {
                 return ResponseEntity.status(403).build();
             } else {
-                delivery.setRatingCourier(body);
-                repo.save(delivery);
+                deliveryService.updateCourierRating(deliveryId, body);
+                delivery = deliveryService.getDelivery(deliveryId);
                 return ResponseEntity.ok(delivery);
             }
         }
@@ -112,11 +108,8 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdRatingRestaurantPut(/*@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) */@PathVariable("deliveryId") UUID deliveryId, /*@Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER)*/ @RequestHeader @NotNull String userId, /*@Parameter(name = "body",description = "Update rating of restaurant for delivery",required = true) */@RequestBody @Valid Integer body) {
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
-        }
-        if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
-            return ResponseEntity.notFound().build();
         } else {
-            Delivery delivery = repo.findById(deliveryId).get();
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
             String type = userMockRepo.getUserType(userId);
             String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
@@ -124,8 +117,8 @@ public class DeliveryController implements DeliveriesApi {
             if (!isCustomer && !type.equals("admin")) {
                 return ResponseEntity.status(403).build();
             } else {
-                delivery.setRatingRestaurant(body);
-                repo.save(delivery);
+                deliveryService.updateRestaurantRating(deliveryId, body);
+                delivery = deliveryService.getDelivery(deliveryId);
                 return ResponseEntity.ok(delivery);
             }
         }
@@ -141,10 +134,8 @@ public class DeliveryController implements DeliveriesApi {
         //Only people that can see rating is the customer who left the rating, the vendor and the admin
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
-        }if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
-            return ResponseEntity.notFound().build();
         } else {
-            Delivery delivery = repo.findById(deliveryId).get();
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
             String type = userMockRepo.getUserType(userId);
             String restaurantEmail = delivery.getRestaurantID();
             String customerEmail = delivery.getRestaurantID();
@@ -168,10 +159,8 @@ public class DeliveryController implements DeliveriesApi {
         //Only people that can see rating is the customer who left the rating, the courier and the admin
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
-        }if (repo.findById(deliveryId).isEmpty() || !repo.existsById(deliveryId)) {
-            return ResponseEntity.notFound().build();
         } else {
-            Delivery delivery = repo.findById(deliveryId).get();
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
             String type = userMockRepo.getUserType(userId);
             String courierEmail = delivery.getCourierID();
             String customerEmail = delivery.getRestaurantID();
