@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
@@ -83,4 +85,16 @@ public class DeliveryService {
             super(HttpStatus.NOT_FOUND, "Delivery with specified id not found");
         }
     }
+
+    public List<Delivery> getAcceptedDeliveries(){
+        return deliveryRepository.findAll().stream()
+            .filter(delivery -> delivery.getCourierID() == null).collect(Collectors.toList());
+    }
+
+    public void updateDeliveryCourier(UUID deliveryId, String courierId){
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setCourierID(courierId);
+        deliveryRepository.save(delivery);
+    }
+
 }

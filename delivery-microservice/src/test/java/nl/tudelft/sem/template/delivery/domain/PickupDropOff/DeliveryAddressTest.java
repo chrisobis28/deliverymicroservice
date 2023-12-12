@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.domain.PickupDropOff;
 
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.domain.TestRepos.TestDeliveryRepository;
@@ -23,6 +24,7 @@ class DeliveryAddressTest {
     private TestDeliveryRepository repo1;
 
     private DeliveryController sut1;
+    private UsersCommunication userCommunication;
 
     private TestRestaurantRepository repo2;
 
@@ -31,7 +33,8 @@ class DeliveryAddressTest {
     @BeforeEach
     public void setup() {
         repo1 = new TestDeliveryRepository();
-        sut1 = new DeliveryController(new DeliveryService(repo1,repo2));
+        userCommunication = new UsersCommunication();
+        sut1 = new DeliveryController(new DeliveryService(repo1,repo2), userCommunication);
     }
 
     @Test
