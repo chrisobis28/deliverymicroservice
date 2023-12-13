@@ -53,6 +53,7 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.mockito:mockito-core:3.12.4'
 
 	// Mocking components in app
 	implementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
@@ -65,7 +66,8 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation('org.junit.jupiter:junit-jupiter:5.8.2')
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
+	//testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.12.4'
+	testImplementation('org.mockito:mockito-core:3.12.4')
 	testImplementation('org.assertj:assertj-core:3.23.1')
 
 	// Annotation
@@ -139,7 +141,6 @@ apply plugin: 'info.solidsoft.pitest'
 pitest {
 	//adds dependency to org.pitest:pitest-junit5-plugin and sets "testPlugin" to "junit5"
 	junit5PluginVersion = '0.12'
-
 	targetClasses = ['nl.tudelft.sem.template.*']  //by default "${project.group}.*"
 	pitestVersion = '1.5.1' //not needed when a default PIT version should be used
 	threads = 4

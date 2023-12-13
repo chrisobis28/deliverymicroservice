@@ -29,4 +29,13 @@ public class StatisticsController implements StatisticsApi {
         }
         return ResponseEntity.ok(ratings);
     }
+
+    /*
+    * @RequestMapping(
+    method = {RequestMethod.GET},
+    value = {"/statistics/ratings-for-orders"},
+    produces = {"application/json"}
+  )
+  default ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(@Parameter(name = "orderIds",description = "Array of order ids",required = true,in = ParameterIn.HEADER) @RequestHeader(value = "orderIds",required = true) @NotNull List<UUID> orderIds) {
+    * */
 }
