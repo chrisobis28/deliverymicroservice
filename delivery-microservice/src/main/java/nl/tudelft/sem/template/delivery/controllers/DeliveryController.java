@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-//import nl.tudelft.sem.template.delivery.UserRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -76,7 +75,7 @@ public class DeliveryController implements DeliveriesApi {
         List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
             return ResponseEntity.ok(deliveryAddress);
         } catch (DeliveryService.DeliveryNotFoundException e) {
-            return ResponseEntity.status(404).body(List.of());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
     }
     // TODO: Authenticate user id
@@ -93,7 +92,7 @@ public class DeliveryController implements DeliveriesApi {
             List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
             return ResponseEntity.ok(pickupAddress);
         } catch (DeliveryService.DeliveryNotFoundException e) {
-            return ResponseEntity.status(404).body(List.of());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
 
     }
@@ -105,10 +104,6 @@ public class DeliveryController implements DeliveriesApi {
         Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
         return ResponseEntity.ok(updatedDelivery);
     }
-
-
-    //@Mock
-    //UserRepository userMockRepo = mock(UserRepository.class);
 
     /**
      * Checks if a string is null or empty
@@ -239,7 +234,7 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
 
         // Account type is "in-existent"
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
     }
 
     // TODO: CHRIS
@@ -257,17 +252,17 @@ public class DeliveryController implements DeliveriesApi {
             }
             case "courier": {
                 if(delivery.getCourierID() == null)
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No courier assigned to order");
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courier assigned to order.");
                 if (delivery.getCourierID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
             }
             case "customer": {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("FORBIDDEN");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
         }
 
-        // Account type is "in-existent"
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("SERVER_ERROR");
+        // Account type is "non-existent"
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User lacks valid authentication credentials.");
     }
 
     // TODO: CHRIS
@@ -283,8 +278,8 @@ public class DeliveryController implements DeliveriesApi {
         switch (userType) {
             case "customer":
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            case "in-existent":
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            case "non-existent":
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
             case "admin":
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
             case "courier": {
@@ -292,7 +287,7 @@ public class DeliveryController implements DeliveriesApi {
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
                 } else {
                     // Courier is not allowed to assign other couriers to orders or assign themselves over someone
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 }
             }
             case "vendor": {
@@ -302,7 +297,31 @@ public class DeliveryController implements DeliveriesApi {
 
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         return ResponseEntity.ok(delivery);
-
     }
 
+    /**
+     * Updates the estimated preparation time of an order
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @param body Update prep time of delivery (required)
+     * @return a delivery object with the updates that took place
+     */
+    @PutMapping("/deliveries/{deliveryId}/prep")
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdPrepPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody Integer body) {
+        String userType = usersCommunication.getAccountType(userId);
+        if(userType.equals("admin") ||
+                userType.equals("vendor")) {
+            deliveryService.updateEstimatedPrepTime(deliveryId, body);
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(delivery);
+        } else if (userType.equals("client") ||
+                userType.equals("courier")) {
+            // User lacks necessary permission levels.
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        } else {
+            // User lacks valid authentication credentials.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 }

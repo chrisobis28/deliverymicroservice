@@ -109,4 +109,15 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
 
+    /**
+     * Updates the estimated preparation time of a delivery object
+     * and persists in the database
+     * @param deliveryId ID of delivery to be updated
+     * @param prepTime new value for the update
+     */
+    public void updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setEstimatedPrepTime(prepTime);
+        deliveryRepository.save(delivery);
+    }
 }
