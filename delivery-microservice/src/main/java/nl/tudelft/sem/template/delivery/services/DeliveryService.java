@@ -77,6 +77,18 @@ public class DeliveryService {
         return restaurant.map(Restaurant::getLocation).orElseThrow(() -> new DeliveryNotFoundException());
     }
 
+    public void updateCourierRating(UUID deliveryId, Integer rating) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setRatingCourier(rating);
+        deliveryRepository.save(delivery);
+    }
+
+    public void updateRestaurantRating(UUID deliveryId, Integer rating) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setRatingRestaurant(rating);
+        deliveryRepository.save(delivery);
+    }
+
     /**
      * Exception to be used when a Delivery entity with a given ID is not found.
      */
@@ -97,4 +109,15 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
 
+    /**
+     * Updates the estimated preparation time of a delivery object
+     * and persists in the database
+     * @param deliveryId ID of delivery to be updated
+     * @param prepTime new value for the update
+     */
+    public void updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setEstimatedPrepTime(prepTime);
+        deliveryRepository.save(delivery);
+    }
 }

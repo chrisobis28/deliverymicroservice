@@ -35,7 +35,7 @@ public class UsersCommunication {
     } catch (Exception e) {
       e.printStackTrace();
     }
-    return "in-existent";
+    return "non-existent";
   }
 
 }
