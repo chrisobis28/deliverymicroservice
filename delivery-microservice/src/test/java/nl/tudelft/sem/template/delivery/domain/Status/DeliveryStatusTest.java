@@ -1,6 +1,7 @@
-package nl.tudelft.sem.template.delivery.domain;
+package nl.tudelft.sem.template.delivery.domain.Status;
 
 
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
