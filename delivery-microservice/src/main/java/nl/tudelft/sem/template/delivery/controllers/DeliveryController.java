@@ -12,8 +12,6 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -54,7 +52,7 @@ public class DeliveryController implements DeliveriesApi {
 
     /**
      * inserts an element into the repo
-     * @param delivery
+     * @param delivery delivery being inserted
      * @return the entity
      */
     public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
@@ -194,7 +192,7 @@ public class DeliveryController implements DeliveriesApi {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             String type = usersCommunication.getAccountType(userId);
             String restaurantEmail = delivery.getRestaurantID();
-            String customerEmail = delivery.getRestaurantID();
+            String customerEmail = delivery.getCustomerID();
             boolean isVendor = type.equals("vendor") && restaurantEmail.equals(userId);
             boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
             if (!type.equals("admin") && !isVendor && !isCustomer) {
@@ -219,7 +217,7 @@ public class DeliveryController implements DeliveriesApi {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             String type = usersCommunication.getAccountType(userId);
             String courierEmail = delivery.getCourierID();
-            String customerEmail = delivery.getRestaurantID();
+            String customerEmail = delivery.getCustomerID();
             boolean isCourier = type.equals("courier") && courierEmail.equals(userId);
             boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
             if (!type.equals("admin") && !isCourier && !isCustomer) {
