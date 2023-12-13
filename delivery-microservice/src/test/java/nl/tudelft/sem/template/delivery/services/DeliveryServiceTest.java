@@ -1,6 +1,6 @@
-package nl.tudelft.sem.template.delivery.domain;
+package nl.tudelft.sem.template.delivery.services;
 
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.Test;
@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
 
@@ -63,5 +64,46 @@ class DeliveryServiceTest {
 
         when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
         assertThat(deliveryService.getDelivery(deliveryId)).isEqualTo(delivery);
+    }
+
+    @Test
+    void updateEstimatedPrepTime() {
+        UUID deliveryId = UUID.randomUUID();
+        Integer prepTime = 25;
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setCourierID("courier@example.org");
+        delivery.setStatus(DeliveryStatus.DELIVERED);
+        delivery.setCustomerID("customer@example.org");
+
+        Delivery expected = new Delivery();
+        expected.setDeliveryID(deliveryId);
+        expected.setEstimatedPrepTime(25);
+        expected.setRatingRestaurant(5);
+        expected.setCourierID("courier@example.org");
+        expected.setStatus(DeliveryStatus.DELIVERED);
+        expected.setCustomerID("customer@example.org");
+
+        when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
+        deliveryService.updateEstimatedPrepTime(deliveryId, prepTime);
+        verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
+                x.getDeliveryID().equals(deliveryId) &&
+                        x.getEstimatedPrepTime().equals(prepTime)));
+
+        // Assert that only prep time field changed
+        assertEquals(expected, delivery);
+    }
+
+    @Test
+    void updateEstimatedPrepTimeNotFound() {
+        UUID invalidDeliveryId = UUID.randomUUID();
+        Integer prepTime = 25;
+
+        when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
+        assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
+                .isThrownBy(() -> deliveryService.updateEstimatedPrepTime(invalidDeliveryId, prepTime));
     }
 }
