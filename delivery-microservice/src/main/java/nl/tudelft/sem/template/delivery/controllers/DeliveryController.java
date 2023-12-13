@@ -1,48 +1,104 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.Collections;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 //import nl.tudelft.sem.template.delivery.UserRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
-import static org.mockito.Mockito.mock;
-//@Autowired
-interface UserRepository {
-    String getUserType(String email);
-}
 @RestController
 public class DeliveryController implements DeliveriesApi {
 
     private final DeliveryService deliveryService;
-    private final UserRepository userMockRepo;
+
+    private final UsersCommunication usersCommunication;
 
     /**
-     * Constructor for delivery controller
-     * @param deliveryService external service that handles repository interactions
+     * Constructor
+     * @param deliveryService the delivery service
      */
-    public DeliveryController(DeliveryService deliveryService) {
+    @Autowired
+    public DeliveryController(DeliveryService deliveryService, UsersCommunication usersCommunication) {
         this.deliveryService = deliveryService;
-        this.userMockRepo = mock(UserRepository.class);
+        this.usersCommunication = usersCommunication;
     }
 
     // TODO: Authenticate user id
+
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         DeliveryStatus status = deliveryService.getDeliveryStatus(deliveryId);
         return ResponseEntity.ok(status.toString());
     }
 
+    /**
+     * inserts an element into the repo
+     * @param delivery
+     * @return the entity
+     */
+    public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
+        try {
+            deliveryService.insert(delivery);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * returns the delivery address
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @return delivery address
+     */
+    @Override
+    public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+        try {
+        List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
+            return ResponseEntity.ok(deliveryAddress);
+        } catch (DeliveryService.DeliveryNotFoundException e) {
+            return ResponseEntity.status(404).body(List.of());
+        }
+    }
+    // TODO: Authenticate user id
+
+    /**
+     * Returns the pickup location
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @return the pickup location
+     */
+    @Override
+    public ResponseEntity<List<Double>>  deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+        try {
+            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+            return ResponseEntity.ok(pickupAddress);
+        } catch (DeliveryService.DeliveryNotFoundException e) {
+            return ResponseEntity.status(404).body(List.of());
+        }
+
+    }
     // TODO: Authenticate user id
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
@@ -85,7 +141,7 @@ public class DeliveryController implements DeliveriesApi {
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
-            String type = userMockRepo.getUserType(userId);
+            String type = usersCommunication.getAccountType(userId);
             String email = delivery.getCustomerID();
             boolean isCustomer = userId.equals(email) && type.equals("customer");
             if (!isCustomer && !type.equals("admin")) {
@@ -111,7 +167,7 @@ public class DeliveryController implements DeliveriesApi {
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
-            String type = userMockRepo.getUserType(userId);
+            String type = usersCommunication.getAccountType(userId);
             String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
             boolean isCustomer = userId.equals(email) && type.equals("customer");
             if (!isCustomer && !type.equals("admin")) {
@@ -136,7 +192,7 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.badRequest().build();
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
-            String type = userMockRepo.getUserType(userId);
+            String type = usersCommunication.getAccountType(userId);
             String restaurantEmail = delivery.getRestaurantID();
             String customerEmail = delivery.getRestaurantID();
             boolean isVendor = type.equals("vendor") && restaurantEmail.equals(userId);
@@ -161,7 +217,7 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.badRequest().build();
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
-            String type = userMockRepo.getUserType(userId);
+            String type = usersCommunication.getAccountType(userId);
             String courierEmail = delivery.getCourierID();
             String customerEmail = delivery.getRestaurantID();
             boolean isCourier = type.equals("courier") && courierEmail.equals(userId);
@@ -173,4 +229,82 @@ public class DeliveryController implements DeliveriesApi {
             }
         }
     }
+
+    // TODO: CHRIS
+    @GetMapping("/deliveries/all/accepted")
+    @Override
+    public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
+        String accountType = usersCommunication.getAccountType(userId);
+        if (accountType.equals("admin") || accountType.equals("courier"))
+            return ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
+        if (accountType.equals("vendor") || accountType.equals("customer"))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+
+        // Account type is "in-existent"
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Collections.emptyList());
+    }
+
+    // TODO: CHRIS
+    @GetMapping("/deliveries/{deliveryId}/courier")
+    @Override
+    public ResponseEntity<String> deliveriesDeliveryIdCourierGet(@PathVariable UUID deliveryId,
+                                                                 @RequestHeader String userId) {
+        String userType = usersCommunication.getAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        switch(userType){
+            case "admin": return ResponseEntity.ok(delivery.getCourierID());
+            case "vendor": {
+                if (delivery.getRestaurantID().equals(userId))
+                    return ResponseEntity.ok(delivery.getCourierID());
+            }
+            case "courier": {
+                if(delivery.getCourierID() == null)
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No courier assigned to order");
+                if (delivery.getCourierID().equals(userId))
+                    return ResponseEntity.ok(delivery.getCourierID());
+            }
+            case "customer": {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("FORBIDDEN");
+            }
+        }
+
+        // Account type is "in-existent"
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("SERVER_ERROR");
+    }
+
+    // TODO: CHRIS
+    @PostMapping("/deliveries/{deliveryId}/courier")
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdCourierPut(@PathVariable UUID deliveryId,
+                                                                   @RequestHeader String userId,
+                                                                   @RequestBody String courierId) {
+        String courier = usersCommunication.getAccountType(courierId);
+        String userType = usersCommunication.getAccountType(userId);
+        if (!courier.equals("courier"))
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        switch (userType) {
+            case "customer":
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            case "in-existent":
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            case "admin":
+                deliveryService.updateDeliveryCourier(deliveryId, courierId);
+            case "courier": {
+                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null) {
+                    deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                } else {
+                    // Courier is not allowed to assign other couriers to orders or assign themselves over someone
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                }
+            }
+            case "vendor": {
+                // TODO : Once we have the vendor repository and DAO -> vendor can only assign couriers that are in their list
+            }
+        }
+
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        return ResponseEntity.ok(delivery);
+
+    }
+
 }
