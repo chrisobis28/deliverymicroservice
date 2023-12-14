@@ -1,10 +1,10 @@
-package nl.tudelft.sem.template.delivery.domain.PickupDropOff;
+package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
-import nl.tudelft.sem.template.delivery.domain.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.domain.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryAddressTest {

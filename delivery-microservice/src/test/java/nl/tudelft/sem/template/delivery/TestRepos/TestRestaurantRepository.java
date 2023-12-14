@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.delivery.domain.TestRepos;
+package nl.tudelft.sem.template.delivery.TestRepos;
 
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Restaurant;

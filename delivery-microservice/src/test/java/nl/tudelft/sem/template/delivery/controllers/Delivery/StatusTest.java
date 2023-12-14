@@ -1,10 +1,10 @@
-package nl.tudelft.sem.template.delivery.domain.Status;
+package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
-import nl.tudelft.sem.template.delivery.domain.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.domain.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
