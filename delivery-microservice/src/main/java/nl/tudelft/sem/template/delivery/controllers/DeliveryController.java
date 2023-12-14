@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Error;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +42,63 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     // TODO: Authenticate user id
+
+    /*
+    * @RequestMapping(
+    method = {RequestMethod.POST},
+    value = {"/deliveries"},
+    produces = {"application/json"},
+    consumes = {"application/json"}
+  )
+  default ResponseEntity<Delivery> deliveriesPost(@Parameter(name = "DeliveriesPostRequest",description = "Request body for creating a new Delivery entity") @RequestBody(required = false) @Valid DeliveriesPostRequest deliveriesPostRequest) {
+    *
+    *
+    * */
+
+    /**
+     * Add Delivery endpoint
+     * @param deliveriesPostRequest Request body for creating a new Delivery entity (optional)
+     * @return Delivery entity that was just added to the database
+     */
+    @Override
+    public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveriesPostRequest.getOrderId());
+        delivery.setCustomerID(deliveriesPostRequest.getCustomerId());
+        delivery.setRestaurantID(deliveriesPostRequest.getVendorId());
+        String status = deliveriesPostRequest.getStatus().toUpperCase();
+        switch (status) {
+            case "PENDING":
+                delivery.setStatus(DeliveryStatus.PENDING);
+                break;
+            case "ACCEPTED":
+                delivery.setStatus(DeliveryStatus.ACCEPTED);
+                break;
+            case "REJECTED":
+                delivery.setStatus(DeliveryStatus.REJECTED);
+                break;
+            case "PREPARING":
+                delivery.setStatus(DeliveryStatus.PREPARING);
+                break;
+            case "GIVEN_TO_COURIER":
+                delivery.setStatus(DeliveryStatus.GIVEN_TO_COURIER);
+                break;
+            case "ON_TRANSIT":
+                delivery.setStatus(DeliveryStatus.ON_TRANSIT);
+                break;
+            case "DELIVERED":
+                delivery.setStatus(DeliveryStatus.DELIVERED);
+                break;
+            default:
+                return ResponseEntity.badRequest().build();
+        }
+        delivery.setDeliveryAddress(deliveriesPostRequest.getDeliveryAddress());
+        Error e = new Error().errorId(UUID.randomUUID());
+        e.setType(ErrorType.NONE);
+        delivery.setError(e);
+        delivery = deliveryService.insert(delivery);
+        return ResponseEntity.ok(delivery);
+    }
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
