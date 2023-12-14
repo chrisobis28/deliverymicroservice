@@ -45,8 +45,12 @@ public class DeliveryController implements DeliveriesApi {
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+        String accountType = usersCommunication.getAccountType(userId);
         DeliveryStatus status = deliveryService.getDeliveryStatus(deliveryId);
-        return ResponseEntity.ok(status.toString());
+        if (accountType.equals("admin") || accountType.equals("courier")) {
+            return ResponseEntity.ok(status.toString());
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
     }
 
     /**
@@ -99,10 +103,14 @@ public class DeliveryController implements DeliveriesApi {
     // TODO: Authenticate user id
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
-        DeliveryStatus status = DeliveryStatus.fromValue(statusString);
-        deliveryService.updateDeliveryStatus(deliveryId, status);
-        Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-        return ResponseEntity.ok(updatedDelivery);
+        String accountType = usersCommunication.getAccountType(userId);
+        if (accountType.equals("admin") || accountType.equals("courier")) {
+            DeliveryStatus status = DeliveryStatus.fromValue(statusString);
+            deliveryService.updateDeliveryStatus(deliveryId, status);
+            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(updatedDelivery);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
     /**
