@@ -1,6 +1,7 @@
-package nl.tudelft.sem.template.delivery.controllers;
+package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
+import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import org.junit.jupiter.api.BeforeEach;

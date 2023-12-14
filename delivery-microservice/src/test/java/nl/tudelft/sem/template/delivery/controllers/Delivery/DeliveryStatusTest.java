@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.delivery.domain.Status;
+package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
