@@ -50,7 +50,8 @@ class StatusTest {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
-
+        String customerID = "user@user.com";
+        delivery.setCustomerID(customerID);
         String restaurantId = "pizzahut@yahoo.com";
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantID(restaurantId);
@@ -60,10 +61,11 @@ class StatusTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
+        when(usersCommunication.getAccountType(customerID)).thenReturn("customer");
 
-        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), null).getBody();
+        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),null).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
 
@@ -73,9 +75,12 @@ class StatusTest {
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        String userId = "user@user.com";
+        delivery.setCustomerID(userId);
         sut1.insert(delivery);
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
         UUID invalidDeliveryId = UUID.randomUUID();
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId,null).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId,userId).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
     @Test
     void address_get_found() {
@@ -83,10 +88,45 @@ class StatusTest {
         UUID deliveryID = UUID.randomUUID();
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         delivery.setDeliveryID(deliveryID);
+        String userId = "user@user.com";
+        delivery.setCustomerID(userId);
         sut1.insert(delivery);
-        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), null).getBody();
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
-        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),null).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    }
+    @Test
+    void address_get_unauthorized() {
+        Delivery delivery = new Delivery();;
+        UUID deliveryID = UUID.randomUUID();
+        delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        delivery.setDeliveryID(deliveryID);
+        String userId = "user@user.com";
+        String otherUserId = "newUser@user.com";
+        delivery.setCustomerID(otherUserId);
+        sut1.insert(delivery);
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
+        assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+
+    }
+    @Test
+    void pickup_get_unauthorized() {
+        Delivery delivery = new Delivery();;
+        UUID deliveryID = UUID.randomUUID();
+        delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        delivery.setDeliveryID(deliveryID);
+        String userId = "user@user.com";
+        String otherUserId = "newUser@user.com";
+        delivery.setCustomerID(otherUserId);
+        sut1.insert(delivery);
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), userId).getBody();
+        assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
     }
 
@@ -101,21 +141,21 @@ class StatusTest {
         assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId,null).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
     @Test
-    void get_status_user_unauthorized() {
+    void get_status_user_forbidden() {
         Delivery delivery = new Delivery();;
         UUID deliveryID = UUID.randomUUID();
         delivery.setStatus(DeliveryStatus.ACCEPTED);
         delivery.setDeliveryID(deliveryID);
         String userId = "user@user.com";
-        when(usersCommunication.getAccountType(userId)).thenReturn("User");
-
-        delivery.setCourierID(userId);
+        String otherUserId = "newUser@user.com";
+        delivery.setCustomerID(otherUserId);
         sut1.insert(delivery);
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
 
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,userId).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
     @Test
-    void get_status_courier_unauthorized() {
+    void get_status_courier_forbidden() {
         //TODO
         Delivery delivery = new Delivery();;
         UUID deliveryID = UUID.randomUUID();
@@ -167,7 +207,7 @@ class StatusTest {
         delivery.setStatus(DeliveryStatus.ACCEPTED);
         delivery.setDeliveryID(deliveryID);
         String userId = "user@user.com";
-        when(usersCommunication.getAccountType(userId)).thenReturn("User");
+        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
 
         delivery.setCourierID(userId);
         sut1.insert(delivery);

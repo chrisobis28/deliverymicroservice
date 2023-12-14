@@ -46,6 +46,8 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         String accountType = usersCommunication.getAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if(delivery == null)
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
         if (accountType.equals("admin") ) {
             return ResponseEntity.ok(delivery.getStatus().toString());
         }
@@ -94,9 +96,10 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         try {
             String accountType = usersCommunication.getAccountType(userId);
-
-            // Retrieve delivery information
             Delivery delivery = deliveryService.getDelivery(deliveryId);
+
+            if(delivery == null)
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
             // Check user access based on account type and association with the delivery
             if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
@@ -124,6 +127,10 @@ public class DeliveryController implements DeliveriesApi {
         try {
             String accountType = usersCommunication.getAccountType(userId);
             Delivery delivery = deliveryService.getDelivery(deliveryId);
+
+            if(delivery == null)
+                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+
             // Check user access based on account type and association with the delivery
             if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
                     || (accountType.equals("vendor") && delivery.getRestaurantID().equals(userId))) {
