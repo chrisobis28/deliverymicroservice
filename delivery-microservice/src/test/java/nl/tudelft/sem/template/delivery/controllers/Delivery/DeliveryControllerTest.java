@@ -61,6 +61,12 @@ class DeliveryControllerTest {
     }
 
     @Test
+    void addDeliveryEntityNullDpr() {
+        ResponseEntity<Delivery> result = sut.deliveriesPost(null);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
     void addDeliveryEntityNotRealStatus() {
         DeliveriesPostRequest dpr = new DeliveriesPostRequest();
         dpr.setStatus("invalid");

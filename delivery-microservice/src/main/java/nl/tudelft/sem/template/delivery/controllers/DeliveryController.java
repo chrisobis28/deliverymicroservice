@@ -50,6 +50,9 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
+        if (deliveriesPostRequest == null) {
+            return ResponseEntity.badRequest().build();
+        }
         Delivery delivery = new Delivery();
         String orderId = deliveriesPostRequest.getOrderId();
         String customerId = deliveriesPostRequest.getCustomerId();
