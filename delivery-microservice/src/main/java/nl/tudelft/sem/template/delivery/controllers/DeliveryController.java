@@ -46,9 +46,21 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         String accountType = usersCommunication.getAccountType(userId);
-        DeliveryStatus status = deliveryService.getDeliveryStatus(deliveryId);
-        if (accountType.equals("admin") || accountType.equals("courier")) {
-            return ResponseEntity.ok(status.toString());
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if (accountType.equals("admin") ) {
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if(accountType.equals("courier"))
+        {
+            if(!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if(accountType.equals("vendor"))
+        {
+            if(!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
     }
@@ -103,13 +115,35 @@ public class DeliveryController implements DeliveriesApi {
     // TODO: Authenticate user id
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
+
         String accountType = usersCommunication.getAccountType(userId);
-        if (accountType.equals("admin") || accountType.equals("courier")) {
-            DeliveryStatus status = DeliveryStatus.fromValue(statusString);
-            deliveryService.updateDeliveryStatus(deliveryId, status);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        DeliveryStatus newStatus = DeliveryStatus.fromValue(statusString);
+
+        if (accountType.equals("admin") ) {
+            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
             Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
             return ResponseEntity.ok(updatedDelivery);
         }
+        if(accountType.equals("courier"))
+        {
+            //You do not have access
+            if(!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(updatedDelivery);
+        }
+        if(accountType.equals("vendor"))
+        {
+            //You do not have access
+            if(!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(updatedDelivery);
+        }
+        //We do not know who you are
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
