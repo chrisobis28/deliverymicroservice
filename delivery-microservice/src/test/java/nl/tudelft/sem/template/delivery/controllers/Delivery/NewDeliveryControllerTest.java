@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class StatusTest {
+class NewDeliveryControllerTest {
 
     private TestDeliveryRepository repo1;
 
@@ -201,7 +201,7 @@ class StatusTest {
         assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("ACCEPTED");
     }
     @Test
-    void update_status_user_unauthorized() {
+    void update_status_user_forbidden() {
         Delivery delivery = new Delivery();;
         UUID deliveryID = UUID.randomUUID();
         delivery.setStatus(DeliveryStatus.ACCEPTED);
@@ -212,7 +212,7 @@ class StatusTest {
         delivery.setCourierID(userId);
         sut1.insert(delivery);
 
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,userId,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,userId,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
     }
     @Test
     void update_status_courier_forbidden() {
