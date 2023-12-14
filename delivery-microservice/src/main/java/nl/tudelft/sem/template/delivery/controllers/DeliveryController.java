@@ -63,10 +63,20 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
         Delivery delivery = new Delivery();
-        UUID orderId = UUID.fromString(deliveriesPostRequest.getOrderId());
-        delivery.deliveryID(orderId);
-        delivery.setCustomerID(deliveriesPostRequest.getCustomerId());
-        delivery.setRestaurantID(deliveriesPostRequest.getVendorId());
+        String orderId = deliveriesPostRequest.getOrderId();
+        String customerId = deliveriesPostRequest.getCustomerId();
+        String vendorId = deliveriesPostRequest.getVendorId();
+        List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
+        if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (addr == null || addr.size() != 2) {
+            return ResponseEntity.badRequest().build();
+        }
+        UUID deliveryId = UUID.fromString(orderId);
+        delivery.deliveryID(deliveryId);
+        delivery.setCustomerID(customerId);
+        delivery.setRestaurantID(vendorId);
         String status = deliveriesPostRequest.getStatus().toUpperCase();
         switch (status) {
             case "PENDING":
@@ -93,7 +103,7 @@ public class DeliveryController implements DeliveriesApi {
             default:
                 return ResponseEntity.badRequest().build();
         }
-        delivery.setDeliveryAddress(deliveriesPostRequest.getDeliveryAddress());
+        delivery.setDeliveryAddress(addr);
         Error e = new Error().errorId(UUID.randomUUID());
         e.setType(ErrorType.NONE);
         delivery.setError(e);

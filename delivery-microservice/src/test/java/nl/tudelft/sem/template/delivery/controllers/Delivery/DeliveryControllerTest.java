@@ -7,7 +7,10 @@ import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,14 +61,219 @@ class DeliveryControllerTest {
     }
 
     @Test
+    void addDeliveryEntityNotRealStatus() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("invalid");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(UUID.randomUUID().toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void addDeliveryEntityEmptyEmail() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void addDeliveryEntityNoAddr() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(new ArrayList<>());
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+    @Test
+    void addDeliveryEntity() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.PENDING);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getError().getType(), ErrorType.NONE);
+        assertEquals(added.getStatus(), DeliveryStatus.PENDING);
+    }
+
+    @Test
+    void addDeliveryEntityAccepted() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("accepted");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.ACCEPTED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.ACCEPTED);
+    }
+
+    @Test
+    void addDeliveryEntityRejected() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("reJEcTeD");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.REJECTED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.REJECTED);
+    }
+
+    @Test
+    void addDeliveryEntityPrep() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("PrEpARInG");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.PREPARING);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.PREPARING);
+    }
+
+    @Test
+    void addDeliveryEntityGTC() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("gIven_tO_cOURiER");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.GIVEN_TO_COURIER);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.GIVEN_TO_COURIER);
+    }
+
+    @Test
+    void addDeliveryEntityOT() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("On_TRanSiT");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.ON_TRANSIT);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.ON_TRANSIT);
+    }
+
+    @Test
+    void addDeliveryEntityDelivered() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("deLIVERED");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.DELIVERED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        deliveryController.insert(d);
+
+        ResponseEntity<Delivery> result = deliveryController.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.DELIVERED);
+    }
+
+    @Test
     void deliveriesDeliveryIdPrepPut() {
         // Mock data
         userType = "vendor";
 
         // Mock ratings and user type
         when(usersCommunication.getAccountType(userId)).thenReturn(userType);
-////        doNothing().when(deliveryService).updateEstimatedPrepTime(deliveryId, prepTime);
-////        when(deliveryService.getDelivery(deliveryId)).thenReturn(delivery);
         deliveryController.insert(delivery);
         // Call the method
         ResponseEntity<Delivery> responseEntity = deliveryController.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
@@ -76,8 +286,6 @@ class DeliveryControllerTest {
         assertEquals(returned, delivery);
 
         // Verify that we called the service methods and checked the user type
-//        //verify(deliveryService, times(1)).updateEstimatedPrepTime(deliveryId, prepTime);
-//        //verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -142,7 +350,6 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(userId);
         String type = "customer";
-        Integer rating = 5;
 
 //        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
@@ -174,7 +381,6 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(customerId);
         String type = "admin";
-        Integer rating = 0;
 
 //        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
@@ -231,7 +437,6 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(userId);
         String type = "customer";
-        Integer rating = 5;
 
 //        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
@@ -290,7 +495,6 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(customerId);
         String type = "admin";
-        Integer rating = 0;
 
 //        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
