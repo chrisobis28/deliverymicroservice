@@ -41,7 +41,6 @@ public class DeliveryController implements DeliveriesApi {
         this.usersCommunication = usersCommunication;
     }
 
-    // TODO: Authenticate user id
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
@@ -59,6 +58,12 @@ public class DeliveryController implements DeliveriesApi {
         if(accountType.equals("vendor"))
         {
             if(!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if(accountType.equals("customer"))
+        {
+            if(!delivery.getCustomerID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
             return ResponseEntity.ok(delivery.getStatus().toString());
         }
@@ -88,13 +93,25 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         try {
-        List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
-            return ResponseEntity.ok(deliveryAddress);
+            String accountType = usersCommunication.getAccountType(userId);
+
+            // Retrieve delivery information
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+
+            // Check user access based on account type and association with the delivery
+            if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
+                    || (accountType.equals("vendor") && delivery.getRestaurantID().equals(userId))
+                    || (accountType.equals("customer") && delivery.getCustomerID().equals(userId))) {
+                List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
+                return ResponseEntity.ok(deliveryAddress);
+            } else {
+                // User does not have access
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
+            }
         } catch (DeliveryService.DeliveryNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
     }
-    // TODO: Authenticate user id
 
     /**
      * Returns the pickup location
@@ -103,16 +120,27 @@ public class DeliveryController implements DeliveriesApi {
      * @return the pickup location
      */
     @Override
-    public ResponseEntity<List<Double>>  deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+    public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         try {
-            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
-            return ResponseEntity.ok(pickupAddress);
+            String accountType = usersCommunication.getAccountType(userId);
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+            // Check user access based on account type and association with the delivery
+            if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
+                    || (accountType.equals("vendor") && delivery.getRestaurantID().equals(userId))) {
+                List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+                return ResponseEntity.ok(pickupAddress);
+            } else if (accountType.equals("customer") && delivery.getCustomerID().equals(userId)) {
+                // Customer has access
+                List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+                return ResponseEntity.ok(pickupAddress);
+            } else {
+                // User does not have access
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
+            }
         } catch (DeliveryService.DeliveryNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
-
     }
-    // TODO: Authenticate user id
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
 
@@ -142,6 +170,10 @@ public class DeliveryController implements DeliveriesApi {
             deliveryService.updateDeliveryStatus(deliveryId, newStatus);
             Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
             return ResponseEntity.ok(updatedDelivery);
+        }
+        if(accountType.equals("customer"))
+        {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         }
         //We do not know who you are
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
