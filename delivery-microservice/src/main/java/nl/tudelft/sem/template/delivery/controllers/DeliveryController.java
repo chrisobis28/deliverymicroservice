@@ -43,18 +43,6 @@ public class DeliveryController implements DeliveriesApi {
 
     // TODO: Authenticate user id
 
-    /*
-    * @RequestMapping(
-    method = {RequestMethod.POST},
-    value = {"/deliveries"},
-    produces = {"application/json"},
-    consumes = {"application/json"}
-  )
-  default ResponseEntity<Delivery> deliveriesPost(@Parameter(name = "DeliveriesPostRequest",description = "Request body for creating a new Delivery entity") @RequestBody(required = false) @Valid DeliveriesPostRequest deliveriesPostRequest) {
-    *
-    *
-    * */
-
     /**
      * Add Delivery endpoint
      * @param deliveriesPostRequest Request body for creating a new Delivery entity (optional)
