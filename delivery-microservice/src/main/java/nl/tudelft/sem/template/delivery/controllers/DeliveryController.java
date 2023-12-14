@@ -63,7 +63,8 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
         Delivery delivery = new Delivery();
-        delivery.setDeliveryID(deliveriesPostRequest.getOrderId());
+        UUID orderId = UUID.fromString(deliveriesPostRequest.getOrderId());
+        delivery.deliveryID(orderId);
         delivery.setCustomerID(deliveriesPostRequest.getCustomerId());
         delivery.setRestaurantID(deliveriesPostRequest.getVendorId());
         String status = deliveriesPostRequest.getStatus().toUpperCase();

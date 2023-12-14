@@ -1,11 +1,12 @@
 package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
-import nl.tudelft.sem.template.model.Delivery;
+//import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-import java.util.UUID;
+//import java.util.UUID;
 
 /**
  * This class is a Service for accessing and modifying Restaurant entities.
@@ -13,11 +14,12 @@ import java.util.UUID;
 @Service
 public class RestaurantService {
 
+    @Autowired
     private final RestaurantRepository restaurantRepository;
 
     /**
      * Constructor
-     * @param restaurantRepository
+     * @param restaurantRepository repository restaurant is stored in
      */
     public RestaurantService(RestaurantRepository restaurantRepository) {
         this.restaurantRepository = restaurantRepository;
@@ -29,7 +31,7 @@ public class RestaurantService {
 
     /**
      * Inserts the restaurant into the repo
-     * @param restaurant
+     * @param restaurant restaurant object to be added
      * @return the entity
      */
     public Restaurant insert(Restaurant restaurant) {
