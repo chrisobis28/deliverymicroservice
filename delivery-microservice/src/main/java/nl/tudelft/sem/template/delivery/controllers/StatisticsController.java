@@ -103,9 +103,9 @@ public class StatisticsController implements StatisticsApi {
         List<Delivery> mostRecent = deliveries.stream().filter(d -> d.getDeliveredTime().isAfter(max.minusHours(24)))
             .sorted(Comparator.comparing(Delivery::getDeliveredTime)).collect(Collectors.toList());
 
-        int minHr = mostRecent.get(0).getDeliveredTime().getHour();
-        int maxHr = mostRecent.get((mostRecent.size()-1)).getDeliveredTime().getHour();
-        int n = (maxHr - minHr) + 1;
+        OffsetDateTime minT = mostRecent.get(0).getDeliveredTime();
+        OffsetDateTime maxT = mostRecent.get((mostRecent.size()-1)).getDeliveredTime();
+        int n = (maxT.getHour() - minT.getHour()) + 1;
         List<Integer> count = new ArrayList<>();
 
         for (int i = 0; i < n; i++) {
@@ -113,14 +113,14 @@ public class StatisticsController implements StatisticsApi {
         }
 
         int j = 0;
-        int currHr = minHr;
+        OffsetDateTime curr = minT;
         for (int i = 0; i < mostRecent.size(); i++) {
-            if (mostRecent.get(i).getDeliveredTime().getHour() < currHr) {
+            if (mostRecent.get(i).getDeliveredTime().getHour() - curr.getHour() <= 1) {
                 int currCount = count.get(j);
                 count.set(j, currCount+1);
             } else {
                 j += 1;
-                currHr += 1;
+                curr = mostRecent.get(i).getDeliveredTime();
             }
         }
         return ResponseEntity.ok(count);
