@@ -73,7 +73,7 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * inserts an element into the repo
+     * inserts an element into the repo (internal method)
      * @param delivery delivery being inserted
      * @return the entity
      */

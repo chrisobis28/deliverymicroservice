@@ -22,6 +22,17 @@ public class StatisticsService {
     @Autowired
     private DeliveryRepository deliveryRepository;
 
+    public StatisticsService(DeliveryRepository deliveryRepository) {
+        this.deliveryRepository = deliveryRepository;
+    }
+
+    public Delivery insert(Delivery delivery) {
+        if (delivery == null) {
+            throw new IllegalArgumentException();
+        }
+        return deliveryRepository.save(delivery);
+    }
+
     /**
      * Gets the restaurant rating of a given order
      * @param deliveryId - the order/delivery id

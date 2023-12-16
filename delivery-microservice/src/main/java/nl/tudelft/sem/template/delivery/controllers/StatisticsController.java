@@ -33,6 +33,20 @@ public class StatisticsController implements StatisticsApi {
     }
 
     /**
+     * inserts an element into the repo (internal method)
+     * @param delivery delivery being inserted
+     * @return the entity
+     */
+    public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
+        try {
+            statisticsService.insert(delivery);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
      * Gets the restaurant rating given to orders
      *
      * @param userId used for authorization
