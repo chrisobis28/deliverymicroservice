@@ -107,7 +107,7 @@ public class StatisticsController implements StatisticsApi {
         }
         String type = usersCommunication.getAccountType(userId);
         if (!type.equals("vendor") && !type.equals("admin")) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(userId);
         if (deliveries == null || deliveries.isEmpty()) {
@@ -119,7 +119,12 @@ public class StatisticsController implements StatisticsApi {
 
         OffsetDateTime minT = mostRecent.get(0).getDeliveredTime();
         OffsetDateTime maxT = mostRecent.get((mostRecent.size()-1)).getDeliveredTime();
-        int n = (maxT.getHour() - minT.getHour()) + 1;
+        int n = 0;
+        if (maxT.getDayOfMonth() == minT.getDayOfMonth()) {
+            n = (maxT.getHour() - minT.getHour()) + 1;
+        } else {
+            n = 24 - (minT.getHour() - maxT.getHour()) + 1;
+        }
         List<Integer> count = new ArrayList<>();
 
         for (int i = 0; i < n; i++) {
@@ -129,12 +134,20 @@ public class StatisticsController implements StatisticsApi {
         int j = 0;
         OffsetDateTime curr = minT;
         for (int i = 0; i < mostRecent.size(); i++) {
-            if (mostRecent.get(i).getDeliveredTime().getHour() - curr.getHour() <= 1) {
+            OffsetDateTime t = mostRecent.get(i).getDeliveredTime();
+            if (Math.abs((t.getHour() - curr.getHour())) < 1 || t.getMinute() == 0) {
                 int currCount = count.get(j);
                 count.set(j, currCount+1);
             } else {
-                j += 1;
-                curr = mostRecent.get(i).getDeliveredTime();
+                if (t.getDayOfMonth() == curr.getDayOfMonth()) {
+                    j += (t.getHour() - curr.getHour());
+                } else {
+                    int diff = (24 - curr.getHour()) + t.getHour();
+                    j += diff;
+                }
+                int currCount = count.get(j);
+                count.set(j, currCount+1);
+                curr = t;
             }
         }
         return ResponseEntity.ok(count);

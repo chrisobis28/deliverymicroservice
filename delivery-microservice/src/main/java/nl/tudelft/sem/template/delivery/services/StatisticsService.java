@@ -40,8 +40,8 @@ public class StatisticsService {
      * if no rating is given, returns null
      */
     public Integer getOrderRating(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(x -> x.getRatingRestaurant()).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        return delivery.getRatingRestaurant();
     }
 
     /**
@@ -52,7 +52,8 @@ public class StatisticsService {
     public List<Delivery> getOrdersOfAVendor(String userId) {
         List<Delivery> vendorDeliveries = deliveryRepository.findAll().stream()
             .filter(d -> userId.equals(d.getRestaurantID())).collect(Collectors.toList());
-        List<Delivery> delivered = vendorDeliveries.stream().filter(d -> d.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
+        List<Delivery> delivered = vendorDeliveries.stream().filter(d -> d.getStatus() != null)
+            .filter(d -> d.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
         return delivered.stream().sorted(Comparator.comparing(Delivery::getDeliveredTime)).collect(Collectors.toList());
     }
 }
