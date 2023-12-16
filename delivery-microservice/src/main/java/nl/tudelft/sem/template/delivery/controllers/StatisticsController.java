@@ -23,7 +23,7 @@ public class StatisticsController implements StatisticsApi {
     private final UsersCommunication usersCommunication;
 
     /**
-     * Constructor
+     * Constructor for statistics controller
      * @param statisticsService the statistics service
      */
     @Autowired
@@ -35,7 +35,7 @@ public class StatisticsController implements StatisticsApi {
     /**
      * inserts an element into the repo (internal method)
      * @param delivery delivery being inserted
-     * @return the entity
+     * @return an empty response entity with a corresponding status code
      */
     public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
         try {
@@ -74,26 +74,6 @@ public class StatisticsController implements StatisticsApi {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
         }
     }
-
-    /*
-    * @RequestMapping(
-    method = {RequestMethod.GET},
-    value = {"/statistics/ratings-for-orders"},
-    produces = {"application/json"}
-  )
-  default ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(@Parameter(name = "orderIds",description = "Array of order ids",required = true,in = ParameterIn.HEADER) @RequestHeader(value = "orderIds",required = true) @NotNull List<UUID> orderIds) {
-    * */
-
-    /*
-    * @RequestMapping(
-        method = RequestMethod.GET,
-        value = "/statistics/deliveries-per-hour",
-        produces = { "application/json" }
-    )
-    default ResponseEntity<List<Integer>> statisticsDeliveriesPerHourGet(
-        @Parameter(name = "userId", description = "User ID for authorization", in = ParameterIn.HEADER) @RequestHeader(value = "userId", required = false) String userId
-    ) {
-    * */
 
     /**
      * Get a list of integers representing number of deliveries per hour

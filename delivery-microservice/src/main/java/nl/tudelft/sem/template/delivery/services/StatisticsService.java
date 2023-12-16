@@ -15,17 +15,22 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsService {
 
-    /**
-     * Constructor
-     * @param deliveryRepository the repository storing delivery information
-     */
     @Autowired
     private DeliveryRepository deliveryRepository;
 
+    /**
+     * Constructor for StatisticsService
+     * @param deliveryRepository
+     */
     public StatisticsService(DeliveryRepository deliveryRepository) {
         this.deliveryRepository = deliveryRepository;
     }
 
+    /**
+     * Internal method for inserting delivery into repository (used in testing)
+     * @param delivery - Delivery object saved in repo
+     * @return Delivery object
+     */
     public Delivery insert(Delivery delivery) {
         if (delivery == null) {
             throw new IllegalArgumentException();
