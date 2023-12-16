@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -41,6 +42,75 @@ public class DeliveryController implements DeliveriesApi {
         this.usersCommunication = usersCommunication;
     }
 
+    /**
+     * The get method for getting the pickup time of a delivery
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @return
+     */
+    @Override
+    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+        String accountType = usersCommunication.getAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if(delivery == null)
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (accountType.equals("admin") ) {
+            return ResponseEntity.ok(delivery.getPickupTime());
+        }
+        if(accountType.equals("courier"))
+        {
+            if(!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return ResponseEntity.ok(delivery.getPickupTime());
+        }
+        if(accountType.equals("vendor"))
+        {
+            if(!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return ResponseEntity.ok(delivery.getPickupTime());
+        }
+        if(accountType.equals("customer"))
+        {
+            if(!delivery.getCustomerID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            return ResponseEntity.ok(delivery.getPickupTime());
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
+
+    /**
+     * The put method for updating the pickup time of a delivery
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @param pickupTime Update pick up time of delivery (required)
+     * @return
+     */
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId, @RequestHeader String userId,@RequestBody OffsetDateTime pickupTime) {
+        String accountType = usersCommunication.getAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if(delivery == null)
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        if (accountType.equals("admin") ) {
+            deliveryService.updatePickupTime(deliveryId,pickupTime);
+            return ResponseEntity.ok(delivery);
+        }
+        if(accountType.equals("courier"))
+        {
+            if(!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updatePickupTime(deliveryId,pickupTime);
+            return ResponseEntity.ok(delivery);
+        }
+        if(accountType.equals("vendor"))
+        {
+            if(!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updatePickupTime(deliveryId,pickupTime);
+            return ResponseEntity.ok(delivery);
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    }
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {

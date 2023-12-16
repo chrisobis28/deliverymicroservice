@@ -16,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -81,6 +82,59 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getAccountType(userId)).thenReturn("customer");
         UUID invalidDeliveryId = UUID.randomUUID();
         assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId,userId).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+    @Test
+    void pickup_time_get() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "user@user.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "pizzahut@yahoo.com";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(restaurantId);
+        restaurant.setLocation(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        delivery.setRestaurantID(restaurantId);
+        sut2.insert(restaurant);
+        sut1.insert(delivery);
+
+        when(usersCommunication.getAccountType(customerID)).thenReturn("admin");
+
+        OffsetDateTime pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+    }
+
+    @Test
+    void pickup_time_put() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "user@user.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "pizzahut@yahoo.com";
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(restaurantId);
+        restaurant.setLocation(new ArrayList<>(Arrays.asList(100.0, 100.0)));
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        delivery.setRestaurantID(restaurantId);
+        sut2.insert(restaurant);
+        sut1.insert(delivery);
+
+        when(usersCommunication.getAccountType(customerID)).thenReturn("admin");
+        OffsetDateTime pickupTime;
+        pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        sut1.deliveriesDeliveryIdPickupPut(delivery.getDeliveryID(), customerID,OffsetDateTime.parse("2022-09-30T15:30:00+01:00"));
+        pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2022-09-30T15:30:00+01:00"));
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+
+
     }
     @Test
     void address_get_found() {

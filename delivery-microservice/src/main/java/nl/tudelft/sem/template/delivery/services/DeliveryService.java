@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
@@ -118,6 +119,17 @@ public class DeliveryService {
     public void updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setEstimatedPrepTime(prepTime);
+        deliveryRepository.save(delivery);
+    }
+
+    /**
+     * Updated a delivery pickup time
+     * @param deliveryId the delivery id
+     * @param pickupTime the new pickup time
+     */
+    public void updatePickupTime(UUID deliveryId, OffsetDateTime pickupTime) {
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        delivery.setPickupTime(pickupTime);
         deliveryRepository.save(delivery);
     }
 }
