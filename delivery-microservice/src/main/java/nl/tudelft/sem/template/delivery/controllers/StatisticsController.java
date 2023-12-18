@@ -99,12 +99,24 @@ public class StatisticsController implements StatisticsApi {
 
         OffsetDateTime minT = mostRecent.get(0).getDeliveredTime();
         OffsetDateTime maxT = mostRecent.get((mostRecent.size()-1)).getDeliveredTime();
-        int n = 0;
+        int n;
         if (maxT.getDayOfMonth() == minT.getDayOfMonth()) {
             n = (maxT.getHour() - minT.getHour()) + 1;
         } else {
             n = 24 - (minT.getHour() - maxT.getHour()) + 1;
         }
+        List<Integer> count = getDeliveriesPerHour(n, mostRecent, minT);
+        return ResponseEntity.ok(count);
+    }
+
+    /**
+     * Helper method for finding the deliveries in an hour
+     * @param n number of hour brackets
+     * @param mostRecent all deliveries in the last 24 hrs
+     * @param minT earliest delivery time
+     * @return the list of integers indicating deliveries in an hour bracket (e.g., 14:00-15:00)
+     */
+    public List<Integer> getDeliveriesPerHour(int n, List<Delivery> mostRecent, OffsetDateTime minT) {
         List<Integer> count = new ArrayList<>();
 
         for (int i = 0; i < n; i++) {
@@ -130,7 +142,7 @@ public class StatisticsController implements StatisticsApi {
                 curr = t;
             }
         }
-        return ResponseEntity.ok(count);
+        return count;
     }
 
     /**
