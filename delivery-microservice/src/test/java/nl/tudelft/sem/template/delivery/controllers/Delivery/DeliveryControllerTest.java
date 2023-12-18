@@ -1,18 +1,27 @@
 package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
+import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
+import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+//import org.mockito.InjectMocks;
+//import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,12 +29,15 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryControllerTest {
-    @Mock
-    private DeliveryService deliveryService;
-    @Mock
+
     private UsersCommunication usersCommunication;
-    @InjectMocks
-    private DeliveryController deliveryController;
+
+    private DeliveryController sut;
+
+    private TestDeliveryRepository repo1;
+
+    private TestRestaurantRepository repo2;
+    private RestaurantController restaurantController;
 
     String userId, userType;
     UUID deliveryId;
@@ -41,6 +53,224 @@ class DeliveryControllerTest {
         delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
         delivery.setEstimatedPrepTime(prepTime);
+        repo2 = new TestRestaurantRepository();
+        restaurantController = new RestaurantController(new RestaurantService(repo2));
+        repo1 = new TestDeliveryRepository();
+        usersCommunication = mock(UsersCommunication.class);
+        sut = new DeliveryController(new DeliveryService(repo1,repo2), usersCommunication);
+    }
+
+    @Test
+    void addDeliveryEntityNullDpr() {
+        ResponseEntity<Delivery> result = sut.deliveriesPost(null);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void addDeliveryEntityNotRealStatus() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("invalid");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(UUID.randomUUID().toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void addDeliveryEntityEmptyEmail() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+
+    @Test
+    void addDeliveryEntityNoAddr() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(new ArrayList<>());
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+
+        assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    }
+    @Test
+    void addDeliveryEntity() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("pending");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.PENDING);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getError().getType(), ErrorType.NONE);
+        assertEquals(added.getStatus(), DeliveryStatus.PENDING);
+    }
+
+    @Test
+    void addDeliveryEntityAccepted() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("accepted");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.ACCEPTED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.ACCEPTED);
+    }
+
+    @Test
+    void addDeliveryEntityRejected() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("reJEcTeD");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.REJECTED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.REJECTED);
+    }
+
+    @Test
+    void addDeliveryEntityPrep() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("PrEpARInG");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.PREPARING);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.PREPARING);
+    }
+
+    @Test
+    void addDeliveryEntityGTC() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("gIven_tO_cOURiER");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.GIVEN_TO_COURIER);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.GIVEN_TO_COURIER);
+    }
+
+    @Test
+    void addDeliveryEntityOT() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("On_TRanSiT");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.ON_TRANSIT);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.ON_TRANSIT);
+    }
+
+    @Test
+    void addDeliveryEntityDelivered() {
+        DeliveriesPostRequest dpr = new DeliveriesPostRequest();
+        dpr.setStatus("deLIVERED");
+        dpr.setCustomerId(userId);
+        dpr.setVendorId("hi_im_a_vendor@testmail.com");
+        dpr.setOrderId(deliveryId.toString());
+        dpr.setDeliveryAddress(List.of(50.4, 32.6));
+
+        Delivery d = new Delivery();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("hi_im_a_vendor@testmail.com");
+        d.setCustomerID(userId);
+        d.setStatus(DeliveryStatus.DELIVERED);
+        d.setDeliveryAddress(List.of(50.4, 32.6));
+        sut.insert(d);
+
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        Delivery added = result.getBody();
+
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(added.getStatus(), DeliveryStatus.DELIVERED);
     }
 
     @Test
@@ -50,11 +280,9 @@ class DeliveryControllerTest {
 
         // Mock ratings and user type
         when(usersCommunication.getAccountType(userId)).thenReturn(userType);
-        doNothing().when(deliveryService).updateEstimatedPrepTime(deliveryId, prepTime);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(delivery);
-
+        sut.insert(delivery);
         // Call the method
-        ResponseEntity<Delivery> responseEntity = deliveryController.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
+        ResponseEntity<Delivery> responseEntity = sut.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
 
         // Verify the response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -64,8 +292,6 @@ class DeliveryControllerTest {
         assertEquals(returned, delivery);
 
         // Verify that we called the service methods and checked the user type
-        verify(deliveryService, times(1)).updateEstimatedPrepTime(deliveryId, prepTime);
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -78,7 +304,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getAccountType(userId)).thenReturn(userType);
 
         // Call the method
-        ResponseEntity<Delivery> responseEntity = deliveryController.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
+        ResponseEntity<Delivery> responseEntity = sut.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
 
         // Verify the response
         assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
@@ -88,8 +314,8 @@ class DeliveryControllerTest {
         assertNull(returned);
 
         // Verify that no inner methods were called
-        verify(deliveryService, never()).updateEstimatedPrepTime(deliveryId, prepTime);
-        verify(deliveryService, never()).getDelivery(deliveryId);
+////        verify(deliveryService, never()).updateEstimatedPrepTime(deliveryId, prepTime);
+////        verify(deliveryService, never()).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -102,7 +328,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getAccountType(userId)).thenReturn(userType);
 
         // Call the method
-        ResponseEntity<Delivery> responseEntity = deliveryController.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
+        ResponseEntity<Delivery> responseEntity = sut.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime);
 
         // Verify the response
         assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
@@ -112,8 +338,8 @@ class DeliveryControllerTest {
         assertNull(returned);
 
         // Verify that no inner methods were called
-        verify(deliveryService, never()).updateEstimatedPrepTime(deliveryId, prepTime);
-        verify(deliveryService, never()).getDelivery(deliveryId);
+//        verify(deliveryService, never()).updateEstimatedPrepTime(deliveryId, prepTime);
+//        verify(deliveryService, never()).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -130,26 +356,20 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(userId);
         String type = "customer";
-        Integer rating = 5;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-        doAnswer(invocation -> {
-            Integer r = invocation.getArgument(1);
-            m.setRatingCourier(r);
-            return m;
-        }).when(deliveryService).updateCourierRating(deliveryId, rating);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingCourierPut(deliveryId, userId, 5);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingCourierPut(deliveryId, userId, 5);
 
         Delivery resultBody = result.getBody();
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assert resultBody != null;
         assertEquals(5, resultBody.getRatingCourier());
 
-        verify(deliveryService, times(1)).updateCourierRating(deliveryId, rating);
-        verify(deliveryService, times(2)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).updateCourierRating(deliveryId, rating);
+//        verify(deliveryService, times(2)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -167,26 +387,19 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(customerId);
         String type = "admin";
-        Integer rating = 0;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-        doAnswer(invocation -> {
-            Integer r = invocation.getArgument(1);
-            m.setRatingCourier(r);
-            return m;
-        }).when(deliveryService).updateCourierRating(deliveryId, rating);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingCourierPut(deliveryId, userId, 0);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingCourierPut(deliveryId, userId, 0);
 
         Delivery resultBody = result.getBody();
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assert resultBody != null;
         assertEquals(0, resultBody.getRatingCourier());
 
-        verify(deliveryService, times(1)).updateCourierRating(deliveryId, rating);
-        verify(deliveryService, times(2)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).updateCourierRating(deliveryId, rating);
+//        verify(deliveryService, times(2)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -205,15 +418,15 @@ class DeliveryControllerTest {
         String type = "courier";
         Integer rating = 5;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(courierId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingCourierPut(deliveryId, courierId, rating);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingCourierPut(deliveryId, courierId, rating);
 
         assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(courierId);
     }
 
@@ -230,26 +443,19 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(userId);
         String type = "customer";
-        Integer rating = 5;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-        doAnswer(invocation -> {
-            Integer r = invocation.getArgument(1);
-            m.setRatingRestaurant(r);
-            return m;
-        }).when(deliveryService).updateRestaurantRating(deliveryId, rating);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, 5);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, 5);
 
         Delivery resultBody = result.getBody();
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assert resultBody != null;
         assertEquals(5, resultBody.getRatingRestaurant());
 
-        verify(deliveryService, times(1)).updateRestaurantRating(deliveryId, rating);
-        verify(deliveryService, times(2)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).updateRestaurantRating(deliveryId, rating);
+//        verify(deliveryService, times(2)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -269,15 +475,15 @@ class DeliveryControllerTest {
         String type = "customer";
         Integer rating = 5;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating);
 
         assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -295,26 +501,19 @@ class DeliveryControllerTest {
         m.setRestaurantID(restaurantId);
         m.setCustomerID(customerId);
         String type = "admin";
-        Integer rating = 0;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-        doAnswer(invocation -> {
-            Integer r = invocation.getArgument(1);
-            m.setRatingRestaurant(r);
-            return m;
-        }).when(deliveryService).updateRestaurantRating(deliveryId, rating);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, 0);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, 0);
 
         Delivery resultBody = result.getBody();
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assert resultBody != null;
         assertEquals(0, resultBody.getRatingRestaurant());
 
-        verify(deliveryService, times(1)).updateRestaurantRating(deliveryId, rating);
-        verify(deliveryService, times(2)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).updateRestaurantRating(deliveryId, rating);
+//        verify(deliveryService, times(2)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -334,15 +533,15 @@ class DeliveryControllerTest {
         String type = "customer";
         Integer rating = 5;
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(userId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Delivery> result = deliveryController.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating);
 
         assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
 
@@ -360,16 +559,16 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "vendor";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(restaurantId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNull(result.getBody());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(restaurantId);
     }
 
@@ -388,15 +587,15 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "vendor";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(restaurantId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId);
 
         assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(restaurantId);
     }
 
@@ -414,15 +613,15 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "customer";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(customerId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, customerId);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, customerId);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(customerId);
     }
 
@@ -440,15 +639,15 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "courier";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(courierId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingCourierGet(deliveryId, courierId);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, courierId);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(courierId);
     }
 
@@ -467,15 +666,15 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "courier";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(diffCourierId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
-
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingCourierGet(deliveryId, diffCourierId);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, diffCourierId);
 
         assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(diffCourierId);
     }
 
@@ -493,15 +692,16 @@ class DeliveryControllerTest {
         m.setCustomerID(customerId);
         String type = "customer";
 
-        //Mock deliveryService/userRepo methods
+//        //Mock deliveryService/userRepo methods
         when(usersCommunication.getAccountType(customerId)).thenReturn(type);
-        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+//        when(deliveryService.getDelivery(deliveryId)).thenReturn(m);
+        sut.insert(m);
 
-        ResponseEntity<Integer> result = deliveryController.deliveriesDeliveryIdRatingCourierGet(deliveryId, customerId);
+        ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, customerId);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
 
-        verify(deliveryService, times(1)).getDelivery(deliveryId);
+//        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(customerId);
     }
 }

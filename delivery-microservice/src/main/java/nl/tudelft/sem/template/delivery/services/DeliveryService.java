@@ -34,7 +34,7 @@ public class DeliveryService {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
     }
     public Delivery insert(Delivery delivery) {
-        if (delivery == null) {
+        if (delivery == null || delivery.getDeliveryID() == null) {
             throw new IllegalArgumentException();
         }
         return deliveryRepository.save(delivery);

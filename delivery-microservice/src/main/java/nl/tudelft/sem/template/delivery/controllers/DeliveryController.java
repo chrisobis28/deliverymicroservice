@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Error;
 import org.springframework.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +41,65 @@ public class DeliveryController implements DeliveriesApi {
         this.usersCommunication = usersCommunication;
     }
 
+
+    /**
+     * Add Delivery endpoint
+     * @param deliveriesPostRequest Request body for creating a new Delivery entity (optional)
+     * @return Delivery entity that was just added to the database
+     */
+    @Override
+    public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
+        if (deliveriesPostRequest == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        Delivery delivery = new Delivery();
+        String orderId = deliveriesPostRequest.getOrderId();
+        String customerId = deliveriesPostRequest.getCustomerId();
+        String vendorId = deliveriesPostRequest.getVendorId();
+        List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
+        if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        if (addr == null || addr.size() != 2) {
+            return ResponseEntity.badRequest().build();
+        }
+        UUID deliveryId = UUID.fromString(orderId);
+        delivery.deliveryID(deliveryId);
+        delivery.setCustomerID(customerId);
+        delivery.setRestaurantID(vendorId);
+        String status = deliveriesPostRequest.getStatus().toUpperCase();
+        switch (status) {
+            case "PENDING":
+                delivery.setStatus(DeliveryStatus.PENDING);
+                break;
+            case "ACCEPTED":
+                delivery.setStatus(DeliveryStatus.ACCEPTED);
+                break;
+            case "REJECTED":
+                delivery.setStatus(DeliveryStatus.REJECTED);
+                break;
+            case "PREPARING":
+                delivery.setStatus(DeliveryStatus.PREPARING);
+                break;
+            case "GIVEN_TO_COURIER":
+                delivery.setStatus(DeliveryStatus.GIVEN_TO_COURIER);
+                break;
+            case "ON_TRANSIT":
+                delivery.setStatus(DeliveryStatus.ON_TRANSIT);
+                break;
+            case "DELIVERED":
+                delivery.setStatus(DeliveryStatus.DELIVERED);
+                break;
+            default:
+                return ResponseEntity.badRequest().build();
+        }
+        delivery.setDeliveryAddress(addr);
+        Error e = new Error().errorId(UUID.randomUUID());
+        e.setType(ErrorType.NONE);
+        delivery.setError(e);
+        delivery = deliveryService.insert(delivery);
+        return ResponseEntity.ok(delivery);
+    }
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
