@@ -132,4 +132,9 @@ public class DeliveryService {
         delivery.setPickupTime(pickupTime);
         deliveryRepository.save(delivery);
     }
+
+    public Restaurant getRestaurant(UUID deliveryId){
+        String restaurantId = getDelivery(deliveryId).getRestaurantID();
+        return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+    }
 }
