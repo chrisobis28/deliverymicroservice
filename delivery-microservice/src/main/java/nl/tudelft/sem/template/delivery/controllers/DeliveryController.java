@@ -505,17 +505,20 @@ public class DeliveryController implements DeliveriesApi {
         switch (userType) {
             case "customer":
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            case "non-existent":
+            case "in-existent":
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            case "admin":
+            case "admin": {
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                break;
+            }
             case "courier": {
-                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null) {
+                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null){
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
-                } else {
-                    // Courier is not allowed to assign other couriers to orders or assign themselves over someone
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    break;
                 }
+                // Courier is not allowed to assign other couriers to orders or assign themselves over someone
+                else
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
             case "vendor": {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
@@ -530,6 +533,7 @@ public class DeliveryController implements DeliveriesApi {
                 if(restaurant.getCouriers() != null && !restaurant.getCouriers().contains(courierId))
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                break;
             }
         }
 
