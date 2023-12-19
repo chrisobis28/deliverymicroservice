@@ -847,4 +847,155 @@ class DeliveryControllerTest {
 
         verify(usersCommunication, times(1)).getAccountType(userId);
     }
+
+    @Test
+    void deliveriesDeliveryIdCourierGetAdmin(){
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "customer@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        String courierId = "courier@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setCourierID(courierId);
+        m1.setRestaurantID(vendorId);
+        m1.setCustomerID(customerId);
+        sut.insert(m1);
+
+        String userId = "user@testmail.com";
+        String type = "admin";
+        when(usersCommunication.getAccountType(userId)).thenReturn(type);
+
+        ResponseEntity<String> res = sut.deliveriesDeliveryIdCourierGet(deliveryId, userId);
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+        assertEquals(res.getBody(), courierId);
+        verify(usersCommunication, times(1)).getAccountType(userId);
+    }
+
+    @Test
+    void deliveriesDeliveryIdCourierGetVendor(){
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "customer@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        String courierId = "courier@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setCourierID(courierId);
+        m1.setRestaurantID(vendorId);
+        m1.setCustomerID(customerId);
+        sut.insert(m1);
+
+        String userId = "user@testmail.com";
+        String type = "vendor";
+        when(usersCommunication.getAccountType(userId)).thenReturn(type);
+        when(usersCommunication.getAccountType(vendorId)).thenReturn(type);
+
+        // Vendor checks the courier for their own order
+        ResponseEntity<String> res1 = sut.deliveriesDeliveryIdCourierGet(deliveryId, vendorId);
+        assertEquals(HttpStatus.OK, res1.getStatusCode());
+        verify(usersCommunication, times(1)).getAccountType(vendorId);
+        assertEquals(res1.getBody(), courierId);
+
+        // Vendor is not allowed to check the courier of another vendor's order
+        ResponseEntity<String> res2 = sut.deliveriesDeliveryIdCourierGet(deliveryId, userId);
+        assertEquals(HttpStatus.FORBIDDEN, res2.getStatusCode());
+        verify(usersCommunication, times(1)).getAccountType(userId);
+        assertEquals(res2.getBody(), "User lacks necessary permissions.");
+    }
+
+    @Test
+    void deliveriesDeliveryIdCourierGetCustomer(){
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "customer@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        String courierId = "courier@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setCourierID(courierId);
+        m1.setRestaurantID(vendorId);
+        m1.setCustomerID(customerId);
+        sut.insert(m1);
+
+        String userId = "user@testmail.com";
+        String type = "customer";
+        when(usersCommunication.getAccountType(userId)).thenReturn(type);
+
+        ResponseEntity<String> res = sut.deliveriesDeliveryIdCourierGet(deliveryId, userId);
+        assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+        assertEquals(res.getBody(), "User lacks necessary permissions.");
+        verify(usersCommunication, times(1)).getAccountType(userId);
+    }
+
+    @Test
+    void deliveriesDeliveryIdCourierGetInExistent(){
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "customer@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        String courierId = "courier@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setCourierID(courierId);
+        m1.setRestaurantID(vendorId);
+        m1.setCustomerID(customerId);
+        sut.insert(m1);
+
+        String userId = "user@testmail.com";
+        String type = "in-existent";
+        when(usersCommunication.getAccountType(userId)).thenReturn(type);
+
+        ResponseEntity<String> res = sut.deliveriesDeliveryIdCourierGet(deliveryId, userId);
+        assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
+        assertEquals(res.getBody(), "User lacks valid authentication credentials.");
+        verify(usersCommunication, times(1)).getAccountType(userId);
+    }
+
+    // Courier:
+    @Test
+    void deliveriesDeliveryIdCourierGetCourier(){
+        String courierId = "courier@testmail.com";
+        String otherCourierId = "othercourier@testmail.com";
+
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "customer@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setCourierID(null);
+        m1.setRestaurantID(vendorId);
+        m1.setCustomerID(customerId);
+        sut.insert(m1);
+
+        UUID deliveryId2 = UUID.randomUUID();
+        Delivery m2 = new Delivery();
+        m2.setDeliveryID(deliveryId2);
+        m2.setCourierID(courierId);
+        m2.setRestaurantID(vendorId);
+        m2.setCustomerID(customerId);
+        sut.insert(m2);
+
+        UUID deliveryId3 = UUID.randomUUID();
+        Delivery m3 = new Delivery();
+        m3.setDeliveryID(deliveryId3);
+        m3.setCourierID(otherCourierId);
+        m3.setRestaurantID(vendorId);
+        m3.setCustomerID(customerId);
+        sut.insert(m3);
+
+        String type = "courier";
+        when(usersCommunication.getAccountType(courierId)).thenReturn(type);
+
+        ResponseEntity<String> res1 = sut.deliveriesDeliveryIdCourierGet(deliveryId, courierId);
+        assertEquals(HttpStatus.NOT_FOUND, res1.getStatusCode());
+        assertEquals(res1.getBody(), "No courier assigned to order.");
+        verify(usersCommunication, times(1)).getAccountType(courierId);
+
+        ResponseEntity<String> res2 = sut.deliveriesDeliveryIdCourierGet(deliveryId2, courierId);
+        assertEquals(HttpStatus.OK, res2.getStatusCode());
+        assertEquals(res2.getBody(), courierId);
+        verify(usersCommunication, times(2)).getAccountType(courierId);
+
+        ResponseEntity<String> res3 = sut.deliveriesDeliveryIdCourierGet(deliveryId3, courierId);
+        assertEquals(HttpStatus.FORBIDDEN, res3.getStatusCode());
+        assertEquals(res3.getBody(), "User lacks necessary permissions.");
+        verify(usersCommunication, times(3)).getAccountType(courierId);
+    }
 }

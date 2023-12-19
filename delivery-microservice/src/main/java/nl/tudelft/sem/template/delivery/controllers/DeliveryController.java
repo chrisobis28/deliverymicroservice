@@ -468,12 +468,14 @@ public class DeliveryController implements DeliveriesApi {
             case "vendor": {
                 if (delivery.getRestaurantID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
             case "courier": {
                 if(delivery.getCourierID() == null)
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courier assigned to order.");
                 if (delivery.getCourierID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
             case "customer": {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
