@@ -1,19 +1,15 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
+//import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.delivery.services.RestaurantService;
+//import nl.tudelft.sem.template.delivery.services.DeliveryService;
+//import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -77,7 +73,7 @@ class StatisticsControllerTest {
     void testForDeliveriesPerHrEmptyID() {
         when(usersCommunication.getAccountType(userId)).thenReturn("courier");
 
-        ResponseEntity<List<Integer>> actual = sut.statisticsDeliveriesPerHourGet("");
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet("", "");
         assertEquals(HttpStatus.BAD_REQUEST, actual.getStatusCode());
     }
 
@@ -85,7 +81,17 @@ class StatisticsControllerTest {
     void testForDeliveriesPerHrUnauthorized() {
         when(usersCommunication.getAccountType(userId)).thenReturn("courier");
 
-        ResponseEntity<List<Integer>> actual = sut.statisticsDeliveriesPerHourGet(userId);
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
+        assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
+    }
+
+    @Test
+    void testForDeliveriesPerHrUnauthorized2() {
+        String userId2 = userId.concat("impostor");
+        when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
+        when(usersCommunication.getAccountType(userId2)).thenReturn("vendor");
+
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId2, userId);
         assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
     }
 
@@ -104,9 +110,11 @@ class StatisticsControllerTest {
         sut.insert(d5);
         sut.insert(d6);
 
+        String userId2 = userId.concat("vendor");
         when(usersCommunication.getAccountType(userId)).thenReturn("admin");
+        when(usersCommunication.getAccountType(userId2)).thenReturn("vendor");
 
-        ResponseEntity<List<Integer>> actual = sut.statisticsDeliveriesPerHourGet(userId);
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId2);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
         assertEquals(new ArrayList<>(), actual.getBody());
     }
@@ -128,7 +136,7 @@ class StatisticsControllerTest {
 
         when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
 
-        ResponseEntity<List<Integer>> actual = sut.statisticsDeliveriesPerHourGet(userId);
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
         assertEquals(new ArrayList<>(), actual.getBody());
     }
@@ -142,7 +150,7 @@ class StatisticsControllerTest {
         OffsetDateTime date4 = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date5 = OffsetDateTime.of(2023, 12, 12, 18, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date6 = OffsetDateTime.of(2023, 12, 12, 19, 32, 23, 0, ZoneOffset.ofHours(0));
-        List<Integer> expected = List.of(1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,1);
+        List<Double> expected = List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0);
         d1.setStatus(DeliveryStatus.DELIVERED);
         d2.setStatus(DeliveryStatus.DELIVERED);
         d3.setStatus(DeliveryStatus.DELIVERED);
@@ -171,7 +179,7 @@ class StatisticsControllerTest {
         //Set-up
         when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
 
-        ResponseEntity<List<Integer>> actual = sut.statisticsDeliveriesPerHourGet(userId);
+        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
         assertEquals(expected, actual.getBody());
     }

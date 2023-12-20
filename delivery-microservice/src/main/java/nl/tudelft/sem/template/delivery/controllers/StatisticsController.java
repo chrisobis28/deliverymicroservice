@@ -10,9 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.OffsetDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequestMapping("/statistics")
 @RestController
@@ -81,67 +79,48 @@ public class StatisticsController implements StatisticsApi {
      * @return list of number of deliveries per hour (limiting to most recent day)
      */
     @Override
-    public ResponseEntity<List<Integer>> statisticsDeliveriesPerHourGet(@Parameter String userId) {
-        if (isNullOrEmpty(userId)) {
+    public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId, @Parameter String vendorId) {
+        if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
             return ResponseEntity.badRequest().build();
         }
         String type = usersCommunication.getAccountType(userId);
-        if (!type.equals("vendor") && !type.equals("admin")) {
+        boolean isVendor = type.equals("vendor") && vendorId.equals(userId);
+        if (!isVendor && !type.equals("admin")) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(userId);
+        List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>());
         }
-        OffsetDateTime max = deliveries.get((deliveries.size()-1)).getDeliveredTime();
-        List<Delivery> mostRecent = deliveries.stream().filter(d -> d.getDeliveredTime().isAfter(max.minusHours(24)))
-            .sorted(Comparator.comparing(Delivery::getDeliveredTime)).collect(Collectors.toList());
-
-        OffsetDateTime minT = mostRecent.get(0).getDeliveredTime();
-        OffsetDateTime maxT = mostRecent.get((mostRecent.size()-1)).getDeliveredTime();
-        int n;
-        if (maxT.getDayOfMonth() == minT.getDayOfMonth()) {
-            n = (maxT.getHour() - minT.getHour()) + 1;
-        } else {
-            n = 24 - (minT.getHour() - maxT.getHour()) + 1;
-        }
-        List<Integer> count = getDeliveriesPerHour(n, mostRecent, minT);
+        List<Double> count = getDeliveriesPerHour(deliveries);
         return ResponseEntity.ok(count);
     }
 
     /**
-     * Helper method for finding the deliveries in an hour
-     * @param n number of hour brackets
-     * @param mostRecent all deliveries in the last 24 hrs
-     * @param minT earliest delivery time
-     * @return the list of integers indicating deliveries in an hour bracket (e.g., 14:00-15:00)
+     * Calculates the trend of deliveries per hour
+     * @param deliveries list of all deliveries of a specific courier
+     * @return list of doubles representing avg deliveries in each hr bracket
      */
-    public List<Integer> getDeliveriesPerHour(int n, List<Delivery> mostRecent, OffsetDateTime minT) {
-        List<Integer> count = new ArrayList<>();
-
-        for (int i = 0; i < n; i++) {
-            count.add(0);
+    public List<Double> getDeliveriesPerHour(List<Delivery> deliveries) {
+        List<Double> count = new ArrayList<>();
+        List<List<Delivery>> deliveriesByHr = new ArrayList<>();
+        for (int i = 0; i < 24; i++) {
+            deliveriesByHr.add(new ArrayList<>());
         }
 
-        int j = 0;
-        OffsetDateTime curr = minT;
-        for (int i = 0; i < mostRecent.size(); i++) {
-            OffsetDateTime t = mostRecent.get(i).getDeliveredTime();
-            if (Math.abs((t.getHour() - curr.getHour())) < 1 || t.getMinute() == 0) {
-                int currCount = count.get(j);
-                count.set(j, currCount+1);
-            } else {
-                if (t.getDayOfMonth() == curr.getDayOfMonth()) {
-                    j += (t.getHour() - curr.getHour());
-                } else {
-                    int diff = (24 - curr.getHour()) + t.getHour();
-                    j += diff;
-                }
-                int currCount = count.get(j);
-                count.set(j, currCount+1);
-                curr = t;
-            }
+        for (Delivery d: deliveries) {
+            int hr_delivered = d.getDeliveredTime().getHour();
+            deliveriesByHr.get(hr_delivered).add(d);
         }
+
+        int n = deliveries.size()-1;
+        int days = (deliveries.get(n).getDeliveredTime().getDayOfYear() - deliveries.get(0).getDeliveredTime().getDayOfYear()) + 1;
+        for (List<Delivery> del: deliveriesByHr) {
+            //double days = (double) del.stream().map(d -> d.getDeliveredTime().getDayOfMonth()).distinct().count();
+            double d = del.size()/((double)days);
+            count.add(d);
+        }
+
         return count;
     }
 
