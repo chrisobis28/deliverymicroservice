@@ -74,9 +74,11 @@ public class StatisticsController implements StatisticsApi {
     }
 
     /**
-     * Get a list of integers representing number of deliveries per hour
-     * @param userId User ID for authorization (optional)
-     * @return list of number of deliveries per hour (limiting to most recent day)
+     * Get no. of deliveries made in each hour bracket of a day averaged over no. of days delivered for
+     * e.g., if there is only data for 13/12/2023 and 12/12/2023 then delivery count is averaged over 2 days
+     * @param userId User ID for authorization
+     * @param vendorId ID of the vendor whose delivery stats are being queried
+     * @return list of doubles representing avg deliveries in each hr bracket
      */
     @Override
     public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId, @Parameter String vendorId) {
