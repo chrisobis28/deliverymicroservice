@@ -522,7 +522,7 @@ public class DeliveryController implements DeliveriesApi {
             }
             case "vendor": {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
-                Restaurant restaurant = deliveryService.getRestaurant(deliveryId);
+                Restaurant restaurant = deliveryService.getRestaurant(delivery.getRestaurantID());
                 // Not allowed to assign couriers to different vendors
                 if(!restaurant.getRestaurantID().equals(userId))
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);

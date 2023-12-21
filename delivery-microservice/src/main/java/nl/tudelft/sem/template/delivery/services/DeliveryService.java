@@ -133,8 +133,7 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
 
-    public Restaurant getRestaurant(UUID deliveryId){
-        String restaurantId = getDelivery(deliveryId).getRestaurantID();
+    public Restaurant getRestaurant(String restaurantId){
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
     }
 }
