@@ -6,10 +6,7 @@ import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +17,7 @@ public class StatisticsService {
 
     /**
      * Constructor for StatisticsService
-     * @param deliveryRepository
+     * @param deliveryRepository database where Delivery objects are stored
      */
     public StatisticsService(DeliveryRepository deliveryRepository) {
         this.deliveryRepository = deliveryRepository;
@@ -60,5 +57,33 @@ public class StatisticsService {
         List<Delivery> delivered = vendorDeliveries.stream().filter(d -> d.getStatus() != null)
             .filter(d -> d.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
         return delivered.stream().sorted(Comparator.comparing(Delivery::getDeliveredTime)).collect(Collectors.toList());
+    }
+
+    /**
+     * Calculates the trend of deliveries per hour
+     * @param deliveries list of all deliveries of a specific courier
+     * @return list of doubles representing avg deliveries in each hr bracket
+     */
+    public List<Double> getDeliveriesPerHour(List<Delivery> deliveries) {
+        List<Double> count = new ArrayList<>();
+        List<List<Delivery>> deliveriesByHr = new ArrayList<>();
+        for (int i = 0; i < 24; i++) {
+            deliveriesByHr.add(new ArrayList<>());
+        }
+
+        for (Delivery d: deliveries) {
+            int hr_delivered = d.getDeliveredTime().getHour();
+            deliveriesByHr.get(hr_delivered).add(d);
+        }
+
+        int n = deliveries.size()-1;
+        int days = (deliveries.get(n).getDeliveredTime().getDayOfYear() - deliveries.get(0).getDeliveredTime().getDayOfYear()) + 1;
+        for (List<Delivery> del: deliveriesByHr) {
+            //double days = (double) del.stream().map(d -> d.getDeliveredTime().getDayOfMonth()).distinct().count();
+            double d = del.size()/((double)days);
+            count.add(d);
+        }
+
+        return count;
     }
 }
