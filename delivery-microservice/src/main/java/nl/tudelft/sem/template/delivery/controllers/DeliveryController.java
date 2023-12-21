@@ -433,7 +433,11 @@ public class DeliveryController implements DeliveriesApi {
         }
     }
 
-    // TODO: CHRIS
+    /**
+     * Gets all accepted orders in the system, meaning those that do not yet have a courier assigned
+     * @param userId ID of the User for authorization (required)
+     * @return a List of Delivery Objects
+     */
     @GetMapping("/deliveries/all/accepted")
     @Override
     public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
@@ -447,7 +451,12 @@ public class DeliveryController implements DeliveriesApi {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
     }
 
-    // TODO: CHRIS
+    /**
+     * Gets the courier ID of an order
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId ID of the User for authorization (required)
+     * @return a String with the ID of the courier
+     */
     @GetMapping("/deliveries/{deliveryId}/courier")
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCourierGet(@PathVariable UUID deliveryId,
@@ -459,12 +468,14 @@ public class DeliveryController implements DeliveriesApi {
             case "vendor": {
                 if (delivery.getRestaurantID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
             case "courier": {
                 if(delivery.getCourierID() == null)
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courier assigned to order.");
                 if (delivery.getCourierID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
             case "customer": {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
@@ -475,7 +486,13 @@ public class DeliveryController implements DeliveriesApi {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User lacks valid authentication credentials.");
     }
 
-    // TODO: CHRIS
+    /**
+     * Updates the courier ID of an order
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId ID of the User for authorization (required)
+     * @param courierId ID of the courier for updating the Delivery (required)
+     * @return a Delivery Object with the updates that took place
+     */
     @PostMapping("/deliveries/{deliveryId}/courier")
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdCourierPut(@PathVariable UUID deliveryId,
@@ -488,20 +505,35 @@ public class DeliveryController implements DeliveriesApi {
         switch (userType) {
             case "customer":
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            case "non-existent":
+            case "in-existent":
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            case "admin":
+            case "admin": {
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                break;
+            }
             case "courier": {
-                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null) {
+                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null){
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
-                } else {
-                    // Courier is not allowed to assign other couriers to orders or assign themselves over someone
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    break;
                 }
+                // Courier is not allowed to assign other couriers to orders or assign themselves over someone
+                else
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
             case "vendor": {
-                // TODO : Once we have the vendor repository and DAO -> vendor can only assign couriers that are in their list
+                Delivery delivery = deliveryService.getDelivery(deliveryId);
+                Restaurant restaurant = deliveryService.getRestaurant(delivery.getRestaurantID());
+                // Not allowed to assign couriers to different vendors
+                if(!restaurant.getRestaurantID().equals(userId))
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                // Not allowed to assign another courier
+                if(delivery.getCourierID() != null)
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                // Not allowed to assign couriers that are not in the list of own couriers (if restaurant uses it)
+                if(restaurant.getCouriers() != null && !restaurant.getCouriers().contains(courierId))
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                break;
             }
         }
 
