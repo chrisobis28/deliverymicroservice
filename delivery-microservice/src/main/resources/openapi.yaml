@@ -2083,6 +2083,11 @@ paths:
           description: User ID for authorization
           schema:
             type: string
+        - name: vendorId
+          in: header
+          description: ID of the vendor whose delivery stats are being queried
+          schema:
+            type: string
       responses:
         '200':
           description: Successfully computed statistic
@@ -2091,8 +2096,9 @@ paths:
               schema:
                 type: array
                 items:
-                  type: integer
-                example: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24 ]
+                  type: number
+                  format: double
+                example: [ 1.5, 2.25, 3.0, 4.0, 5.0, 6.1, 7.0, 8.3, 9.0, 10.75, 11.0, 12.0, 13.0, 14.0, 15.0, 16.5, 17.6, 18.8, 19.0, 20.3, 21.1, 22.4, 23.5, 24.45 ]
                 description: An array representing the count of deliveries for each hour (0-23).
         '401':
           description: Unauthorized access.
