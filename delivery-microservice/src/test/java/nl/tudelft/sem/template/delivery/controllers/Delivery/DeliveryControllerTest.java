@@ -674,7 +674,7 @@ class DeliveryControllerTest {
         sut.insert(m);
         ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, diffCourierId);
 
-        assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 
 //        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getAccountType(diffCourierId);
