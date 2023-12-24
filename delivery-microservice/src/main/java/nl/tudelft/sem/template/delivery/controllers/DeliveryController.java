@@ -1,28 +1,21 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.model.*;
 import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.*;
 import org.springframework.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,15 +24,16 @@ public class DeliveryController implements DeliveriesApi {
     private final DeliveryService deliveryService;
 
     private final UsersCommunication usersCommunication;
+    private final DeliveryStatusHandler deliveryStatusHandler;
 
     /**
      * Constructor
      * @param deliveryService the delivery service
      */
-    @Autowired
-    public DeliveryController(DeliveryService deliveryService, UsersCommunication usersCommunication) {
+    public DeliveryController(DeliveryService deliveryService, UsersCommunication usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
+        this.deliveryStatusHandler = deliveryStatusHandler;
     }
 
     /**
@@ -223,32 +217,12 @@ public class DeliveryController implements DeliveriesApi {
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        String accountType = usersCommunication.getAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if(delivery == null)
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
-        if (accountType.equals("admin") ) {
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if(accountType.equals("courier"))
-        {
-            if(!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if(accountType.equals("vendor"))
-        {
-            if(!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if(accountType.equals("customer"))
-        {
-            if(!delivery.getCustomerID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
+        return deliveryStatusHandler.getDeliveryStatus(deliveryId, userId);
+    }
+
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
+        return deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
     }
 
     /**
@@ -356,43 +330,6 @@ public class DeliveryController implements DeliveriesApi {
         } catch (DeliveryService.DeliveryNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
         }
-    }
-    @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody String statusString) {
-
-        String accountType = usersCommunication.getAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        DeliveryStatus newStatus = DeliveryStatus.fromValue(statusString);
-
-        if (accountType.equals("admin") ) {
-            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-            return ResponseEntity.ok(updatedDelivery);
-        }
-        if(accountType.equals("courier"))
-        {
-            //You do not have access
-            if(!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-            return ResponseEntity.ok(updatedDelivery);
-        }
-        if(accountType.equals("vendor"))
-        {
-            //You do not have access
-            if(!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-            return ResponseEntity.ok(updatedDelivery);
-        }
-        if(accountType.equals("customer"))
-        {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        //We do not know who you are
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
     /**
