@@ -448,6 +448,8 @@ public class DeliveryController implements DeliveriesApi {
             String type = usersCommunication.getAccountType(userId);
             String restaurantEmail = delivery.getRestaurantID();
             String customerEmail = delivery.getCustomerID();
+
+            if (isNullOrEmpty(restaurantEmail) || isNullOrEmpty(customerEmail)) return ResponseEntity.notFound().build();
             boolean isVendor = type.equals("vendor") && restaurantEmail.equals(userId);
             boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
             if (!type.equals("admin") && !isVendor && !isCustomer) {
@@ -473,10 +475,11 @@ public class DeliveryController implements DeliveriesApi {
             String type = usersCommunication.getAccountType(userId);
             String courierEmail = delivery.getCourierID();
             String customerEmail = delivery.getCustomerID();
+            if (isNullOrEmpty(courierEmail) || isNullOrEmpty(customerEmail)) return ResponseEntity.notFound().build();
             boolean isCourier = type.equals("courier") && courierEmail.equals(userId);
             boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
             if (!type.equals("admin") && !isCourier && !isCustomer) {
-                return ResponseEntity.status(403).build();
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             } else {
                 return ResponseEntity.ok(delivery.getRatingCourier());
             }
