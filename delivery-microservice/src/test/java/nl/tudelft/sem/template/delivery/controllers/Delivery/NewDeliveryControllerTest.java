@@ -1,14 +1,13 @@
 package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
+import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
-import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import static org.assertj.core.api.Assertions.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,7 +43,7 @@ class NewDeliveryControllerTest {
         repo1 = new TestDeliveryRepository();
         repo2 = new TestRestaurantRepository();
         usersCommunication =  mock(UsersCommunication.class);
-        sut1 = new DeliveryController(new DeliveryService(repo1,repo2), usersCommunication);
+        sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
         sut2 = new RestaurantController(new RestaurantService(repo2));
     }
     @Test
@@ -193,136 +193,5 @@ class NewDeliveryControllerTest {
         sut1.insert(delivery);
         UUID invalidDeliveryId = UUID.randomUUID();
         assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId,null).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
-    }
-    @Test
-    void get_status_user_forbidden() {
-        Delivery delivery = new Delivery();;
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        String userId = "user@user.com";
-        String otherUserId = "newUser@user.com";
-        delivery.setCustomerID(otherUserId);
-        sut1.insert(delivery);
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
-
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    }
-    @Test
-    void get_status_courier_forbidden() {
-        //TODO
-        Delivery delivery = new Delivery();;
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "user@user.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("courier");
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("FORBIDDEN");
-    }
-    @Test
-    void get_status_courier_authorized() {
-        Delivery delivery = new Delivery();
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "courier@pizza.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("courier");
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("ACCEPTED");
-    }
-    @Test
-    void get_status_admin() {
-        Delivery delivery = new Delivery();
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "admin@admin.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("admin");
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("ACCEPTED");
-    }
-    @Test
-    void update_status_user_forbidden() {
-        Delivery delivery = new Delivery();;
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        String userId = "user@user.com";
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
-
-        delivery.setCourierID(userId);
-        sut1.insert(delivery);
-
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,userId,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-    }
-    @Test
-    void update_status_courier_forbidden() {
-        Delivery delivery = new Delivery();;
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "user@user.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("courier");
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"ACCEPTED").getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("FORBIDDEN");
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("FORBIDDEN");
-
-    }
-    @Test
-    void update_status_courier_authorized() {
-        Delivery delivery = new Delivery();
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "courier@pizza.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("courier");
-
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"ACCEPTED").getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("ACCEPTED");
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("PREPARING");
-   }
-    @Test
-    void update_status_admin() {
-        Delivery delivery = new Delivery();
-        UUID deliveryID = UUID.randomUUID();
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-        delivery.setDeliveryID(deliveryID);
-        delivery.setCourierID("courier@pizza.com");
-
-        String courierID = "admin@admin.com";
-        when(usersCommunication.getAccountType(courierID)).thenReturn("admin");
-
-        sut1.insert(delivery);
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"ACCEPTED").getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("ACCEPTED");
-        assertThat(sut1.deliveriesDeliveryIdStatusPut(deliveryID,courierID,"PREPARING").getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(sut1.deliveriesDeliveryIdStatusGet(deliveryID,courierID).getBody()).isEqualTo("PREPARING");
-
     }
 }

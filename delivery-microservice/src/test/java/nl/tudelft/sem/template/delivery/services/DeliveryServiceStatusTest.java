@@ -1,8 +1,7 @@
-package nl.tudelft.sem.template.delivery.controllers.Delivery;
+package nl.tudelft.sem.template.delivery.services;
 
 
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.Test;
@@ -14,11 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-class DeliveryStatusTest {
+class DeliveryServiceStatusTest {
 
     @Mock
     public DeliveryRepository deliveryRepositoryMock;
