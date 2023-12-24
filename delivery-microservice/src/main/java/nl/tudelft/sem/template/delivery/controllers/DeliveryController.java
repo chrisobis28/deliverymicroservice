@@ -43,6 +43,56 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
+     * Get an error associated with a delivery
+     * (don't check for null error bc error is initialized along with Delivery)
+     * @param deliveryId ID of the Delivery entity (required) id of Delivery entity
+     * @param userId User ID for authorization (required) user ID
+     * @return ResponseEntity containing error (if user is authorized)
+     */
+    @Override
+    public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader(value = "userId") String userId) {
+        if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
+        String user = usersCommunication.getAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        String customer_id = delivery.getCustomerID();
+        String c_id = delivery.getCourierID();
+        String r_id = delivery.getRestaurantID();
+        if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id)) return ResponseEntity.notFound().build();
+        boolean isVendor = userId.equals(r_id) && user.equals("vendor");
+        boolean isCustomer = userId.equals(customer_id) && user.equals("customer");
+        boolean isCourier = userId.equals(c_id) && user.equals("courier");
+        if (!user.equals("admin") && !isCourier && !isVendor && !isCustomer) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } else {
+            return ResponseEntity.ok(delivery.getError());
+        }
+    }
+
+    /**
+     * Get the id of the restaurant making the delivery
+     * - access granted only for vendor of restaurant making delivery, courier making delivery and admin
+     * @param deliveryId ID of the Delivery entity (required) - checking if Delivery entity exists
+     * @param userId User ID for authorization (required) - ID of user making the request
+     * @return ResponseEntity containing restaurant id (if user is authorized)
+     */
+    @Override
+    public ResponseEntity<String> deliveriesDeliveryIdRestaurantGet(UUID deliveryId, String userId) {
+        if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        String userType = usersCommunication.getAccountType(userId);
+        String r_id = delivery.getRestaurantID();
+        String c_id = delivery.getCourierID();
+        if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
+        boolean isVendor = userType.equals("vendor") && userId.equals(r_id);
+        boolean isCourier = userType.equals("courier") && userId.equals(c_id);
+        if (!userType.equals("admin") && !isVendor && !isCourier) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.ok(r_id);
+        }
+    }
+
+    /**
      * The get method for getting the pickup time of a delivery
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId User ID for authorization (required)
