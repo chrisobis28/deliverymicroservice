@@ -266,6 +266,36 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
+     * Gets delivery time of Delivery entity
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId User ID for authorization (required)
+     * @return gets delivery time (if user is authorized to see it)
+     */
+    @Override
+    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdDeliveredTimeGet(UUID deliveryId, String userId) {
+        try {
+            if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
+            String user = usersCommunication.getAccountType(userId);
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+            String cust_id = delivery.getCustomerID();
+            String c_id = delivery.getCourierID();
+            String r_id = delivery.getRestaurantID();
+            if (isNullOrEmpty(c_id) || isNullOrEmpty(cust_id) || isNullOrEmpty(r_id) || delivery.getDeliveredTime() == null)
+                return ResponseEntity.notFound().build();
+            boolean isVendor = userId.equals(r_id) && user.equals("vendor");
+            boolean isCustomer = userId.equals(cust_id) && user.equals("customer");
+            boolean isCourier = userId.equals(c_id) && user.equals("courier");
+            if (!user.equals("admin") && !isCourier && !isVendor && !isCustomer) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            } else {
+                return ResponseEntity.ok(delivery.getDeliveredTime());
+            }
+        } catch (DeliveryService.DeliveryNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
      * returns the delivery address
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId User ID for authorization (required)
@@ -278,7 +308,7 @@ public class DeliveryController implements DeliveriesApi {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
 
             if(delivery == null)
-                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
             // Check user access based on account type and association with the delivery
             if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
