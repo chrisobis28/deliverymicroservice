@@ -3,8 +3,9 @@ package nl.tudelft.sem.template.delivery.controllers;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
+//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.*;
 import org.springframework.http.HttpStatus;
@@ -23,14 +24,14 @@ public class DeliveryController implements DeliveriesApi {
 
     private final DeliveryService deliveryService;
 
-    private final UsersCommunication usersCommunication;
+    private final UsersAuthenticationService usersCommunication;
     private final DeliveryStatusHandler deliveryStatusHandler;
 
     /**
      * Constructor
      * @param deliveryService the delivery service
      */
-    public DeliveryController(DeliveryService deliveryService, UsersCommunication usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
+    public DeliveryController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
@@ -46,16 +47,17 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader(value = "userId") String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-        String user = usersCommunication.getAccountType(userId);
+        //String user = usersCommunication.getUserAccountType(userId);
+        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         String customer_id = delivery.getCustomerID();
         String c_id = delivery.getCourierID();
         String r_id = delivery.getRestaurantID();
         if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id)) return ResponseEntity.notFound().build();
-        boolean isVendor = userId.equals(r_id) && user.equals("vendor");
-        boolean isCustomer = userId.equals(customer_id) && user.equals("customer");
-        boolean isCourier = userId.equals(c_id) && user.equals("courier");
-        if (!user.equals("admin") && !isCourier && !isVendor && !isCustomer) {
+        boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
+        boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
+        boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
+        if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         } else {
             return ResponseEntity.ok(delivery.getError());
@@ -73,13 +75,13 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<String> deliveriesDeliveryIdRestaurantGet(UUID deliveryId, String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        String userType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         String r_id = delivery.getRestaurantID();
         String c_id = delivery.getCourierID();
         if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
-        boolean isVendor = userType.equals("vendor") && userId.equals(r_id);
-        boolean isCourier = userType.equals("courier") && userId.equals(c_id);
-        if (!userType.equals("admin") && !isVendor && !isCourier) {
+        boolean isVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(r_id);
+        boolean isCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(c_id);
+        if (!userType.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCourier) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
             return ResponseEntity.ok(r_id);
@@ -94,26 +96,26 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        String accountType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         if(delivery == null)
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        if (accountType.equals("admin") ) {
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) ) {
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        if(accountType.equals("courier"))
+        if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
         {
             if(!delivery.getCourierID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        if(accountType.equals("vendor"))
+        if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
         {
             if(!delivery.getRestaurantID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        if(accountType.equals("customer"))
+        if(accountType.equals(UsersAuthenticationService.AccountType.CLIENT))
         {
             if(!delivery.getCustomerID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -131,22 +133,22 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId, @RequestHeader String userId,@RequestBody OffsetDateTime pickupTime) {
-        String accountType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         if(delivery == null)
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        if (accountType.equals("admin") ) {
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) ) {
             deliveryService.updatePickupTime(deliveryId,pickupTime);
             return ResponseEntity.ok(delivery);
         }
-        if(accountType.equals("courier"))
+        if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
         {
             if(!delivery.getCourierID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             deliveryService.updatePickupTime(deliveryId,pickupTime);
             return ResponseEntity.ok(delivery);
         }
-        if(accountType.equals("vendor"))
+        if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
         {
             if(!delivery.getRestaurantID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
@@ -249,17 +251,17 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdDeliveredTimeGet(UUID deliveryId, String userId) {
         try {
             if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-            String user = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             String cust_id = delivery.getCustomerID();
             String c_id = delivery.getCourierID();
             String r_id = delivery.getRestaurantID();
             if (isNullOrEmpty(c_id) || isNullOrEmpty(cust_id) || isNullOrEmpty(r_id) || delivery.getDeliveredTime() == null)
                 return ResponseEntity.notFound().build();
-            boolean isVendor = userId.equals(r_id) && user.equals("vendor");
-            boolean isCustomer = userId.equals(cust_id) && user.equals("customer");
-            boolean isCourier = userId.equals(c_id) && user.equals("courier");
-            if (!user.equals("admin") && !isCourier && !isVendor && !isCustomer) {
+            boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
+            boolean isCustomer = userId.equals(cust_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
+            boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
+            if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             } else {
                 return ResponseEntity.ok(delivery.getDeliveredTime());
@@ -278,16 +280,16 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         try {
-            String accountType = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
             Delivery delivery = deliveryService.getDelivery(deliveryId);
 
             if(delivery == null)
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
             // Check user access based on account type and association with the delivery
-            if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
-                    || (accountType.equals("vendor") && delivery.getRestaurantID().equals(userId))
-                    || (accountType.equals("customer") && delivery.getCustomerID().equals(userId))) {
+            if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
+                    || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))
+                || (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId))) {
                 List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
                 return ResponseEntity.ok(deliveryAddress);
             } else {
@@ -308,18 +310,18 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         try {
-            String accountType = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
             Delivery delivery = deliveryService.getDelivery(deliveryId);
 
             if(delivery == null)
                 return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
             // Check user access based on account type and association with the delivery
-            if (accountType.equals("admin") || (accountType.equals("courier") && delivery.getCourierID().equals(userId))
-                    || (accountType.equals("vendor") && delivery.getRestaurantID().equals(userId))) {
+            if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
+                    || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))) {
                 List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
                 return ResponseEntity.ok(pickupAddress);
-            } else if (accountType.equals("customer") && delivery.getCustomerID().equals(userId)) {
+            } else if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId)) {
                 // Customer has access
                 List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
                 return ResponseEntity.ok(pickupAddress);
@@ -361,10 +363,10 @@ public class DeliveryController implements DeliveriesApi {
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
-            String type = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
             String email = delivery.getCustomerID();
-            boolean isCustomer = userId.equals(email) && type.equals("customer");
-            if (!isCustomer && !type.equals("admin")) {
+            boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
+            if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
                 return ResponseEntity.status(403).build();
             } else {
                 deliveryService.updateCourierRating(deliveryId, body);
@@ -387,10 +389,10 @@ public class DeliveryController implements DeliveriesApi {
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
-            String type = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
             String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
-            boolean isCustomer = userId.equals(email) && type.equals("customer");
-            if (!isCustomer && !type.equals("admin")) {
+            boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
+            if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
                 return ResponseEntity.status(403).build();
             } else {
                 deliveryService.updateRestaurantRating(deliveryId, body);
@@ -412,14 +414,14 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.badRequest().build();
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
-            String type = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
             String restaurantEmail = delivery.getRestaurantID();
             String customerEmail = delivery.getCustomerID();
 
             if (isNullOrEmpty(restaurantEmail) || isNullOrEmpty(customerEmail)) return ResponseEntity.notFound().build();
-            boolean isVendor = type.equals("vendor") && restaurantEmail.equals(userId);
-            boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
-            if (!type.equals("admin") && !isVendor && !isCustomer) {
+            boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && restaurantEmail.equals(userId);
+            boolean isCustomer = type.equals(UsersAuthenticationService.AccountType.CLIENT) && customerEmail.equals(userId);
+            if (!type.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCustomer) {
                 return ResponseEntity.status(403).build();
             } else {
                 return ResponseEntity.ok(delivery.getRatingRestaurant());
@@ -439,13 +441,13 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.badRequest().build();
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
-            String type = usersCommunication.getAccountType(userId);
+            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
             String courierEmail = delivery.getCourierID();
             String customerEmail = delivery.getCustomerID();
             if (isNullOrEmpty(courierEmail) || isNullOrEmpty(customerEmail)) return ResponseEntity.notFound().build();
-            boolean isCourier = type.equals("courier") && courierEmail.equals(userId);
-            boolean isCustomer = type.equals("customer") && customerEmail.equals(userId);
-            if (!type.equals("admin") && !isCourier && !isCustomer) {
+            boolean isCourier = type.equals(UsersAuthenticationService.AccountType.COURIER) && courierEmail.equals(userId);
+            boolean isCustomer = type.equals(UsersAuthenticationService.AccountType.CLIENT) && customerEmail.equals(userId);
+            if (!type.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isCustomer) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             } else {
                 return ResponseEntity.ok(delivery.getRatingCourier());
@@ -461,10 +463,10 @@ public class DeliveryController implements DeliveriesApi {
     @GetMapping("/deliveries/all/accepted")
     @Override
     public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
-        String accountType = usersCommunication.getAccountType(userId);
-        if (accountType.equals("admin") || accountType.equals("courier"))
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || accountType.equals(UsersAuthenticationService.AccountType.COURIER))
             return ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
-        if (accountType.equals("vendor") || accountType.equals("customer"))
+        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) || accountType.equals(UsersAuthenticationService.AccountType.CLIENT))
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
 
         // Account type is "in-existent"
@@ -481,23 +483,23 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCourierGet(@PathVariable UUID deliveryId,
                                                                  @RequestHeader String userId) {
-        String userType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         switch(userType){
-            case "admin": return ResponseEntity.ok(delivery.getCourierID());
-            case "vendor": {
+            case ADMIN: return ResponseEntity.ok(delivery.getCourierID());
+            case VENDOR: {
                 if (delivery.getRestaurantID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
-            case "courier": {
+            case COURIER: {
                 if(delivery.getCourierID() == null)
                     return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No courier assigned to order.");
                 if (delivery.getCourierID().equals(userId))
                     return ResponseEntity.ok(delivery.getCourierID());
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
-            case "customer": {
+            case CLIENT: {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body("User lacks necessary permissions.");
             }
         }
@@ -518,20 +520,20 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdCourierPut(@PathVariable UUID deliveryId,
                                                                    @RequestHeader String userId,
                                                                    @RequestBody String courierId) {
-        String courier = usersCommunication.getAccountType(courierId);
-        String userType = usersCommunication.getAccountType(userId);
-        if (!courier.equals("courier"))
+        UsersAuthenticationService.AccountType courier = usersCommunication.getUserAccountType(courierId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        if (!courier.equals(UsersAuthenticationService.AccountType.COURIER))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         switch (userType) {
-            case "customer":
+            case CLIENT:
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            case "in-existent":
+            case INVALID:
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            case "admin": {
+            case ADMIN: {
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
                 break;
             }
-            case "courier": {
+            case COURIER: {
                 if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null){
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
                     break;
@@ -540,7 +542,7 @@ public class DeliveryController implements DeliveriesApi {
                 else
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-            case "vendor": {
+            case VENDOR: {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
                 Restaurant restaurant = deliveryService.getRestaurant(delivery.getRestaurantID());
                 // Not allowed to assign couriers to different vendors
@@ -571,14 +573,14 @@ public class DeliveryController implements DeliveriesApi {
     @PutMapping("/deliveries/{deliveryId}/prep")
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdPrepPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody Integer body) {
-        String userType = usersCommunication.getAccountType(userId);
-        if(userType.equals("admin") ||
-                userType.equals("vendor")) {
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        if(userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
+                userType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
             deliveryService.updateEstimatedPrepTime(deliveryId, body);
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             return ResponseEntity.ok(delivery);
-        } else if (userType.equals("client") ||
-                userType.equals("courier")) {
+        } else if (userType.equals(UsersAuthenticationService.AccountType.CLIENT) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER)) {
             // User lacks necessary permission levels.
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         } else {

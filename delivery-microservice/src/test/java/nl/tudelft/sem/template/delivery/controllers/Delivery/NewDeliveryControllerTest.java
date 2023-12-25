@@ -2,11 +2,12 @@ package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
+//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
 import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,13 +37,13 @@ class NewDeliveryControllerTest {
 
     private RestaurantController sut2;
 
-    public UsersCommunication usersCommunication;
+    public UsersAuthenticationService usersCommunication;
 
     @BeforeEach
     public void setup() {
         repo1 = new TestDeliveryRepository();
         repo2 = new TestRestaurantRepository();
-        usersCommunication =  mock(UsersCommunication.class);
+        usersCommunication =  mock(UsersAuthenticationService.class);
         sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
         sut2 = new RestaurantController(new RestaurantService(repo2));
     }
@@ -62,7 +63,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
-        when(usersCommunication.getAccountType(customerID)).thenReturn("customer");
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
@@ -79,7 +80,7 @@ class NewDeliveryControllerTest {
         String userId = "user@user.com";
         delivery.setCustomerID(userId);
         sut1.insert(delivery);
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         UUID invalidDeliveryId = UUID.randomUUID();
         assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId,userId).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -99,7 +100,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
-        when(usersCommunication.getAccountType(customerID)).thenReturn("admin");
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
 
         OffsetDateTime pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
@@ -123,7 +124,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
-        when(usersCommunication.getAccountType(customerID)).thenReturn("admin");
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
         OffsetDateTime pickupTime;
         pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
@@ -138,14 +139,14 @@ class NewDeliveryControllerTest {
     }
     @Test
     void address_get_found() {
-        Delivery delivery = new Delivery();;
+        Delivery delivery = new Delivery();
         UUID deliveryID = UUID.randomUUID();
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         delivery.setDeliveryID(deliveryID);
         String userId = "user@user.com";
         delivery.setCustomerID(userId);
         sut1.insert(delivery);
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -153,7 +154,7 @@ class NewDeliveryControllerTest {
     }
     @Test
     void address_get_unauthorized() {
-        Delivery delivery = new Delivery();;
+        Delivery delivery = new Delivery();
         UUID deliveryID = UUID.randomUUID();
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         delivery.setDeliveryID(deliveryID);
@@ -161,7 +162,7 @@ class NewDeliveryControllerTest {
         String otherUserId = "newUser@user.com";
         delivery.setCustomerID(otherUserId);
         sut1.insert(delivery);
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
         assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
@@ -169,7 +170,7 @@ class NewDeliveryControllerTest {
     }
     @Test
     void pickup_get_unauthorized() {
-        Delivery delivery = new Delivery();;
+        Delivery delivery = new Delivery();
         UUID deliveryID = UUID.randomUUID();
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         delivery.setDeliveryID(deliveryID);
@@ -177,7 +178,7 @@ class NewDeliveryControllerTest {
         String otherUserId = "newUser@user.com";
         delivery.setCustomerID(otherUserId);
         sut1.insert(delivery);
-        when(usersCommunication.getAccountType(userId)).thenReturn("customer");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
         assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
