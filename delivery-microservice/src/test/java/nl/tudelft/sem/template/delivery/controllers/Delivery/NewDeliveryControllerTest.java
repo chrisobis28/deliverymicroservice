@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
+import nl.tudelft.sem.template.delivery.AddressAdapter;
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 //import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
@@ -45,7 +47,7 @@ class NewDeliveryControllerTest {
         repo2 = new TestRestaurantRepository();
         usersCommunication =  mock(UsersAuthenticationService.class);
         sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
-        sut2 = new RestaurantController(new RestaurantService(repo2));
+        sut2 = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
     }
     @Test
     void pickup_get_found() {

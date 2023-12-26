@@ -1,7 +1,8 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.api.RestaurantsApi;
-import nl.tudelft.sem.template.delivery.GPS;
+import nl.tudelft.sem.template.delivery.AddressAdapter;
+//import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 //import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
@@ -15,22 +16,24 @@ import javax.validation.Valid;
 
 import java.util.List;
 
-import static org.mockito.Mockito.mock;
+//import static org.mockito.Mockito.mock;
 
 @RestController
 public class RestaurantController implements RestaurantsApi {
 
     private final RestaurantService restaurantService;
 
-    GPS mockGPS = mock(GPS.class);
+    //GPS mockGPS = mock(GPS.class);
+    private final AddressAdapter addressAdapter;
 
     /**
      * Constructor
      * @param restaurantService the restaurant service
      */
     @Autowired
-    public RestaurantController(RestaurantService restaurantService) {
+    public RestaurantController(RestaurantService restaurantService, AddressAdapter addressAdapter) {
         this.restaurantService = restaurantService;
+        this.addressAdapter = addressAdapter;
     }
 
     /**
@@ -64,7 +67,7 @@ public class RestaurantController implements RestaurantsApi {
         }
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantID(email);
-        restaurant.setLocation(mockGPS.getCoordinatesOfAddress(address));
+        restaurant.setLocation(addressAdapter.convertStringAddressToDouble(address));
         restaurantService.insert(restaurant);
         return ResponseEntity.ok(restaurant);
     }

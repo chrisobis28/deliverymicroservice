@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import nl.tudelft.sem.template.delivery.AddressAdapter;
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.model.Restaurant;
@@ -12,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
+//import static org.mockito.Mockito.when;
 
 class RestaurantControllerTest {
 
@@ -29,7 +31,7 @@ class RestaurantControllerTest {
     co_ord = List.of(32.6, 50.4);
 
     repo2 = new TestRestaurantRepository();
-    sut = new RestaurantController(new RestaurantService(repo2));
+    sut = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
   }
 
   @Test
@@ -88,7 +90,7 @@ class RestaurantControllerTest {
     RestaurantsPostRequest rpr = new RestaurantsPostRequest();
     rpr.setRestaurantID("hi_im_a_vendor@testmail.com");
     rpr.setLocation(addr);
-    when(sut.mockGPS.getCoordinatesOfAddress(addr)).thenReturn(co_ord);
+    //when(sut.mockGPS.getCoordinatesOfAddress(addr)).thenReturn(co_ord);
     Restaurant r = new Restaurant();
     r.setRestaurantID("hi_im_a_vendor@testmail.com");
     r.setLocation(co_ord);
@@ -98,6 +100,7 @@ class RestaurantControllerTest {
     Restaurant added = result.getBody();
 
     assertEquals(HttpStatus.OK, result.getStatusCode());
-    assertEquals(added.getLocation(), co_ord);
+    assertTrue(added.getLocation().get(0) > 52.3);
+    assertTrue(added.getLocation().get(1) > 4.97);
   }
 }

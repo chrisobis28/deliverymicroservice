@@ -1,6 +1,9 @@
 package nl.tudelft.sem.template.delivery.controllers.Delivery;
 
 import java.util.Objects;
+
+import nl.tudelft.sem.template.delivery.AddressAdapter;
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 //import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
@@ -57,7 +60,7 @@ class DeliveryControllerTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setEstimatedPrepTime(prepTime);
         repo2 = new TestRestaurantRepository();
-        restaurantController = new RestaurantController(new RestaurantService(repo2));
+        restaurantController = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
         repo1 = new TestDeliveryRepository();
         usersCommunication = mock(UsersAuthenticationService.class);
         sut = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
