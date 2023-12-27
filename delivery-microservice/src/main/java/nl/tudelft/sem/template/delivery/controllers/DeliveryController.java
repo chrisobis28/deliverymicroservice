@@ -49,18 +49,23 @@ public class DeliveryController implements DeliveriesApi {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
         //String user = usersCommunication.getUserAccountType(userId);
         UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        String customer_id = delivery.getCustomerID();
-        String c_id = delivery.getCourierID();
-        String r_id = delivery.getRestaurantID();
-        if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id)) return ResponseEntity.notFound().build();
-        boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
-        boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
-        boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
-        if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        } else {
-            return ResponseEntity.ok(delivery.getError());
+        try {
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+            String customer_id = delivery.getCustomerID();
+            String c_id = delivery.getCourierID();
+            String r_id = delivery.getRestaurantID();
+            if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id))
+                return ResponseEntity.notFound().build();
+            boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
+            boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
+            boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
+            if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            } else {
+                return ResponseEntity.ok(delivery.getError());
+            }
+        } catch (DeliveryService.DeliveryNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 

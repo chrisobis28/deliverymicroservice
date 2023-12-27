@@ -11,6 +11,8 @@ import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.ErrorType;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +53,102 @@ class NewDeliveryControllerTest {
         usersCommunication =  mock(UsersAuthenticationService.class);
         sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
         sut2 = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
+    }
+
+    @Test
+    void getUnexpectedEventBadRequest() {
+        UUID del_id = UUID.randomUUID();
+        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, null);
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, "");
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getUnexpectedEventNotFound() {
+        UUID del_id = UUID.randomUUID();
+        String courierID = "hi_im_a_user@gmail.com";
+        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, courierID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCourierID(courierID);
+
+        sut1.insert(delivery);
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, courierID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getUnexpectedEventUnauthorized() {
+        UUID del_id = UUID.randomUUID();
+        Error e = new Error();
+        e.setType(ErrorType.NONE);
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_user@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setError(e);
+        delivery.setCustomerID(cID + "h");
+        delivery.setCourierID(coID + "h");
+        delivery.setRestaurantID(vID + "h");
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getUnexpectedEventAuthorized() {
+        String admin = "hi_im_an_admin@gmail.com";
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_vendor@gmail.com";
+        Error e = new Error();
+        e.setType(ErrorType.NONE);
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID);
+        delivery.setCourierID(coID);
+        delivery.setRestaurantID(vID);
+        delivery.setError(e);
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody().getType(), ErrorType.NONE);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody().getType(), ErrorType.NONE);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, admin);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody().getType(), ErrorType.NONE);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody().getType(), ErrorType.NONE);
     }
 
     @Test
