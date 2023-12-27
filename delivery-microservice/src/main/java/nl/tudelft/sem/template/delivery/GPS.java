@@ -61,7 +61,7 @@ public class GPS {
    */
   public String getAddressFromCoordinates(List<Double> coords) {
     String loc;
-    if (coords.get(0) > 39.00) {
+    if (coords.get(0) > 50.00) {
       int c = (int) (coords.get(0)*100000);
       int c2 = (int) (coords.get(1)*100000);
       if ((c - 5201150) == (c2 - 435860) && (c - 5201150) < addresses.size()) {
