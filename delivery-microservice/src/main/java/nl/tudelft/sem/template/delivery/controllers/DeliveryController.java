@@ -92,7 +92,7 @@ public class DeliveryController implements DeliveriesApi {
      * The get method for getting the pickup time of a delivery
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId User ID for authorization (required)
-     * @return
+     * @return pickup time for a delivery
      */
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
@@ -129,7 +129,7 @@ public class DeliveryController implements DeliveriesApi {
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId User ID for authorization (required)
      * @param pickupTime Update pick up time of delivery (required)
-     * @return
+     * @return updated pickup time of delivery
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId, @RequestHeader String userId,@RequestBody OffsetDateTime pickupTime) {
@@ -283,7 +283,7 @@ public class DeliveryController implements DeliveriesApi {
         try {
             Delivery d = deliveryService.getDelivery(deliveryId);
             UsersAuthenticationService.AccountType t = usersCommunication.getUserAccountType(userId);
-            if (isNullOrEmpty(d.getCustomerID()) || isNullOrEmpty(d.getCourierID())) return ResponseEntity.notFound().build();
+            if (isNullOrEmpty(d.getCustomerID()) || isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getRestaurantID())) return ResponseEntity.notFound().build();
             switch (t) {
                 case ADMIN:
                    return ResponseEntity.ok(d.getCustomerID());
@@ -322,7 +322,7 @@ public class DeliveryController implements DeliveriesApi {
             //boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
             boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
             if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             } else {
                 return ResponseEntity.ok(delivery.getDeliveredTime());
             }

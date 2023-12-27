@@ -17,14 +17,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -49,6 +52,187 @@ class NewDeliveryControllerTest {
         sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
         sut2 = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
     }
+
+    @Test
+    void getDeliveredTimeBadRequest() {
+        UUID del_id = UUID.randomUUID();
+        ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, null);
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, "");
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getDeliveredTimeNotFound() {
+        UUID del_id = UUID.randomUUID();
+        String customerID = "hi_im_a_user@gmail.com";
+        ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(customerID);
+
+        sut1.insert(delivery);
+        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getDeliveredTimeUnauthorized() {
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_user@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID + "h");
+        delivery.setCourierID(coID + "h");
+        delivery.setRestaurantID(vID + "h");
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getDeliveredTimeAuthorized() {
+        String admin = "hi_im_an_admin@gmail.com";
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_vendor@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID);
+        delivery.setCourierID(coID);
+        delivery.setRestaurantID(vID);
+        OffsetDateTime t = OffsetDateTime.of(2023, 12, 27, 12, 24, 10, 4, ZoneOffset.ofHours(0));
+        delivery.setDeliveredTime(t);
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), t);
+
+        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), t);
+
+        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, admin);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), t);
+
+        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getCustomerBadRequest() {
+        UUID del_id = UUID.randomUUID();
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, null);
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, "");
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getCustomerDeliveryNotFound() {
+        UUID del_id = UUID.randomUUID();
+        String customerID = "hi_im_a_user@gmail.com";
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, customerID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(customerID);
+
+        sut1.insert(delivery);
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, customerID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void getCustomerDeliveryUnauthorized() {
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_user@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID + "h");
+        delivery.setCourierID(coID + "h");
+        delivery.setRestaurantID(vID + "h");
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getCustomerDeliveryAuthorized() {
+        String admin = "hi_im_an_admin@gmail.com";
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_vendor@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID);
+        delivery.setCourierID(coID);
+        delivery.setRestaurantID(vID);
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), cID);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), cID);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, admin);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), cID);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
+        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+    }
+
     @Test
     void pickup_get_found() {
         UUID deliveryId = UUID.randomUUID();
