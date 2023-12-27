@@ -3,16 +3,13 @@ package nl.tudelft.sem.template.delivery.controllers;
 import nl.tudelft.sem.template.api.RestaurantsApi;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
-//import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-
 import java.util.List;
 
 import static org.mockito.Mockito.mock;
@@ -26,15 +23,16 @@ public class RestaurantController implements RestaurantsApi {
 
     /**
      * Constructor
+     *
      * @param restaurantService the restaurant service
      */
-    @Autowired
     public RestaurantController(RestaurantService restaurantService) {
         this.restaurantService = restaurantService;
     }
 
     /**
      * Inserts the restaurant into the repo
+     *
      * @param restaurant the restaurant to insert
      * @return the entity
      */
@@ -49,6 +47,7 @@ public class RestaurantController implements RestaurantsApi {
 
     /**
      * Add a Restaurant to database
+     *
      * @param restaurantsPostRequest Request body for creating a new Restaurant entity. This is an internal endpoint that ensures consistency among microservices. Should be called by others when creating a restaurant. (optional)
      * @return response entity with added restaurant
      */
@@ -71,15 +70,17 @@ public class RestaurantController implements RestaurantsApi {
 
     /**
      * Checks if a string is null or empty
+     *
      * @param str string to check
      * @return boolean value indicating whether string is empty or not
      */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.equals(" ");
+        return str == null || str.isEmpty() || str.isBlank();
     }
 
     /**
      * Checks if an address is valid
+     *
      * @param str string to check
      * @return boolean value indicating whether address is invalid or not
      */
