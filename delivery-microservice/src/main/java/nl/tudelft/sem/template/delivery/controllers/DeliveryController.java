@@ -74,17 +74,21 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdRestaurantGet(UUID deliveryId, String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        String r_id = delivery.getRestaurantID();
-        String c_id = delivery.getCourierID();
-        if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
-        boolean isVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(r_id);
-        boolean isCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(c_id);
-        if (!userType.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCourier) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        } else {
-            return ResponseEntity.ok(r_id);
+        try {
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
+            UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+            String r_id = delivery.getRestaurantID();
+            String c_id = delivery.getCourierID();
+            if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
+            boolean isVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(r_id);
+            boolean isCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(c_id);
+            if (!userType.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCourier) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            } else {
+                return ResponseEntity.ok(r_id);
+            }
+        } catch (DeliveryService.DeliveryNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
