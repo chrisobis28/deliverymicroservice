@@ -49,23 +49,19 @@ public class DeliveryController implements DeliveriesApi {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
         //String user = usersCommunication.getUserAccountType(userId);
         UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        try {
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
-            String customer_id = delivery.getCustomerID();
-            String c_id = delivery.getCourierID();
-            String r_id = delivery.getRestaurantID();
-            if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id))
-                return ResponseEntity.notFound().build();
-            boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
-            boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
-            boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
-            if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
-                return ResponseEntity.ok(delivery.getError());
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        String customer_id = delivery.getCustomerID();
+        String c_id = delivery.getCourierID();
+        String r_id = delivery.getRestaurantID();
+        if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id))
             return ResponseEntity.notFound().build();
+        boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
+        boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
+        boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
+        if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor && !isCustomer) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.ok(delivery.getError());
         }
     }
 
@@ -79,21 +75,17 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdRestaurantGet(UUID deliveryId, String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-        try {
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
-            UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-            String r_id = delivery.getRestaurantID();
-            String c_id = delivery.getCourierID();
-            if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
-            boolean isVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(r_id);
-            boolean isCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(c_id);
-            if (!userType.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCourier) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
-                return ResponseEntity.ok(r_id);
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
-            return ResponseEntity.notFound().build();
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        String r_id = delivery.getRestaurantID();
+        String c_id = delivery.getCourierID();
+        if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
+        boolean isVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(r_id);
+        boolean isCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(c_id);
+        if (!userType.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCourier) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.ok(r_id);
         }
     }
 
@@ -259,24 +251,20 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdCurrentLocationGet(UUID deliveryId, String userId) {
         if (isNullOrEmpty(userId) || deliveryId == null) return ResponseEntity.badRequest().build();
-        try {
-            Delivery d = deliveryService.getDelivery(deliveryId);
-            UsersAuthenticationService.AccountType t = usersCommunication.getUserAccountType(userId);
-            if (/*isNullOrEmpty(d.getCourierID()) ||*/ isNullOrEmpty(d.getCustomerID())) return ResponseEntity.notFound().build();
-            switch (t) {
-                case ADMIN -> {
-                    return ResponseEntity.ok(List.of());
-                }
-                case CLIENT -> {
-                    if (userId.equals(d.getCustomerID())) return ResponseEntity.ok(List.of());
-                    else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                }
-                default -> {
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-                }
+        Delivery d = deliveryService.getDelivery(deliveryId);
+        UsersAuthenticationService.AccountType t = usersCommunication.getUserAccountType(userId);
+        if (/*isNullOrEmpty(d.getCourierID()) ||*/ isNullOrEmpty(d.getCustomerID())) return ResponseEntity.notFound().build();
+        switch (t) {
+            case ADMIN -> {
+                return ResponseEntity.ok(List.of());
             }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            case CLIENT -> {
+                if (userId.equals(d.getCustomerID())) return ResponseEntity.ok(List.of());
+                else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            default -> {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
         }
     }
 
@@ -289,24 +277,20 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCustomerGet(UUID deliveryId, String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-        try {
-            Delivery d = deliveryService.getDelivery(deliveryId);
-            UsersAuthenticationService.AccountType t = usersCommunication.getUserAccountType(userId);
-            if (isNullOrEmpty(d.getCustomerID()) || isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getRestaurantID())) return ResponseEntity.notFound().build();
-            switch (t) {
-                case ADMIN:
-                   return ResponseEntity.ok(d.getCustomerID());
-                case COURIER:
-                    if (userId.equals(d.getCourierID())) return ResponseEntity.ok(d.getCustomerID());
-                    else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                case VENDOR:
-                    if (userId.equals(d.getRestaurantID())) return ResponseEntity.ok(d.getCustomerID());
-                    else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-                default:
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
-            return ResponseEntity.notFound().build();
+        Delivery d = deliveryService.getDelivery(deliveryId);
+        UsersAuthenticationService.AccountType t = usersCommunication.getUserAccountType(userId);
+        if (isNullOrEmpty(d.getCustomerID()) || isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getRestaurantID())) return ResponseEntity.notFound().build();
+        switch (t) {
+            case ADMIN:
+                return ResponseEntity.ok(d.getCustomerID());
+            case COURIER:
+                if (userId.equals(d.getCourierID())) return ResponseEntity.ok(d.getCustomerID());
+                else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            case VENDOR:
+                if (userId.equals(d.getRestaurantID())) return ResponseEntity.ok(d.getCustomerID());
+                else return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            default:
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 
@@ -318,25 +302,21 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdDeliveredTimeGet(UUID deliveryId, String userId) {
-        try {
-            if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
-            UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
-            //String customer_id = delivery.getCustomerID();
-            String c_id = delivery.getCourierID();
-            String r_id = delivery.getRestaurantID();
-            if (isNullOrEmpty(c_id) || /* isNullOrEmpty(customer_id) ||*/ isNullOrEmpty(r_id) || delivery.getDeliveredTime() == null)
-                return ResponseEntity.notFound().build();
-            boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
-            //boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
-            boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
-            if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            } else {
-                return ResponseEntity.ok(delivery.getDeliveredTime());
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
+        if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
+        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        //String customer_id = delivery.getCustomerID();
+        String c_id = delivery.getCourierID();
+        String r_id = delivery.getRestaurantID();
+        if (isNullOrEmpty(c_id) || /* isNullOrEmpty(customer_id) ||*/ isNullOrEmpty(r_id) || delivery.getDeliveredTime() == null)
             return ResponseEntity.notFound().build();
+        boolean isVendor = userId.equals(r_id) && user.equals(UsersAuthenticationService.AccountType.VENDOR);
+        //boolean isCustomer = userId.equals(customer_id) && user.equals(UsersAuthenticationService.AccountType.CLIENT);
+        boolean isCourier = userId.equals(c_id) && user.equals(UsersAuthenticationService.AccountType.COURIER);
+        if (!user.equals(UsersAuthenticationService.AccountType.ADMIN) && !isCourier && !isVendor) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.ok(delivery.getDeliveredTime());
         }
     }
 

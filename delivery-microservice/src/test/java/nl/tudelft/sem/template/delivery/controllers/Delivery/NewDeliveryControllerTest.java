@@ -30,6 +30,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -68,15 +69,14 @@ class NewDeliveryControllerTest {
     void getUnexpectedEventNotFound() {
         UUID del_id = UUID.randomUUID();
         String courierID = "hi_im_a_user@gmail.com";
-        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, courierID);
-        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, courierID));
 
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCourierID(courierID);
 
         sut1.insert(delivery);
-        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, courierID);
+        ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, courierID);
         assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
@@ -164,15 +164,14 @@ class NewDeliveryControllerTest {
     void getRestaurantNotFound() {
         UUID del_id = UUID.randomUUID();
         String courierID = "hi_im_a_user@gmail.com";
-        ResponseEntity<String> res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, courierID);
-        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, courierID));
 
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCourierID(courierID);
 
         sut1.insert(delivery);
-        res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, courierID);
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, courierID);
         assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
@@ -253,15 +252,14 @@ class NewDeliveryControllerTest {
     void getDeliveredTimeNotFound() {
         UUID del_id = UUID.randomUUID();
         String customerID = "hi_im_a_user@gmail.com";
-        ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID);
-        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID));
 
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCustomerID(customerID);
 
         sut1.insert(delivery);
-        res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID);
+        ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID);
         assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
@@ -344,15 +342,14 @@ class NewDeliveryControllerTest {
     void getCustomerDeliveryNotFound() {
         UUID del_id = UUID.randomUUID();
         String customerID = "hi_im_a_user@gmail.com";
-        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, customerID);
-        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, customerID));
 
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCustomerID(customerID);
 
         sut1.insert(delivery);
-        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, customerID);
+        ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, customerID);
         assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
     }
 
