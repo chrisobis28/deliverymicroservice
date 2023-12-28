@@ -15,12 +15,9 @@ public class AddressAdapter {
 
   public List<Double> convertStringAddressToDouble(List<String> address) {
     if (address == null || address.size() == 0) return null;
-    StringBuilder location = new StringBuilder();
-    for (String s : address) {
-      location.append(s).append(" ");
-    }
-    location = new StringBuilder(location.toString().trim());
-    return gps.getCoordinatesFromAddress(location.toString()).getLeft();
+    String location = String.join(" ", address);
+    location = location.trim();
+    return gps.getCoordinatesFromAddress(location).getLeft();
   }
 
   public List<String> convertDoubleToStringAddress(List<Double> coords) {
