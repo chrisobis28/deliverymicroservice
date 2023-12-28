@@ -2,8 +2,8 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import nl.tudelft.sem.template.api.StatisticsApi;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,14 +18,14 @@ public class StatisticsController implements StatisticsApi {
 
     private final StatisticsService statisticsService;
 
-    private final UsersCommunication usersCommunication;
+    private final UsersAuthenticationService usersCommunication;
 
     /**
      * Constructor for statistics controller
      * @param statisticsService the statistics service
      */
     @Autowired
-    public StatisticsController(StatisticsService statisticsService, UsersCommunication usersCommunication) {
+    public StatisticsController(StatisticsService statisticsService, UsersAuthenticationService usersCommunication) {
         this.statisticsService = statisticsService;
         this.usersCommunication = usersCommunication;
     }
@@ -55,16 +55,16 @@ public class StatisticsController implements StatisticsApi {
     @GetMapping("/ratings-for-orders")
     @Override
     public ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId, @RequestBody List<UUID> orderIds) {
-        String userType = usersCommunication.getAccountType(userId);
-        if (userType.equals("admin")) {
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             List<Integer> ratings = new ArrayList<>();
             for (UUID orderId : orderIds) {
                 ratings.add(statisticsService.getOrderRating(orderId));
             }
             return ResponseEntity.ok(ratings);
-        } else if (userType.equals("vendor") ||
-                userType.equals("courier") ||
-                userType.equals("client")) {
+        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
+                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
             // User lacks necessary permission levels.
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
         } else {
@@ -85,9 +85,9 @@ public class StatisticsController implements StatisticsApi {
         if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
             return ResponseEntity.badRequest().build();
         }
-        String type = usersCommunication.getAccountType(userId);
-        boolean isVendor = type.equals("vendor") && vendorId.equals(userId);
-        if (!isVendor && !type.equals("admin")) {
+        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
+        boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && vendorId.equals(userId);
+        if (!isVendor && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(vendorId);
