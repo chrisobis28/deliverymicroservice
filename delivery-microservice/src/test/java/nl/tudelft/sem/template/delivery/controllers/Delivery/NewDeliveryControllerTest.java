@@ -97,9 +97,9 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
 
         ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
@@ -129,10 +129,10 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -192,6 +192,9 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
@@ -222,6 +225,10 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
         when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -277,9 +284,9 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
@@ -308,10 +315,10 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -326,7 +333,7 @@ class NewDeliveryControllerTest {
         assertEquals(res.getBody(), t);
 
         res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, cID);
-        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
     }
 
     @Test
@@ -367,12 +374,12 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
-        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+        assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
 
         res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
@@ -396,10 +403,10 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
-        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -414,7 +421,7 @@ class NewDeliveryControllerTest {
         assertEquals(res.getBody(), cID);
 
         res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
-        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+        assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
     }
 
     @Test
