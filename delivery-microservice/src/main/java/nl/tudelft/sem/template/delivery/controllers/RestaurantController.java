@@ -4,7 +4,6 @@ import nl.tudelft.sem.template.api.RestaurantsApi;
 import nl.tudelft.sem.template.delivery.AddressAdapter;
 //import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
-//import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
-
 import java.util.List;
 
 //import static org.mockito.Mockito.mock;
@@ -78,7 +76,7 @@ public class RestaurantController implements RestaurantsApi {
      * @return boolean value indicating whether string is empty or not
      */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.equals(" ");
+        return str == null || str.isEmpty() || str.isBlank();
     }
 
     /**

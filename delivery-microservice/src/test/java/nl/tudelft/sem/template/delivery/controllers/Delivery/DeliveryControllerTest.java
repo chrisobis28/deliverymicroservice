@@ -52,7 +52,6 @@ class DeliveryControllerTest {
 
     @BeforeEach
     void setUp() {
-        // Mock data
         userId = "user@example.org";
         deliveryId = UUID.randomUUID();
         prepTime = 25;
@@ -487,7 +486,7 @@ class DeliveryControllerTest {
         sut.insert(m);
         ResponseEntity<Delivery> result = sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating);
 
-        assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
 
 //        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getUserAccountType(userId);
@@ -599,7 +598,7 @@ class DeliveryControllerTest {
         sut.insert(m);
         ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId);
 
-        assertEquals(HttpStatus.valueOf(403), result.getStatusCode());
+        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
 
 //        verify(deliveryService, times(1)).getDelivery(deliveryId);
         verify(usersCommunication, times(1)).getUserAccountType(restaurantId);
@@ -678,6 +677,7 @@ class DeliveryControllerTest {
         sut.insert(m);
         ResponseEntity<Integer> result = sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, diffCourierId);
 
+        //assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
 
 //        verify(deliveryService, times(1)).getDelivery(deliveryId);

@@ -29,10 +29,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class NewDeliveryControllerTest {
@@ -496,8 +494,9 @@ class NewDeliveryControllerTest {
         sut1.insert(delivery);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         UUID invalidDeliveryId = UUID.randomUUID();
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId,userId).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId, userId));
     }
+
     @Test
     void pickup_time_get() {
         UUID deliveryId = UUID.randomUUID();
@@ -518,7 +517,7 @@ class NewDeliveryControllerTest {
 
         OffsetDateTime pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
 
@@ -542,15 +541,16 @@ class NewDeliveryControllerTest {
         OffsetDateTime pickupTime;
         pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        sut1.deliveriesDeliveryIdPickupPut(delivery.getDeliveryID(), customerID,OffsetDateTime.parse("2022-09-30T15:30:00+01:00"));
+        sut1.deliveriesDeliveryIdPickupPut(delivery.getDeliveryID(), customerID, OffsetDateTime.parse("2022-09-30T15:30:00+01:00"));
         pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
         assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2022-09-30T15:30:00+01:00"));
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
 
 
     }
+
     @Test
     void address_get_found() {
         Delivery delivery = new Delivery();
@@ -563,9 +563,10 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
-        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getStatusCode()).isEqualTo(HttpStatus.OK);
 
     }
+
     @Test
     void address_get_unauthorized() {
         Delivery delivery = new Delivery();
@@ -579,9 +580,10 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
-        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
     }
+
     @Test
     void pickup_get_unauthorized() {
         Delivery delivery = new Delivery();
@@ -595,7 +597,7 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(List.of()));
-        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(),userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        assertThat(sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), userId).getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
 
     }
 
@@ -607,6 +609,6 @@ class NewDeliveryControllerTest {
         delivery.setDeliveryAddress(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         sut1.insert(delivery);
         UUID invalidDeliveryId = UUID.randomUUID();
-        assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId,null).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId, null));
     }
 }

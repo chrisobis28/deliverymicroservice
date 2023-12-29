@@ -29,7 +29,10 @@ public class DeliveryController implements DeliveriesApi {
 
     /**
      * Constructor
-     * @param deliveryService the delivery service
+     *
+     * @param deliveryService       the delivery service
+     * @param usersCommunication    mock for users authorization
+     * @param deliveryStatusHandler Handles the status of Delivery entities
      */
     public DeliveryController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
         this.deliveryService = deliveryService;
@@ -95,7 +98,7 @@ public class DeliveryController implements DeliveriesApi {
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         if(delivery == null)
             return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) ) {
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             return ResponseEntity.ok(delivery.getPickupTime());
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
@@ -140,14 +143,14 @@ public class DeliveryController implements DeliveriesApi {
         {
             if(!delivery.getCourierID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updatePickupTime(deliveryId,pickupTime);
+            deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
         {
             if(!delivery.getRestaurantID().equals(userId))
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updatePickupTime(deliveryId,pickupTime);
+            deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -214,12 +217,29 @@ public class DeliveryController implements DeliveriesApi {
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        return deliveryStatusHandler.getDeliveryStatus(deliveryId, userId);
-    }
-
-    @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
-        return deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if (delivery == null)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
+            if (!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
+            if (!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+            if (!delivery.getCustomerID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
+            return ResponseEntity.ok(delivery.getStatus().toString());
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
     }
 
     /**
@@ -309,26 +329,26 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        try {
-            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
+        //try {
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
 
-            if(delivery == null)
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
-
-            // Check user access based on account type and association with the delivery
-            if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
-                    || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))
-                || (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId))) {
-                List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
-                return ResponseEntity.ok(deliveryAddress);
-            } else {
-                // User does not have access
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
+        if(delivery == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+
+        // Check user access based on account type and association with the delivery
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
+            || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))
+            || (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId))) {
+            List<Double> deliveryAddress = deliveryService.getDeliveryAddress(deliveryId);
+            return ResponseEntity.ok(deliveryAddress);
+        } else {
+            // User does not have access
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
         }
+        //} catch (DeliveryService.DeliveryNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+//        }
     }
 
     /**
@@ -339,29 +359,51 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        try {
-            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
+        //try {
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
 
-            if(delivery == null)
-                return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
-
-            // Check user access based on account type and association with the delivery
-            if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
-                    || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))) {
-                List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
-                return ResponseEntity.ok(pickupAddress);
-            } else if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId)) {
-                // Customer has access
-                List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
-                return ResponseEntity.ok(pickupAddress);
-            } else {
-                // User does not have access
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
-            }
-        } catch (DeliveryService.DeliveryNotFoundException e) {
+        if (delivery == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+
+        // Check user access based on account type and association with the delivery
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
+            || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))) {
+            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+            return ResponseEntity.ok(pickupAddress);
+        } else if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId)) {
+            // Customer has access
+            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+            return ResponseEntity.ok(pickupAddress);
+        } else {
+            // User does not have access
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
         }
+//        } catch (DeliveryService.DeliveryNotFoundException e) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
+//        }
+        //For deliveriesDeliveryIdStatusPut
+        /*if (accountType.equals("courier")) {
+            //You do not have access
+            if (!delivery.getCourierID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(updatedDelivery);
+        }
+        if (accountType.equals("vendor")) {
+            //You do not have access
+            if (!delivery.getRestaurantID().equals(userId))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
+            return ResponseEntity.ok(updatedDelivery);
+        }
+        if (accountType.equals("customer")) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        }
+        //We do not know who you are
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);*/
     }
 
     /**
@@ -370,7 +412,7 @@ public class DeliveryController implements DeliveriesApi {
      * @return boolean value indicating whether string is empty or not
      */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.equals(" ");
+        return str == null || str.isEmpty() || str.isBlank();
     }
 
     /**
@@ -439,7 +481,7 @@ public class DeliveryController implements DeliveriesApi {
         value = {"/{deliveryId}/rating-restaurant"},
         produces = {"application/json"}
     )
-    public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
+    public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter(name = "deliveryId", description = "ID of the Delivery entity", required = true, in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId", description = "User ID for authorization", required = true, in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
         //Only people that can see rating is the customer who left the rating, the vendor and the admin
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
@@ -467,7 +509,7 @@ public class DeliveryController implements DeliveriesApi {
         value = {"/{deliveryId}/rating-courier"},
         produces = {"application/json"}
     )
-    public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
+    public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter(name = "deliveryId", description = "ID of the Delivery entity", required = true, in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId", description = "User ID for authorization", required = true, in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
         //Only people that can see rating is the customer who left the rating, the courier and the admin
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
@@ -543,8 +585,8 @@ public class DeliveryController implements DeliveriesApi {
     /**
      * Updates the courier ID of an order
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId ID of the User for authorization (required)
-     * @param courierId ID of the courier for updating the Delivery (required)
+     * @param userId     ID of the User for authorization (required)
+     * @param courierId  ID of the courier for updating the Delivery (required)
      * @return a Delivery Object with the updates that took place
      */
     @PostMapping("/deliveries/{deliveryId}/courier")
@@ -578,13 +620,13 @@ public class DeliveryController implements DeliveriesApi {
                 Delivery delivery = deliveryService.getDelivery(deliveryId);
                 Restaurant restaurant = deliveryService.getRestaurant(delivery.getRestaurantID());
                 // Not allowed to assign couriers to different vendors
-                if(!restaurant.getRestaurantID().equals(userId))
+                if (!restaurant.getRestaurantID().equals(userId))
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 // Not allowed to assign another courier
-                if(delivery.getCourierID() != null)
+                if (delivery.getCourierID() != null)
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 // Not allowed to assign couriers that are not in the list of own couriers (if restaurant uses it)
-                if(restaurant.getCouriers() != null && !restaurant.getCouriers().contains(courierId))
+                if (restaurant.getCouriers() != null && !restaurant.getCouriers().contains(courierId))
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
                 break;
@@ -598,8 +640,8 @@ public class DeliveryController implements DeliveriesApi {
     /**
      * Updates the estimated preparation time of an order
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
-     * @param body Update prep time of delivery (required)
+     * @param userId     User ID for authorization (required)
+     * @param body       Update prep time of delivery (required)
      * @return a delivery object with the updates that took place
      */
     @PutMapping("/deliveries/{deliveryId}/prep")
@@ -617,6 +659,42 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         } else {
             // User lacks valid authentication credentials.
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
+
+    /**
+     * Computes an estimation for when an order will be delivered
+     *
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId     User ID for authorization (required)
+     * @return an estimated delivery time
+     */
+    @Override
+    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+        if (isNullOrEmpty(userId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        // Vendors can see estimations for their orders only
+        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
+        // Couriers can see estimations for their deliveries only
+        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
+        // Customers can see estimations for their orders only
+        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
+                allowedVendor ||
+                allowedCourier ||
+                allowedCustomer) {
+            OffsetDateTime now = OffsetDateTime.now();
+            OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId, now);
+            return ResponseEntity.ok(estimate);
+        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
+                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }

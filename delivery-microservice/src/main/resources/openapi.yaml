@@ -1999,6 +1999,14 @@ paths:
                 type: string
                 description: Code indicating unauthorized access
                 example: "UNAUTHORIZED"
+        '403':
+          description: Forbidden. User lacks necessary permissions. Only admins have access to analytics.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "FORBIDDEN"
         '404':
           description: Error not found. There doesn't exist an Error with the given ID.
           content:
@@ -2304,7 +2312,8 @@ components:
   schemas:
     Delivery:
       type: object
-      x-class-extra-annotation: "@javax.persistence.Entity @javax.persistence.Table(name = \"deliveries\")"
+      x-class-extra-annotation: '@javax.persistence.Entity @javax.persistence.Table(name = "deliveries")'
+      x-field-extra-annotation: '@javax.persistence.OneToOne(mappedBy = "error", cascade = {javax.persistence.CascadeType.PERSIST, javax.persistence.CascadeType.MERGE, javax.persistence.CascadeType.REFRESH}) @javax.persistence.MapsId'
       properties:
         deliveryID:
           type: string
@@ -2395,6 +2404,8 @@ components:
           description: optional field to indicate delay in minutes
         type:
           $ref: "#/components/schemas/ErrorType"
+        Delivery:
+          $ref: "#/components/schemas/Delivery"
     ErrorType:
       type: string
       description: Type of problem with delivery (i.e., cancellation/delay). Can be scaled later. Potentially, delayed deliveries will also have a specified numeric delay.
