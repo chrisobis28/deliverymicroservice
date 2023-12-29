@@ -423,7 +423,8 @@ public class DeliveryController implements DeliveriesApi {
             String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
             boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
             if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-                return ResponseEntity.status(403).build();
+                if (type.equals(UsersAuthenticationService.AccountType.INVALID)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             } else {
                 deliveryService.updateRestaurantRating(deliveryId, body);
                 delivery = deliveryService.getDelivery(deliveryId);
@@ -452,7 +453,8 @@ public class DeliveryController implements DeliveriesApi {
             boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && restaurantEmail.equals(userId);
             boolean isCustomer = type.equals(UsersAuthenticationService.AccountType.CLIENT) && customerEmail.equals(userId);
             if (!type.equals(UsersAuthenticationService.AccountType.ADMIN) && !isVendor && !isCustomer) {
-                return ResponseEntity.status(403).build();
+                if (type.equals(UsersAuthenticationService.AccountType.INVALID)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+                else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             } else {
                 return ResponseEntity.ok(delivery.getRatingRestaurant());
             }

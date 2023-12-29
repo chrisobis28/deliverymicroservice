@@ -88,6 +88,7 @@ class NewDeliveryControllerTest {
         String cID = "hi_im_a_user@gmail.com";
         String coID = "hi_im_a_courier@gmail.com";
         String vID = "hi_im_a_user@gmail.com";
+        String invalid = "hi_im_an_impostor@gmail.com";
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setError(e);
@@ -100,9 +101,11 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
@@ -112,6 +115,9 @@ class NewDeliveryControllerTest {
 
         res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, vID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, invalid);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -184,6 +190,7 @@ class NewDeliveryControllerTest {
         String cID = "hi_im_a_user@gmail.com";
         String coID = "hi_im_a_courier@gmail.com";
         String vID = "hi_im_a_user@gmail.com";
+        String invalid = "hi_im_an_impostor@gmail.com";
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCustomerID(cID + "h");
@@ -195,9 +202,11 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
@@ -207,6 +216,9 @@ class NewDeliveryControllerTest {
 
         res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, vID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, invalid);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -246,7 +258,7 @@ class NewDeliveryControllerTest {
         assertEquals(res.getBody(), vID);
 
         res = sut1.deliveriesDeliveryIdRestaurantGet(del_id, cID);
-        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
     }
 
     @Test
@@ -279,6 +291,7 @@ class NewDeliveryControllerTest {
         String cID = "hi_im_a_user@gmail.com";
         String coID = "hi_im_a_courier@gmail.com";
         String vID = "hi_im_a_user@gmail.com";
+        String invalid = "hi_im_an_impostor@gmail.com";
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCustomerID(cID + "h");
@@ -290,9 +303,11 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
@@ -302,6 +317,9 @@ class NewDeliveryControllerTest {
 
         res = sut1.deliveriesDeliveryIdCustomerGet(del_id, vID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, invalid);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -372,6 +390,7 @@ class NewDeliveryControllerTest {
         String cID = "hi_im_a_user@gmail.com";
         String coID = "hi_im_a_courier@gmail.com";
         String vID = "hi_im_a_user@gmail.com";
+        String invalid = "hi_im_an_impostor@gmail.com";
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(del_id);
         delivery.setCustomerID(cID + "h");
@@ -383,9 +402,11 @@ class NewDeliveryControllerTest {
         when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
@@ -395,6 +416,9 @@ class NewDeliveryControllerTest {
 
         res = sut1.deliveriesDeliveryIdCustomerGet(del_id, vID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdCustomerGet(del_id, invalid);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
     }
 
     @Test
