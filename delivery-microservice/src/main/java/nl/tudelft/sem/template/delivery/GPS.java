@@ -16,6 +16,12 @@ public class GPS {
   //List<Double> getCoordinatesOfAddress(List<String> address);
   List<Pair<List<Double>, String>> addresses = new ArrayList<>();
 
+  List<Double> delft_coords = List.of(52.0115, 4.3586);
+  List<Double> rotterdam_coords = List.of(51.9227, 4.4792);
+  List<Double> amsterdam_coords = List.of(52.3212, 4.9707);
+  List<Double> eindhoven_coords = List.of(51.4355, 5.4803);
+
+  List<Double> other = List.of(39.00, 34.00);
   /**
    * Return a pair containing mocked coordinates and actual location in parameter
    * @param location address to be converted to coordinates
@@ -24,31 +30,20 @@ public class GPS {
   public Pair<List<Double>, String> getCoordinatesFromAddress(String location) {
     DecimalFormat df = new DecimalFormat("#.#####");
     DecimalFormat df2 = new DecimalFormat("##.#####");
+    List<Double> coords;
     double i = addresses.size();
     if (location.contains("NL")) {
-      if (location.contains("Delft")) {
-        Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df2.format((52.0115+(i/10000)))), Double.parseDouble(df.format((4.3586+(i/10000))))), location);
-        addresses.add(p);
-        return p;
-      }
-      else if (location.contains("Rotterdam")) {
-        Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df2.format((51.9227 + (i / 100000)))), Double.parseDouble(df.format((4.4792 + (i / 100000))))), location);
-        addresses.add(p);
-        return p;
-      }
-      else if (location.contains("Amsterdam")) {
-        Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df2.format((52.3212 + (i / 100000)))), Double.parseDouble(df.format((4.9707 + (i / 100000))))), location);
-        addresses.add(p);
-        return p;
-      }
-      else {
-        Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df2.format((51.4355+(i/100000)))), Double.parseDouble(df.format((5.4803+(i/100000))))), location);
-        addresses.add(p);
-        return p;
-      }
+      if (location.contains("Delft")) coords = delft_coords;
+      else if (location.contains("Rotterdam")) coords = rotterdam_coords;
+      else if (location.contains("Amsterdam")) coords = amsterdam_coords;
+      else coords = eindhoven_coords;
+
+      Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df2.format((coords.get(0)+(i/100000)))), Double.parseDouble(df.format((coords.get(1)+(i/100000))))), location);
+      addresses.add(p);
+      return p;
     } else {
       df = new DecimalFormat("##.###");
-      Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df.format((39.00+(i/1000)))), Double.parseDouble(df.format((34.00+(i/1000))))), location);
+      Pair<List<Double>, String> p = Pair.of(List.of(Double.parseDouble(df.format((other.get(0)+(i/1000)))), Double.parseDouble(df.format((other.get(1)+(i/1000))))), location);
       addresses.add(p);
       return p;
     }

@@ -268,12 +268,21 @@ public class DeliveryController implements DeliveriesApi {
         Delivery d = deliveryService.getDelivery(deliveryId);
         boolean check = usersCommunication.checkUserAccessToDelivery(userId, d);
         UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        if (isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getCustomerID())) return ResponseEntity.notFound().build();
+        if (isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getCustomerID()) || isInvalidLatLong(d.getCurrentLocation())) return ResponseEntity.notFound().build();
         if (!check) {
             if (user.equals(UsersAuthenticationService.AccountType.INVALID)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        else return ResponseEntity.ok(List.of());
+        else return ResponseEntity.ok(d.getCurrentLocation());
+    }
+
+    /**
+     * Method to check if coordinates are valid
+     * @param coords coordinates to check
+     * @return boolean value indicating whether coordinates are valid
+     */
+    public boolean isInvalidLatLong(List<Double> coords) {
+        return coords == null || coords.size() != 2;
     }
 
     /**
@@ -360,24 +369,21 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         //try {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
+        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
 
         if (delivery == null)
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
         // Check user access based on account type and association with the delivery
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || (accountType.equals(UsersAuthenticationService.AccountType.COURIER) && delivery.getCourierID().equals(userId))
-            || (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) && delivery.getRestaurantID().equals(userId))) {
-            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
-            return ResponseEntity.ok(pickupAddress);
-        } else if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT) && delivery.getCustomerID().equals(userId)) {
-            // Customer has access
+        if (check) {
             List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
             return ResponseEntity.ok(pickupAddress);
         } else {
+            if (type.equals(UsersAuthenticationService.AccountType.INVALID)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(List.of());
             // User does not have access
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
+            else return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
         }
 //        } catch (DeliveryService.DeliveryNotFoundException e) {
 //            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());

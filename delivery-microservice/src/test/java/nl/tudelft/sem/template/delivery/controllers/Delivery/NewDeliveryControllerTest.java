@@ -45,8 +45,11 @@ class NewDeliveryControllerTest {
 
     public UsersAuthenticationService usersCommunication;
 
+    List<Double> coords;
+
     @BeforeEach
     public void setup() {
+        coords = List.of(100.0, 100.0);
         repo1 = new TestDeliveryRepository();
         repo2 = new TestRestaurantRepository();
         usersCommunication =  mock(UsersAuthenticationService.class);
@@ -143,18 +146,22 @@ class NewDeliveryControllerTest {
 
         ResponseEntity<Error> res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertNotNull(res.getBody());
         assertEquals(res.getBody().getType(), ErrorType.NONE);
 
         res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, vID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertNotNull(res.getBody());
         assertEquals(res.getBody().getType(), ErrorType.NONE);
 
         res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, admin);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertNotNull(res.getBody());
         assertEquals(res.getBody().getType(), ErrorType.NONE);
 
         res = sut1.deliveriesDeliveryIdUnexpectedEventGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertNotNull(res.getBody());
         assertEquals(res.getBody().getType(), ErrorType.NONE);
     }
 
@@ -460,6 +467,109 @@ class NewDeliveryControllerTest {
     }
 
     @Test
+    void getCurrentLocationBadRequest() {
+        UUID del_id = UUID.randomUUID();
+        ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, null);
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, "");
+        assertEquals(res.getStatusCode(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getCurrentLocationDeliveryNotFound() {
+        UUID del_id = UUID.randomUUID();
+        String customerID = "hi_im_a_user@gmail.com";
+        assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, customerID));
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(customerID);
+
+        sut1.insert(delivery);
+        ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, customerID);
+        assertEquals(res.getStatusCode(), HttpStatus.NOT_FOUND);
+    }
+//deliveriesDeliveryIdCurrentLocationGet
+    @Test
+    void getCurrentLocationUnauthorized() {
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_user@gmail.com";
+        String invalid = "hi_im_an_impostor@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID + "h");
+        delivery.setCourierID(coID + "h");
+        delivery.setRestaurantID(vID + "h");
+        delivery.setCurrentLocation(coords);
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
+
+        ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, cID);
+        assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, invalid);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
+
+    @Test
+    void getCurrentLocationAuthorized() {
+        String admin = "hi_im_an_admin@gmail.com";
+        UUID del_id = UUID.randomUUID();
+        String cID = "hi_im_a_user@gmail.com";
+        String coID = "hi_im_a_courier@gmail.com";
+        String vID = "hi_im_a_vendor@gmail.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(del_id);
+        delivery.setCustomerID(cID);
+        delivery.setCourierID(coID);
+        delivery.setRestaurantID(vID);
+        delivery.setCurrentLocation(coords);
+
+        sut1.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
+        when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
+        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
+
+        ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, coID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), coords);
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, vID);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), coords);
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, admin);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+        assertEquals(res.getBody(), coords);
+
+        res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, cID);
+        assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+    }
+
+    @Test
     void pickup_get_found() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
@@ -475,6 +585,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
+        when(usersCommunication.checkUserAccessToDelivery(customerID, delivery)).thenReturn(true);
         when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), customerID).getBody();
@@ -492,7 +603,8 @@ class NewDeliveryControllerTest {
         String userId = "user@user.com";
         delivery.setCustomerID(userId);
         sut1.insert(delivery);
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        //when(usersCommunication.checkUserAccessToDelivery(userId, delivery)).thenReturn(true);
+        //when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         UUID invalidDeliveryId = UUID.randomUUID();
         assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut1.deliveriesDeliveryIdPickupLocationGet(invalidDeliveryId, userId));
     }
@@ -513,6 +625,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
+        when(usersCommunication.checkUserAccessToDelivery(customerID, delivery)).thenReturn(true);
         when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
 
         OffsetDateTime pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
@@ -537,6 +650,7 @@ class NewDeliveryControllerTest {
         sut2.insert(restaurant);
         sut1.insert(delivery);
 
+        when(usersCommunication.checkUserAccessToDelivery(customerID, delivery)).thenReturn(true);
         when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
         OffsetDateTime pickupTime;
         pickupTime = sut1.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
