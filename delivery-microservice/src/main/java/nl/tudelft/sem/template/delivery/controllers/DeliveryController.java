@@ -79,7 +79,7 @@ public class DeliveryController implements DeliveriesApi {
         String c_id = delivery.getCourierID();
         if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) return ResponseEntity.notFound().build();
         if (!check && userType.equals(UsersAuthenticationService.AccountType.INVALID)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        if (!check || userType.equals(UsersAuthenticationService.AccountType.CLIENT)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (!check /*|| userType.equals(UsersAuthenticationService.AccountType.CLIENT)*/) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         else return ResponseEntity.ok(r_id);
     }
 

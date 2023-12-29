@@ -64,11 +64,11 @@ public class GPS {
     if (coords.get(0) > 50.00) {
       int c = (int) (coords.get(0)*100000);
       int c2 = (int) (coords.get(1)*100000);
-      if ((c - 5201150) == (c2 - 435860) && (c - 5201150) < addresses.size()) {
+      if (isInDelft(c, c2)) {
         loc = addresses.get((c - 5201150)).getRight();
-      } else if ((c - 5192270) == (c2 - 447920) && (c - 5192270) < addresses.size()) {
+      } else if (isInRotterdam(c, c2)) {
         loc = addresses.get((c - 5192270)).getRight();
-      } else if ((c - 5232120) == (c2 - 497070) && (c - 5232120) < addresses.size()) {
+      } else if (isInAmsterdam(c, c2)) {
         loc = addresses.get((c - 5232120)).getRight();
       } else {
         loc = addresses.get((c - 5143550)).getRight();
@@ -78,5 +78,35 @@ public class GPS {
       loc = addresses.get((c - 39000)).getRight();
     }
     return loc;
+  }
+
+  /**
+   * Checks if coordinates are in Delft
+   * @param c check value (from latitude coordinate)
+   * @param c2 check value (from longitude coordinate)
+   * @return boolean indicating if coordinates are in Delft
+   */
+  public boolean isInDelft(int c, int c2) {
+    return (c - 5201150) == (c2 - 435860) && (c - 5201150) < addresses.size();
+  }
+
+  /**
+   * Checks if coordinates are in Rotterdam
+   * @param c check value (from latitude coordinate)
+   * @param c2 check value (from longitude coordinate)
+   * @return boolean indicating if coordinates are in Rotterdam
+   */
+  public boolean isInRotterdam(int c, int c2) {
+    return (c - 5192270) == (c2 - 447920) && (c - 5192270) < addresses.size();
+  }
+
+  /**
+   * Checks if coordinates are in Amsterdam
+   * @param c check value (from latitude coordinate)
+   * @param c2 check value (from longitude coordinate)
+   * @return boolean indicating if coordinates are in Amsterdam
+   */
+  public boolean isInAmsterdam(int c, int c2) {
+    return (c - 5232120) == (c2 - 497070) && (c - 5232120) < addresses.size();
   }
 }
