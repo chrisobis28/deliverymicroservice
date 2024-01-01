@@ -3,9 +3,9 @@ package nl.tudelft.sem.template.delivery.controllers;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestErrorRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
@@ -22,11 +22,13 @@ import static org.mockito.Mockito.*;
 
 class ErrorControllerTest {
 
-    private UsersCommunication usersCommunication;
+    private UsersAuthenticationService usersCommunication;
     private ErrorController sut;
     private DeliveryController deliveryController;
 
-    String userId, userType, reason;
+    String userId, reason;
+
+    UsersAuthenticationService.AccountType userType;
     UUID deliveryId;
     Integer value;
     ErrorType errorType;
@@ -71,7 +73,7 @@ class ErrorControllerTest {
         // Services and dependency injections
         DeliveryService deliveryService = new DeliveryService(repo2, repo3);
         ErrorService errorService = new ErrorService(repo1, repo2);
-        usersCommunication = mock(UsersCommunication.class);
+        usersCommunication = mock(UsersAuthenticationService.class);
 
         // Controllers
         sut = new ErrorController(errorService, deliveryService, usersCommunication);
@@ -81,13 +83,13 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdGetAdmin() {
         // Set Data
-        userType = "admin";
+        userType = UsersAuthenticationService.AccountType.ADMIN;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
         error.setType(errorType);
         error.setReason(reason);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -98,7 +100,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -110,7 +112,7 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdGetVendor() {
         // Set Data
-        userType = "vendor";
+        userType = UsersAuthenticationService.AccountType.VENDOR;
         errorType = ErrorType.DELAYED;
         reason = "Due to busy schedule, order will be 20 minutes late.";
         value = 20;
@@ -118,7 +120,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         error.setValue(value);
         delivery.setRestaurantID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -129,7 +131,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -141,11 +143,11 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdGetCourier() {
         // Set Data
-        userType = "courier";
+        userType = UsersAuthenticationService.AccountType.COURIER;
         errorType = ErrorType.NONE;
         error.setType(errorType);
         delivery.setCourierID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -156,7 +158,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -168,14 +170,14 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdGetCustomer() {
         // Set Data
-        userType = "customer";
+        userType = UsersAuthenticationService.AccountType.CLIENT;
         errorType = ErrorType.OTHER;
         reason = "Payment was unsuccessful. Customer intervention expected.";
         value = null;
         error.setType(errorType);
         error.setReason(reason);
         delivery.setCustomerID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -186,7 +188,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -199,13 +201,13 @@ class ErrorControllerTest {
     void errorsDeliveryIdGetCustomerForbidden() {
         // Set Data
         String otherUserId = "other@user.org";
-        userType = "customer";
+        userType = UsersAuthenticationService.AccountType.CLIENT;
         errorType = ErrorType.OTHER;
         reason = "Payment was unsuccessful. Customer intervention expected.";
         error.setType(errorType);
         error.setReason(reason);
         delivery.setCustomerID(otherUserId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -216,7 +218,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
         assertNull(getError);
     }
@@ -224,12 +226,12 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdGetUnauthorized() {
         // Set Data
-        userType = "non-existent";
+        userType = UsersAuthenticationService.AccountType.INVALID;
         errorType = ErrorType.OTHER;
         reason = "Payment was unsuccessful. Customer intervention expected.";
         error.setType(errorType);
         error.setReason(reason);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -240,7 +242,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
         assertNull(getError);
     }
@@ -249,12 +251,12 @@ class ErrorControllerTest {
     void errorsDeliveryIdGetNoUserID() {
         // Set Data
         String emptyUserId = "";
-        userType = "admin";
+        userType = UsersAuthenticationService.AccountType.ADMIN;
         errorType = ErrorType.OTHER;
         reason = "Payment was unsuccessful. Customer intervention expected.";
         error.setType(errorType);
         error.setReason(reason);
-        when(usersCommunication.getAccountType(any(String.class))).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(any(String.class))).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -265,7 +267,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, never()).getAccountType(any(String.class));
+        verify(usersCommunication, never()).getUserAccountType(any(String.class));
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         assertNull(getError);
     }
@@ -273,14 +275,14 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdPutAdmin() {
         // Set Data
-        userType = "admin";
+        userType = UsersAuthenticationService.AccountType.ADMIN;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
         error.setType(errorType);
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -291,7 +293,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -303,7 +305,7 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdPutVendor() {
         // Set Data
-        userType = "vendor";
+        userType = UsersAuthenticationService.AccountType.VENDOR;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
@@ -311,7 +313,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setRestaurantID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -322,7 +324,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -334,7 +336,7 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdPutCourier() {
         // Set Data
-        userType = "courier";
+        userType = UsersAuthenticationService.AccountType.COURIER;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
@@ -342,7 +344,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setCourierID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -353,7 +355,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertNotNull(getError);
         assertEquals(deliveryId, getError.getErrorId());
@@ -365,7 +367,7 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdPutCustomer() {
         // Set Data
-        userType = "customer";
+        userType = UsersAuthenticationService.AccountType.CLIENT;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
@@ -373,7 +375,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setCourierID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -384,7 +386,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
         assertNull(getError);
     }
@@ -392,7 +394,7 @@ class ErrorControllerTest {
     @Test
     void errorsDeliveryIdPutUnauthorized() {
         // Set Data
-        userType = "non-existent";
+        userType = UsersAuthenticationService.AccountType.INVALID;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
@@ -400,7 +402,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setCourierID(userId);
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -411,7 +413,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, times(1)).getAccountType(userId);
+        verify(usersCommunication, times(1)).getUserAccountType(userId);
         assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
         assertNull(getError);
     }
@@ -420,7 +422,7 @@ class ErrorControllerTest {
     void errorsDeliveryIdPutNoUserId() {
         // Set Data
         String emptyUserId = "";
-        userType = "customer";
+        userType = UsersAuthenticationService.AccountType.CLIENT;
         errorType = ErrorType.CANCELLED;
         reason = "Food ingredients are not currently available to prepare your order. Apologies for the inconvenience.";
         value = null;
@@ -428,7 +430,7 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setCourierID(userId);
-        when(usersCommunication.getAccountType(any(String.class))).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(any(String.class))).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -439,7 +441,7 @@ class ErrorControllerTest {
         Error getError = result.getBody();
 
         // Assert
-        verify(usersCommunication, never()).getAccountType(any(String.class));
+        verify(usersCommunication, never()).getUserAccountType(any(String.class));
         assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
         assertNull(getError);
     }

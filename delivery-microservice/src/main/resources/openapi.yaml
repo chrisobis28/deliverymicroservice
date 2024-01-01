@@ -2365,6 +2365,15 @@ components:
             type: number
             format: double
           description: Latitude and longitude of the location the delivery is going to
+        currentLocation:
+          x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"currentLocation\")"
+          type: array
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+            format: double
+          description: Latitude and longitude of the current location of the delivery
         ratingCourier:
           x-field-extra-annotation: "@javax.persistence.Column(name = \"ratingCourier\")"
           type: integer

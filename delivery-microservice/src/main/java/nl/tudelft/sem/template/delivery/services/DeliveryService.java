@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 @Service
 public class DeliveryService {
 
-    private DeliveryRepository deliveryRepository;
-    private RestaurantRepository restaurantRepository;
+    private final DeliveryRepository deliveryRepository;
+    private final RestaurantRepository restaurantRepository;
 
     @Autowired
     public DeliveryService(DeliveryRepository deliveryRepository, RestaurantRepository restaurantRepository) {
@@ -244,10 +244,10 @@ public class DeliveryService {
     /**
      * Compute the distance between two coordinates
      *
-     * @param lat1
-     * @param lon1
-     * @param lat2
-     * @param lon2
+     * @param lat1 latitude of 1st coordinate
+     * @param lon1 longitude of 1st coordinate
+     * @param lat2 latitude of 2nd coordinate
+     * @param lon2 longitude of 2nd coordinate
      * @return the distance in kilometers as a double number
      */
     public Double computeHaversine(double lat1, double lon1, double lat2, double lon2) {

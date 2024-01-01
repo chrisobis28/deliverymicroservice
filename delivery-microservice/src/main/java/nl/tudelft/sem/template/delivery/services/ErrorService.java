@@ -7,7 +7,7 @@ import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+//import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -79,7 +79,7 @@ public class ErrorService {
      * Persists an entity in the database
      * Used for testing purposes
      *
-     * @param error
+     * @param error Error to add to repository
      * @return the inserted error
      */
     public Error insert(Error error) {

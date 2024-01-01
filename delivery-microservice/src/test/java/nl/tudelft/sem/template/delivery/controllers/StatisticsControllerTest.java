@@ -1,11 +1,8 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-//import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-//import nl.tudelft.sem.template.delivery.services.DeliveryService;
-//import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,11 +22,12 @@ import static org.mockito.Mockito.*;
 //@ExtendWith(MockitoExtension.class)
 class StatisticsControllerTest {
     private StatisticsService statisticsService;
-    private UsersCommunication usersCommunication;
+    private UsersAuthenticationService usersCommunication;
 
     private StatisticsController sut;
 
-    String userId, userType;
+    String userId;
+    UsersAuthenticationService.AccountType userType;
     UUID orderId1;
     UUID orderId2;
     UUID orderId3;
@@ -64,14 +62,14 @@ class StatisticsControllerTest {
         d5.setDeliveryID(orderId5);
         d6.setDeliveryID(orderId6);
         repo1 = new TestDeliveryRepository();
-        usersCommunication = mock(UsersCommunication.class);
+        usersCommunication = mock(UsersAuthenticationService.class);
         statisticsService = new StatisticsService(repo1);
         sut = new StatisticsController(statisticsService, usersCommunication);
     }
 
     @Test
     void testForDeliveriesPerHrEmptyID() {
-        when(usersCommunication.getAccountType(userId)).thenReturn("courier");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet("", "");
         assertEquals(HttpStatus.BAD_REQUEST, actual.getStatusCode());
@@ -79,7 +77,7 @@ class StatisticsControllerTest {
 
     @Test
     void testForDeliveriesPerHrUnauthorized() {
-        when(usersCommunication.getAccountType(userId)).thenReturn("courier");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
         assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
@@ -88,8 +86,8 @@ class StatisticsControllerTest {
     @Test
     void testForDeliveriesPerHrUnauthorized2() {
         String userId2 = userId.concat("impostor");
-        when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
-        when(usersCommunication.getAccountType(userId2)).thenReturn("vendor");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId2, userId);
         assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
@@ -111,8 +109,8 @@ class StatisticsControllerTest {
         sut.insert(d6);
 
         String userId2 = userId.concat("vendor");
-        when(usersCommunication.getAccountType(userId)).thenReturn("admin");
-        when(usersCommunication.getAccountType(userId2)).thenReturn("vendor");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId2);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
@@ -134,7 +132,7 @@ class StatisticsControllerTest {
         sut.insert(d5);
         sut.insert(d6);
 
-        when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
@@ -177,7 +175,7 @@ class StatisticsControllerTest {
         sut.insert(d6);
 
         //Set-up
-        when(usersCommunication.getAccountType(userId)).thenReturn("vendor");
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
@@ -186,10 +184,10 @@ class StatisticsControllerTest {
 
     @Test
     void statisticsRatingsForOrdersGet() {
-        userType = "admin";
+        userType = UsersAuthenticationService.AccountType.ADMIN;
         d1.setRatingRestaurant(4);
         // Mock ratings and user type
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         sut.insert(d1);
         sut.insert(d2);
 
@@ -209,10 +207,10 @@ class StatisticsControllerTest {
 
     @Test
     void statisticsRatingsForOrdersGetForbidden() {
-        userType = "client";
+        userType = UsersAuthenticationService.AccountType.CLIENT;
 
         // Mock user type
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Call the method
         ResponseEntity<List<Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
@@ -228,10 +226,10 @@ class StatisticsControllerTest {
 
     @Test
     void statisticsRatingsForOrdersGetUnauthorized() {
-        userType = "non-existent";
+        userType = UsersAuthenticationService.AccountType.INVALID;
 
         // Mock user type
-        when(usersCommunication.getAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Call the method
         ResponseEntity<List<Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);

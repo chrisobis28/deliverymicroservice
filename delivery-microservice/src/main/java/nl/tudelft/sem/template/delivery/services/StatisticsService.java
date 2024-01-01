@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 @Service
 public class StatisticsService {
 
-    private DeliveryRepository deliveryRepository;
+    private final DeliveryRepository deliveryRepository;
 
     /**
      * Constructor

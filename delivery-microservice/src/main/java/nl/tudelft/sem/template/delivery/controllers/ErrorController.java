@@ -1,13 +1,14 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.api.ErrorsApi;
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
+//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+//import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class ErrorController implements ErrorsApi {
 
     private final ErrorService errorService;
     private final DeliveryService deliveryService;
-    private final UsersCommunication usersCommunication;
+    private final UsersAuthenticationService usersCommunication;
 
     /**
      * Constructor
@@ -29,7 +30,7 @@ public class ErrorController implements ErrorsApi {
      * @param deliveryService    the delivery service
      * @param usersCommunication mock for users authorization
      */
-    public ErrorController(ErrorService errorService, DeliveryService deliveryService, UsersCommunication usersCommunication) {
+    public ErrorController(ErrorService errorService, DeliveryService deliveryService, UsersAuthenticationService usersCommunication) {
         this.errorService = errorService;
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
@@ -48,23 +49,23 @@ public class ErrorController implements ErrorsApi {
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
         }
-        String userType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         // Vendors can see errors only in their orders
-        boolean allowedVendor = userType.equals("vendor") && userId.equals(delivery.getRestaurantID());
+        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
         // Couriers can see errors only in orders they deliver
-        boolean allowedCourier = userType.equals("courier") && userId.equals(delivery.getCourierID());
+        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
         // Customers can see errors only in orders they made
-        boolean allowedCustomer = userType.equals("customer") && userId.equals(delivery.getCustomerID());
-        if (userType.equals("admin") ||
+        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
                 allowedVendor ||
                 allowedCourier ||
                 allowedCustomer) {
             Error error = errorService.getError(deliveryId);
             return ResponseEntity.ok(error);
-        } else if (userType.equals("vendor") ||
-                userType.equals("courier") ||
-                userType.equals("customer")) {
+        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
+                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
@@ -87,21 +88,21 @@ public class ErrorController implements ErrorsApi {
         if (isNullOrEmpty(userId)) {
             return ResponseEntity.badRequest().build();
         }
-        String userType = usersCommunication.getAccountType(userId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Error deliveryError = errorService.getError(deliveryId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         // Vendors can edit errors only in their orders
-        boolean allowedVendor = userType.equals("vendor") && userId.equals(delivery.getRestaurantID());
+        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
         // Couriers can edit errors only in orders they deliver
-        boolean allowedCourier = userType.equals("courier") && userId.equals(delivery.getCourierID());
-        if (userType.equals("admin") ||
+        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
                 allowedVendor ||
                 allowedCourier) {
             deliveryError = errorService.updateError(deliveryId, error);
             return ResponseEntity.ok(deliveryError);
-        } else if (userType.equals("vendor") ||
-                userType.equals("courier") ||
-                userType.equals("customer")) {
+        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
+                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
