@@ -155,6 +155,37 @@ public class RestaurantController implements RestaurantsApi {
         }
     }
 
+    /**
+     * The get method for getting the orders of a restaurant that were not assigned yet
+     * @param restaurantId ID of the Restaurant entity (required)
+     * @param userId User ID for authorization (required)
+     * @return list of orders ready to be taken by couriers
+     */
+    @Override
+    @GetMapping("/restaurants/{restaurantId}/new-orders")
+    public ResponseEntity<List<Delivery>> restaurantsRestaurantIdNewOrdersGet(@PathVariable String restaurantId, @RequestHeader String userId){
+        try {
+            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+            switch(accountType){
+                case ADMIN: {
+                    return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
+                }
+                case VENDOR: {
+                    if(userId.equals(restaurantId))
+                        ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                }
+                case COURIER:
+                case CLIENT:
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        catch(RestaurantService.RestaurantNotFoundException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 
     /**
      * Checks if a string is null or empty

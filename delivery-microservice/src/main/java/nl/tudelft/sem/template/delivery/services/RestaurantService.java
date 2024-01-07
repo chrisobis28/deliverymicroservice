@@ -1,7 +1,11 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,16 +18,17 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class RestaurantService {
 
-    @Autowired
     private final RestaurantRepository restaurantRepository;
+    private final DeliveryRepository deliveryRepository;
 
     /**
      * Constructor
      *
      * @param restaurantRepository repository restaurant is stored in
      */
-    public RestaurantService(RestaurantRepository restaurantRepository) {
+    public RestaurantService(RestaurantRepository restaurantRepository, DeliveryRepository deliveryRepository) {
         this.restaurantRepository = restaurantRepository;
+        this.deliveryRepository = deliveryRepository;
     }
 
     public Restaurant getRestaurant(String restaurantId) {
@@ -62,5 +67,12 @@ public class RestaurantService {
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
         r.setDeliveryZone(requestBody);
         restaurantRepository.save(r);
+    }
+
+    public List<Delivery> getAllNewOrders(String restaurantId){
+        Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
+        return deliveryRepository.findAllByrestaurantId(restaurantId).stream().filter(d -> d.getCourierID() == null)
+            .filter(d -> List.of(DeliveryStatus.PREPARING, DeliveryStatus.ACCEPTED)
+            .contains(d.getStatus())).collect(Collectors.toList());
     }
 }

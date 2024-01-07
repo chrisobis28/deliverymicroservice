@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 import java.util.UUID;
 import nl.tudelft.sem.template.delivery.AddressAdapter;
 import nl.tudelft.sem.template.delivery.GPS;
+import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 class RestaurantControllerTest {
 
+  private TestDeliveryRepository repo1;
   private TestRestaurantRepository repo2;
   private RestaurantController sut;
   private UsersAuthenticationService usersCommunication;
@@ -43,7 +46,7 @@ class RestaurantControllerTest {
     usersCommunication = mock(UsersAuthenticationService.class);
 
     repo2 = new TestRestaurantRepository();
-    sut = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()), usersCommunication);
+    sut = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
   }
 
   @Test
@@ -227,9 +230,7 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
-    assertNull(res.getBody());
+    assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
   }
 
   @Test

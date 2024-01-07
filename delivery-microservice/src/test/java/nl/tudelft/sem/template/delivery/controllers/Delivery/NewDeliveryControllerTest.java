@@ -54,7 +54,7 @@ class NewDeliveryControllerTest {
         repo2 = new TestRestaurantRepository();
         usersCommunication =  mock(UsersAuthenticationService.class);
         sut1 = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
-        sut2 = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()), usersCommunication);
+        sut2 = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
     }
 
     @Test
