@@ -4,6 +4,7 @@ import nl.tudelft.sem.template.delivery.AddressAdapter;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,12 +15,14 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 //import static org.mockito.Mockito.when;
 
 class RestaurantControllerTest {
 
   private TestRestaurantRepository repo2;
   private RestaurantController sut;
+  private UsersAuthenticationService usersCommunication;
 
   List<String> addr;
   List<Double> co_ord;
@@ -30,8 +33,10 @@ class RestaurantControllerTest {
     addr = List.of("NL","1234AB","Amsterdam","Kalverstraat","36B");
     co_ord = List.of(32.6, 50.4);
 
+    usersCommunication = mock(UsersAuthenticationService.class);
+
     repo2 = new TestRestaurantRepository();
-    sut = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
+    sut = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()), usersCommunication);
   }
 
   @Test

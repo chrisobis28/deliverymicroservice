@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.util.List;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,5 +50,11 @@ public class RestaurantService {
         public RestaurantNotFoundException() {
             super(HttpStatus.NOT_FOUND, "Restaurant with specified id not found");
         }
+    }
+
+    public void updateLocation(String restaurantId, List<Double> requestBody){
+        Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
+        r.setLocation(requestBody);
+        restaurantRepository.save(r);
     }
 }
