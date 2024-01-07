@@ -109,29 +109,23 @@ public class RestaurantController implements RestaurantsApi {
     @PutMapping("/restaurants/{restaurantId}/location")
     public ResponseEntity<Restaurant> restaurantsRestaurantIdLocationPut(@PathVariable String restaurantId, @RequestHeader String userId,
                                                                          @RequestBody List<Double> requestBody) {
-        try{
-            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            switch(accountType){
-                case ADMIN: {
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        switch (accountType) {
+            case ADMIN -> {
+                restaurantService.updateLocation(restaurantId, requestBody);
+                return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
+            }
+            case VENDOR -> {
+                if (userId.equals(restaurantId)) {
                     restaurantService.updateLocation(restaurantId, requestBody);
                     return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                 }
-                case VENDOR: {
-                    if (userId.equals(restaurantId)){
-                        restaurantService.updateLocation(restaurantId, requestBody);
-                        return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-                    }
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-                }
-                case COURIER:
-                case CLIENT:
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            case COURIER, CLIENT ->
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
         }
-        catch (RestaurantService.RestaurantNotFoundException e){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
     }
 
     /**
@@ -145,29 +139,23 @@ public class RestaurantController implements RestaurantsApi {
     @PutMapping("/restaurants/{restaurantId}/deliver-zone")
     public ResponseEntity<Restaurant> restaurantsRestaurantIdDeliverZonePut(@PathVariable String restaurantId, @RequestHeader String userId,
                                                                          @RequestBody Double requestBody) {
-        try{
             UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            switch(accountType){
-                case ADMIN: {
+            switch (accountType) {
+                case ADMIN -> {
                     restaurantService.updateDeliverZone(restaurantId, requestBody);
                     return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                 }
-                case VENDOR: {
+                case VENDOR -> {
                     if (userId.equals(restaurantId)){
                         restaurantService.updateDeliverZone(restaurantId, requestBody);
                         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                     }
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
                 }
-                case COURIER:
-                case CLIENT:
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                case COURIER, CLIENT ->
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-        }
-        catch (RestaurantService.RestaurantNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
     }
 
     /**

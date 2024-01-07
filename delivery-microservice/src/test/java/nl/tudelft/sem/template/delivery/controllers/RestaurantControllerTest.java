@@ -168,9 +168,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
     when(usersCommunication.getUserAccountType(otherRestaurantId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, otherRestaurantId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, otherRestaurantId, List.of(0.1, 0.1)));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -185,9 +185,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -202,9 +202,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -219,9 +219,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+    assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+    assertEquals(exception.getReason(), "UNAUTHORIZED");
   }
 
   @Test
@@ -232,10 +232,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
-    assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
-    assertNull(res.getBody());
-      //assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+    assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+    assertEquals(exception.getReason(), "Restaurant with specified id not found");
   }
 
   @Test
@@ -285,9 +284,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
     when(usersCommunication.getUserAccountType(otherRestaurantId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0);
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -302,9 +301,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -319,9 +318,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
-    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
   }
 
   @Test
@@ -336,9 +335,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
-    assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+    assertEquals(exception.getReason(), "UNAUTHORIZED");
   }
 
   @Test
@@ -349,9 +348,9 @@ class RestaurantControllerTest {
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
-    assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
-    assertNull(res.getBody());
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+    assertEquals(exception.getReason(), "Restaurant with specified id not found");
   }
 
   @Test
