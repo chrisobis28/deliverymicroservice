@@ -95,7 +95,6 @@ public class RestaurantController implements RestaurantsApi {
                                                                          @RequestBody List<Double> requestBody) {
         try{
             UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            Restaurant restaurant = restaurantService.getRestaurant(restaurantId);
             switch(accountType){
                 case ADMIN: {
                     restaurantService.updateLocation(restaurantId, requestBody);
@@ -108,7 +107,7 @@ public class RestaurantController implements RestaurantsApi {
                     }
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 }
-                case COURIER :
+                case COURIER:
                 case CLIENT:
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
