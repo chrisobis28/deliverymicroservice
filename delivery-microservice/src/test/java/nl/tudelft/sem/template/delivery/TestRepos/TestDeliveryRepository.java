@@ -89,7 +89,7 @@ public class TestDeliveryRepository implements DeliveryRepository {
     }
 
     @Override
-    public List<Delivery> findAllByrestaurantId(String restaurantId) {
+    public List<Delivery> findAllByrestaurantID(String restaurantId) {
         return deliveryList.stream()
             .filter(delivery -> delivery.getRestaurantID().equals(restaurantId))
             .collect(Collectors.toList());

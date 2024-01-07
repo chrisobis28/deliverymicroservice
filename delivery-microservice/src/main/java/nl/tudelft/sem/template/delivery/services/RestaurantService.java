@@ -84,7 +84,7 @@ public class RestaurantService {
 
     public List<Delivery> getAllNewOrders(String restaurantId){
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
-        return deliveryRepository.findAllByrestaurantId(restaurantId).stream().filter(d -> d.getCourierID() == null)
+        return deliveryRepository.findAllByrestaurantID(restaurantId).stream().filter(d -> d.getCourierID() == null)
             .filter(d -> List.of(DeliveryStatus.PREPARING, DeliveryStatus.ACCEPTED)
             .contains(d.getStatus())).collect(Collectors.toList());
     }
