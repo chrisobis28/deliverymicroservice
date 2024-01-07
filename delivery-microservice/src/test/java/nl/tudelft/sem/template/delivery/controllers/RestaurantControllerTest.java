@@ -231,4 +231,120 @@ class RestaurantControllerTest {
     assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
     assertNull(res.getBody());
   }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutAdmin(){
+    String restaurantId = "restaurant_admin@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    String userId = "user_admin@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+    assertEquals(HttpStatus.OK, res.getStatusCode());
+    assertNotNull(res.getBody());
+    assertEquals(res.getBody().getDeliveryZone(), 20.0);
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutSameVendor(){
+    String restaurantId = "restaurant_sameVendor@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
+    when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0);
+    assertEquals(HttpStatus.OK, res.getStatusCode());
+    assertNotNull(res.getBody());
+    assertEquals(res.getBody().getDeliveryZone(), 20.0);
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutDiffVendor(){
+    String restaurantId = "restaurant_diffVendor@testmail.com";
+    String otherRestaurantId = "other_restaurant_diffVendor@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
+    when(usersCommunication.getUserAccountType(otherRestaurantId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0);
+    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+    assertNull(res.getBody());
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutCourier(){
+    String restaurantId = "restaurant_courier@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    String userId = "user_courier@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+    assertNull(res.getBody());
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutClient(){
+    String restaurantId = "restaurant_client@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    String userId = "user_client@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+    assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
+    assertNull(res.getBody());
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutInvalid(){
+    String restaurantId = "restaurant_invalid@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    sut.insert(r);
+
+    String userId = "user_invalid@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+    assertEquals(HttpStatus.UNAUTHORIZED, res.getStatusCode());
+    assertNull(res.getBody());
+  }
+
+  @Test
+  void restaurantsRestaurantIdDeliverZonePutNotFound(){
+    String restaurantId = "restaurant_not_found@testmail.com";
+
+    String userId = "user_not_found@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+    assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
+    assertNull(res.getBody());
+  }
 }

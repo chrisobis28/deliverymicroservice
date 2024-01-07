@@ -87,6 +87,7 @@ public class RestaurantController implements RestaurantsApi {
      * The put method for updating the location of a restaurant
      * @param restaurantId ID of the Restaurant entity (required)
      * @param userId User ID for authorization (required)
+     * @param requestBody Coordinates of the new location of the restaurant
      * @return updated location of a restaurant
      */
     @Override
@@ -119,10 +120,11 @@ public class RestaurantController implements RestaurantsApi {
     }
 
     /**
-     * The put method for updating the location of a restaurant
+     * The put method for updating the delivery zone of a restaurant
      * @param restaurantId ID of the Restaurant entity (required)
      * @param userId User ID for authorization (required)
-     * @return updated location of a restaurant
+     * @param requestBody Radius of the new delivery zone of the Restaurant
+     * @return updated delivery zone of a restaurant
      */
     @Override
     @PutMapping("/restaurants/{restaurantId}/deliver-zone")
