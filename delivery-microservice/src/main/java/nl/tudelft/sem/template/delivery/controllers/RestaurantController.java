@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.List;
+import org.springframework.web.server.ResponseStatusException;
 
 //import static org.mockito.Mockito.mock;
 
@@ -55,6 +56,20 @@ public class RestaurantController implements RestaurantsApi {
     public ResponseEntity<Void> insert(@RequestBody Restaurant restaurant) {
         try {
             restaurantService.insert(restaurant);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    /**
+     * Inserts the delivery into the repo for testing purposes
+     * @param delivery the delivery to insert
+     * @return the entity
+     */
+    public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
+        try {
+            restaurantService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
@@ -151,7 +166,7 @@ public class RestaurantController implements RestaurantsApi {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
         catch (RestaurantService.RestaurantNotFoundException e){
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
@@ -164,26 +179,20 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     @GetMapping("/restaurants/{restaurantId}/new-orders")
     public ResponseEntity<List<Delivery>> restaurantsRestaurantIdNewOrdersGet(@PathVariable String restaurantId, @RequestHeader String userId){
-        try {
-            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-            switch(accountType){
-                case ADMIN: {
-                    return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-                }
-                case VENDOR: {
-                    if(userId.equals(restaurantId))
-                        ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-                }
-                case COURIER:
-                case CLIENT:
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        switch (accountType) {
+            case ADMIN -> {
+                return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
             }
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            case VENDOR -> {
+                if (userId.equals(restaurantId))
+                    return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+            }
+            case COURIER, CLIENT ->
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
         }
-        catch(RestaurantService.RestaurantNotFoundException e){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
     }
 
 

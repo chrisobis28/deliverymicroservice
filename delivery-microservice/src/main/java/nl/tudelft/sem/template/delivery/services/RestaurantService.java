@@ -49,6 +49,19 @@ public class RestaurantService {
     }
 
     /**
+     * Inserts the delivery into the repo
+     *
+     * @param delivery delivery object to be added
+     * @return the entity
+     */
+    public Delivery insert(Delivery delivery) {
+        if (delivery == null) {
+            throw new IllegalArgumentException();
+        }
+        return deliveryRepository.save(delivery);
+    }
+
+    /**
      * Exception to be used when a Restaurant entity with a given ID is not found.
      */
     static public class RestaurantNotFoundException extends ResponseStatusException {
