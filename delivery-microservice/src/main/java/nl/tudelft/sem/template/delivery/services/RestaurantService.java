@@ -57,4 +57,10 @@ public class RestaurantService {
         r.setLocation(requestBody);
         restaurantRepository.save(r);
     }
+
+    public void updateDeliverZone(String restaurantId, Double requestBody){
+        Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
+        r.setDeliveryZone(requestBody);
+        restaurantRepository.save(r);
+    }
 }

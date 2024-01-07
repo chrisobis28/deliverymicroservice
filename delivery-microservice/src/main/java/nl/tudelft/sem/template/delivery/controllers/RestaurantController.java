@@ -118,6 +118,41 @@ public class RestaurantController implements RestaurantsApi {
         }
     }
 
+    /**
+     * The put method for updating the location of a restaurant
+     * @param restaurantId ID of the Restaurant entity (required)
+     * @param userId User ID for authorization (required)
+     * @return updated location of a restaurant
+     */
+    @Override
+    @PutMapping("/restaurants/{restaurantId}/deliver-zone")
+    public ResponseEntity<Restaurant> restaurantsRestaurantIdDeliverZonePut(@PathVariable String restaurantId, @RequestHeader String userId,
+                                                                         @RequestBody Double requestBody) {
+        try{
+            UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+            switch(accountType){
+                case ADMIN: {
+                    restaurantService.updateDeliverZone(restaurantId, requestBody);
+                    return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
+                }
+                case VENDOR: {
+                    if (userId.equals(restaurantId)){
+                        restaurantService.updateDeliverZone(restaurantId, requestBody);
+                        return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
+                    }
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                }
+                case COURIER:
+                case CLIENT:
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        catch (RestaurantService.RestaurantNotFoundException e){
+            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 
     /**
      * Checks if a string is null or empty
