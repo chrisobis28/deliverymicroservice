@@ -59,9 +59,9 @@ class DeliveryControllerTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setEstimatedPrepTime(prepTime);
         repo2 = new TestRestaurantRepository();
-        restaurantController = new RestaurantController(new RestaurantService(repo2), new AddressAdapter(new GPS()));
-        repo1 = new TestDeliveryRepository();
         usersCommunication = mock(UsersAuthenticationService.class);
+        repo1 = new TestDeliveryRepository();
+        restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
         sut = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
     }
 
