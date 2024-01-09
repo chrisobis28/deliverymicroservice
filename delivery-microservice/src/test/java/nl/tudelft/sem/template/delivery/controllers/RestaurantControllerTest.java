@@ -111,7 +111,7 @@ class RestaurantControllerTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID("hi_im_a_vendor@testmail.com");
     r.setLocation(co_ord);
-    sut.insert(r);
+    //sut.insert(r);
 
     ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
     Restaurant added = result.getBody();
@@ -241,6 +241,7 @@ class RestaurantControllerTest {
   void restaurantsRestaurantIdDeliverZonePutAdmin(){
     String restaurantId = "restaurant_admin@testmail.com";
     Restaurant r = new Restaurant();
+    r.setLocation(List.of(6.7,6.7));
     r.setRestaurantID(restaurantId);
     r.setDeliveryZone(10.0);
     sut.insert(r);
@@ -260,6 +261,7 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_sameVendor@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(List.of(1.2,3.4));
     r.setDeliveryZone(10.0);
     sut.insert(r);
 
@@ -358,6 +360,7 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_neworders_admin@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(List.of(6.7,6.7));
     sut.insert(r);
     // FIRST DELIVERY ON TRANSIT
     UUID deliveryId1 = UUID.randomUUID();
@@ -400,6 +403,7 @@ class RestaurantControllerTest {
   void restaurantsRestaurantIdNewOrdersGetSameVendor(){
     String restaurantId = "restaurant_neworders_same_vendor@testmail.com";
     Restaurant r = new Restaurant();
+    r.setLocation(List.of(5.6,67.7));
     r.setRestaurantID(restaurantId);
     sut.insert(r);
 

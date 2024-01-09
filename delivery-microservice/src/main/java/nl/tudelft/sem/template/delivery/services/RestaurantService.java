@@ -8,6 +8,7 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
+    @Lazy
     private final DeliveryRepository deliveryRepository;
 
     /**
@@ -31,21 +33,38 @@ public class RestaurantService {
         this.deliveryRepository = deliveryRepository;
     }
 
+    /**
+     * Retrieve restaurant or throw an exception if not found
+     * @param restaurantId restaurant id
+     * @return the restaurant
+     */
     public Restaurant getRestaurant(String restaurantId) {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
     }
 
     /**
      * Inserts the restaurant into the repo
-     *
-     * @param restaurant restaurant object to be added
+     * @param  restaurantId the id of the new restaurant
+     * @param  location the location of the new restaurant
      * @return the entity
      */
-    public Restaurant insert(Restaurant restaurant) {
-        if (restaurant == null) {
-            throw new IllegalArgumentException();
+
+    public Restaurant insert(String restaurantId, List<Double> location) {
+        if (restaurantId == null || location==null ||
+                location.size()!=2 ) {
+            throw new IllegalRestaurantParametersException();
         }
-        return restaurantRepository.save(restaurant);
+        try{
+            getRestaurant(restaurantId);
+        }catch(RestaurantNotFoundException e){
+
+            Restaurant r = new Restaurant();
+            r.setRestaurantID(restaurantId);
+            r.setLocation(location);
+            return restaurantRepository.save(r);
+            //TO DO deal with global variable for default delivery zone
+        }
+        throw new IllegalRestaurantParametersException();
     }
 
     /**
@@ -70,6 +89,15 @@ public class RestaurantService {
         }
     }
 
+    /**
+     * Exception to be used when a Restaurant entity with a given ID already exists or has the same location.
+     */
+    static public class IllegalRestaurantParametersException extends ResponseStatusException {
+        public IllegalRestaurantParametersException() {
+            super(HttpStatus.BAD_REQUEST, "Restaurant with those parameters cannot be created");
+        }
+    }
+
     public void updateLocation(String restaurantId, List<Double> requestBody){
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
         r.setLocation(requestBody);
@@ -87,5 +115,18 @@ public class RestaurantService {
         return deliveryRepository.findAllByrestaurantID(restaurantId).stream().filter(d -> d.getCourierID() == null)
             .filter(d -> List.of(DeliveryStatus.PREPARING, DeliveryStatus.ACCEPTED)
             .contains(d.getStatus())).collect(Collectors.toList());
+    }
+
+    /**
+     * sets the new list of couriers or throws  an exception
+     * @param restaurantId the id of the restaurant
+     * @param couriers the new couriers
+     * @return the changed restairant entity
+     */
+    public Restaurant setListOfCouriers(String restaurantId, List<String> couriers){
+        Restaurant r = getRestaurant(restaurantId);
+        r.setCouriers(couriers);
+        restaurantRepository.save(r);
+        return r;
     }
 }
