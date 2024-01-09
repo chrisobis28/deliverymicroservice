@@ -221,29 +221,12 @@ public class DeliveryController implements DeliveriesApi {
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (delivery == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("NOT_FOUND");
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
-            if (!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
-            if (!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            if (!delivery.getCustomerID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("FORBIDDEN");
-            return ResponseEntity.ok(delivery.getStatus().toString());
-        }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("UNAUTHORIZED");
+        return deliveryStatusHandler.getDeliveryStatus(deliveryId, userId);
+    }
+
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
+        return deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
     }
 
     /**

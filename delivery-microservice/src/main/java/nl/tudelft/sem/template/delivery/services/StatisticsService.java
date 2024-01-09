@@ -3,8 +3,10 @@ package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.Statistics;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -92,4 +94,74 @@ public class StatisticsService {
 
         return count;
     }
+
+    public Statistics getCourierStatistics(String courierID, OffsetDateTime startTime,OffsetDateTime endTime) {
+        List<Delivery> courierDeliveries = getSuccessfulDeliveries(courierID)
+                .stream()
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
+                        delivery.getDeliveredTime().isBefore(endTime)).collect(Collectors.toList());
+        Statistics statistics = new Statistics();
+        //Average Rating
+        double averageRating = 0.0;
+        averageRating = courierDeliveries.stream().mapToInt(Delivery::getRatingCourier).average().orElse(0);
+
+        //DeliveryTimeRatio
+        double averageDeliveryTime = 0.0;
+        averageDeliveryTime = courierDeliveries.stream()
+                .mapToDouble(delivery -> delivery.getDeliveredTime().getOffset().getTotalSeconds() / 60.0)
+                .average()
+                .orElse(0.0);
+
+        //SuccessRate
+        List<Delivery> successfulDeliveries = getSuccessfulDeliveries(courierID);
+        List<Delivery> rejectedDeliveries = getRejectedDeliveries(courierID);
+
+
+        List<Delivery> filteredSuccessfulDeliveries = successfulDeliveries.stream()
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
+                        delivery.getDeliveredTime().isBefore(endTime))
+                .collect(Collectors.toList());
+
+
+        List<Delivery> filteredRejectedDeliveries = rejectedDeliveries.stream()
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
+                        delivery.getDeliveredTime().isBefore(endTime))
+                .collect(Collectors.toList());
+
+
+        // Calculate total deliveries
+        long totalDeliveries = filteredSuccessfulDeliveries.size() + filteredRejectedDeliveries.size();
+
+        // Calculate average success rate
+        double averageSuccessRate = totalDeliveries > 0 ?
+                (double) filteredSuccessfulDeliveries.size() / totalDeliveries :
+                0.0;
+
+
+        statistics.setAverageRating(averageRating);
+        statistics.setSuccessRate(averageSuccessRate);
+        statistics.setDeliveryTimeRatio(averageDeliveryTime);
+
+        return statistics;
+    }
+
+    /**
+     * Returns the successful deliveries of a courier
+     *
+     * @param courierId of the courier
+     * @return the deliveries
+     */
+    public List<Delivery> getSuccessfulDeliveries(String courierId) {
+        return deliveryRepository.findAllByCourierID(courierId).stream().filter(x -> x.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
+    }
+   /**
+     * Returns the rejected deliveries of a courier
+     * @param courierId of the courier
+     * @return the deliveries
+     */
+public List<Delivery> getRejectedDeliveries(String courierId)
+{
+    return deliveryRepository.findAllByCourierID(courierId).stream().filter(x->x.getStatus().equals(DeliveryStatus.REJECTED)).collect(Collectors.toList());
+}
+
 }

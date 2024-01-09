@@ -27,6 +27,11 @@ public class TestDeliveryRepository implements DeliveryRepository {
         // Implement sorting if needed
         return deliveryList;
     }
+    @Override
+    public List<Delivery>findAllByCourierID(String courierID)
+    {
+        return deliveryList.stream().filter(x->x.getCourierID().equals(courierID)).collect(Collectors.toList());
+    }
 
     @Override
     public Page<Delivery> findAll(Pageable pageable) {
