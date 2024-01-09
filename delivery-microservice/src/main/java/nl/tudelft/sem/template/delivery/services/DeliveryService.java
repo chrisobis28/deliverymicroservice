@@ -82,6 +82,8 @@ public class DeliveryService {
         return restaurant.map(Restaurant::getLocation).orElseThrow(DeliveryNotFoundException::new);
     }
 
+
+
     public void updateCourierRating(UUID deliveryId, Integer rating) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setRatingCourier(rating);

@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -64,7 +65,7 @@ class StatisticsControllerTest {
         repo1 = new TestDeliveryRepository();
         usersCommunication = mock(UsersAuthenticationService.class);
         statisticsService = new StatisticsService(repo1);
-        sut = new StatisticsController(statisticsService, usersCommunication);
+        sut = new StatisticsController(statisticsService,usersCommunication);
     }
 
     @Test
