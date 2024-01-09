@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 //import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Error;
@@ -27,6 +28,8 @@ public class DeliveryController implements DeliveriesApi {
     private final UsersAuthenticationService usersCommunication;
     private final DeliveryStatusHandler deliveryStatusHandler;
 
+    private final AvailableDeliveryProxy availableDeliveryProxy;
+
     /**
      * Constructor
      *
@@ -38,6 +41,7 @@ public class DeliveryController implements DeliveriesApi {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
+        this.availableDeliveryProxy = new AvailableDeliveryProxy(deliveryService);
     }
 
     /**
@@ -614,8 +618,10 @@ public class DeliveryController implements DeliveriesApi {
                 break;
             }
             case COURIER: {
-                if (userId.equals(courierId) && deliveryService.getDelivery(deliveryId).getCourierID() == null){
+                Delivery delivery = deliveryService.getDelivery(deliveryId);
+                if (userId.equals(courierId) && delivery.getCourierID() == null){
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                    availableDeliveryProxy.checkIfAvailable(delivery);
                     break;
                 }
                 // Courier is not allowed to assign other couriers to orders or assign themselves over someone

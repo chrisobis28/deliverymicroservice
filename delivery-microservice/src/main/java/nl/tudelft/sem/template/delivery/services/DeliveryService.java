@@ -31,6 +31,24 @@ public class DeliveryService {
         this.restaurantRepository = restaurantRepository;
     }
 
+//    /**
+//     * Get all deliveries in db
+//     * @return list of deliveries
+//     */
+//    public List<Delivery> findAll() {
+//        return deliveryRepository.findAll();
+//    }
+
+    /**
+     * Check if restaurant uses own couriers
+     * @param delivery delivery being assigned
+     * @return boolean value showing whether restaurant uses own couriers
+     */
+    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
+        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
+        return !(couriers == null || couriers.isEmpty());
+    }
+
     public Delivery getDelivery(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
     }
