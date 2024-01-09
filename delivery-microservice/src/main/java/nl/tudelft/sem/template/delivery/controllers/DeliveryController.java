@@ -226,7 +226,9 @@ public class DeliveryController implements DeliveriesApi {
 
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
-        return deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
+        ResponseEntity<Delivery> delivery = deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
+        if (delivery.getBody() != null) availableDeliveryProxy.checkIfAvailable(delivery.getBody());
+        return delivery;
     }
 
     /**
@@ -372,31 +374,6 @@ public class DeliveryController implements DeliveriesApi {
             // User does not have access
             else return ResponseEntity.status(HttpStatus.FORBIDDEN).body(List.of());
         }
-//        } catch (DeliveryService.DeliveryNotFoundException e) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
-//        }
-        //For deliveriesDeliveryIdStatusPut
-        /*if (accountType.equals("courier")) {
-            //You do not have access
-            if (!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-            return ResponseEntity.ok(updatedDelivery);
-        }
-        if (accountType.equals("vendor")) {
-            //You do not have access
-            if (!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-            Delivery updatedDelivery = deliveryService.getDelivery(deliveryId);
-            return ResponseEntity.ok(updatedDelivery);
-        }
-        if (accountType.equals("customer")) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        }
-        //We do not know who you are
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);*/
     }
 
     /**
