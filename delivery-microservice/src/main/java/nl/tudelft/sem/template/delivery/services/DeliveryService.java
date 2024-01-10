@@ -287,4 +287,18 @@ public class DeliveryService {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
 
     }
+
+    /**
+     * Retrieves a list of all deliveries assigned to a courier
+     * @param courierId the id of the courier
+     * @return the list of delivery ids
+     */
+    public List<UUID> getDeliveriesForACourier(String courierId){
+        List<UUID> list = deliveryRepository.findAllByCourierID(courierId)
+                .stream()
+                .map(Delivery::getDeliveryID)
+                .collect(Collectors.toList());
+        return list;
+
+    }
 }
