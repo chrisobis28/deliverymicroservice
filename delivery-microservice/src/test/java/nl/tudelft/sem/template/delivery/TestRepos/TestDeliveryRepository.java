@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.TestRepos;
 
-import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.data.domain.Example;
@@ -12,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class TestDeliveryRepository implements DeliveryRepository {
 
@@ -98,6 +98,11 @@ public class TestDeliveryRepository implements DeliveryRepository {
         return deliveryList.stream()
             .filter(delivery -> delivery.getRestaurantID().equals(restaurantId))
             .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Delivery> findAllByCustomerID(String customerID) {
+        return null;
     }
 
     @Override
