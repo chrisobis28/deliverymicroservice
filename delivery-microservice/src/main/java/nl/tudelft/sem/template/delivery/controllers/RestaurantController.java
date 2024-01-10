@@ -56,7 +56,7 @@ public class RestaurantController implements RestaurantsApi {
      */
     public ResponseEntity<Void> insert(@RequestBody Restaurant restaurant) {
         try {
-            restaurantService.insert(restaurant.getRestaurantID(),restaurant.getLocation());
+            restaurantService.insert(restaurant);
             return ResponseEntity.ok().build();
         } catch (RestaurantService.IllegalRestaurantParametersException e) {
             return ResponseEntity.badRequest().build();
@@ -92,7 +92,10 @@ public class RestaurantController implements RestaurantsApi {
         if (isNullOrEmpty(email) || isInvalidAddress(address)) {
             return ResponseEntity.badRequest().build();
         }
-        Restaurant restaurant = restaurantService.insert(email,addressAdapter.convertStringAddressToDouble(address));
+        Restaurant r = new Restaurant();
+        r.setRestaurantID(email);
+        r.setLocation(addressAdapter.convertStringAddressToDouble(address));
+        Restaurant restaurant = restaurantService.insert(r);
         return ResponseEntity.ok(restaurant);
     }
 

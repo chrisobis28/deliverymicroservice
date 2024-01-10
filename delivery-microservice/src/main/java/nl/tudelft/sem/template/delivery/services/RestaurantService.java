@@ -44,25 +44,19 @@ public class RestaurantService {
 
     /**
      * Inserts the restaurant into the repo
-     * @param  restaurantId the id of the new restaurant
-     * @param  location the location of the new restaurant
+     * @param restaurant the restaurant to be saved in the repo
      * @return the entity
      */
 
-    public Restaurant insert(String restaurantId, List<Double> location) {
-        if (restaurantId == null || location==null ||
-                location.size()!=2 ) {
+    public Restaurant insert(Restaurant restaurant) {
+        if (restaurant.getRestaurantID() == null || restaurant.getLocation() ==null ||
+                restaurant.getLocation().size()!=2 ) {
             throw new IllegalRestaurantParametersException();
         }
         try{
-            getRestaurant(restaurantId);
+            getRestaurant(restaurant.getRestaurantID());
         }catch(RestaurantNotFoundException e){
-
-            Restaurant r = new Restaurant();
-            r.setRestaurantID(restaurantId);
-            r.setLocation(location);
-            return restaurantRepository.save(r);
-            //TO DO deal with global variable for default delivery zone
+            return restaurantRepository.save(restaurant);
         }
         throw new IllegalRestaurantParametersException();
     }
