@@ -44,61 +44,48 @@ public class RestaurantServiceTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
         r.setLocation(List.of(12.2,13.3));
-        rs.insert(r);
+        rs.insert("bla", List.of(12.2,13.3));
         assertThat(rs.getRestaurant("bla")).isEqualTo(r);
 
     }
-
     @Test
     public void insertThrowsExceptionNullIdTest(){
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
-            Restaurant r = new Restaurant();
-            r.setRestaurantID(null);
-            r.setLocation(List.of(12.2,13.3));
-            rs.insert(r);
+            rs.insert(null, List.of(12.2,13.3));
         });
     }
-
     @Test
     public void insertThrowsExceptionNullLocationTest(){
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
-            Restaurant r = new Restaurant();
-            r.setRestaurantID("bla");
-            rs.insert(r);
+            rs.insert("bla", null);
         });
     }
 
     @Test
     public void insertThrowsExceptionWrongCoordinatesTest(){
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
-            Restaurant r = new Restaurant();
-            r.setRestaurantID("bla");
-            r.setLocation(List.of(11.1,12.2,342.3));
-            rs.insert(r);
+            rs.insert("bla", List.of(11.1,12.2,342.3));
         });
     }
     @Test
     public void insertTestThrowsRestaurantAlreadyThere(){
-        Restaurant r = new Restaurant();
-        r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
-        rs.insert(r);
+        rs.insert("bla", List.of(12.2,13.3));
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
-            Restaurant r1 = new Restaurant();
-            r1.setRestaurantID("bla");
-            r1.setLocation(List.of(11.1,12.3));
-            rs.insert(r1);
+            rs.insert("bla", List.of(11.1,12.2));
         });
 
     }
 
     @Test
     public void setListOfCouriersTest(){
-        Restaurant r = new Restaurant();
-        r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
-        rs.insert(r);
+        rs.insert("bla", List.of(12.2,13.3));
         rs.setListOfCouriers("bla", List.of("bdsjkbds"));
         assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(List.of("bdsjkbds"));
+
     }
+
+
+
+
+
 }
