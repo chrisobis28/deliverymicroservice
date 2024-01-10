@@ -1140,7 +1140,7 @@ class DeliveryControllerTest {
         UUID deliveryId = UUID.randomUUID();
         String customerId = "customer@testmail.com";
         String vendorId = "vendor@testmail.com";
-        String courierId = "courier@testmail.com";
+        String courierId = "courier7@testmail.com";
         String otherCourierId = "otherCourier@testmail.com";
         Delivery m1 = new Delivery();
         m1.setDeliveryID(deliveryId);
@@ -1159,9 +1159,10 @@ class DeliveryControllerTest {
 
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(95.5,56.5));
         String courierInList = "courier1@testmail.com";
         restaurant.setCouriers(List.of(courierInList));
-        restaurantController.insert(restaurant);
+        repo2.save(restaurant);
 
         String userId = "user@testmail.com";
         UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
