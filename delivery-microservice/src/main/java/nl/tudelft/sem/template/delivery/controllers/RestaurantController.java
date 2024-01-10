@@ -178,7 +178,7 @@ public class RestaurantController implements RestaurantsApi {
                     return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                 }
                 case VENDOR -> {
-                    if (userId.equals(restaurantId)){
+                    if (userId.equals(restaurantId) && !restaurantService.getRestaurant(restaurantId).getCouriers().isEmpty()){
                         restaurantService.updateDeliverZone(restaurantId, requestBody);
                         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                     }

@@ -257,12 +257,32 @@ class RestaurantControllerTest {
   }
 
   @Test
+  void restaurantsRestaurantIdDeliverZonePutEmptyCourierList(){
+    String restaurantId = "restaurant_sameVendor@testmail.com";
+    String otherRestaurantId = "other_restaurant_diffVendor@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
+    r.setCouriers(List.of());
+    sut.insert(r);
+
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
+    when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
+    when(usersCommunication.getUserAccountType(otherRestaurantId)).thenReturn(type);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
+    assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    assertEquals(exception.getReason(), "FORBIDDEN");
+  }
+
+  @Test
   void restaurantsRestaurantIdDeliverZonePutSameVendor(){
     String restaurantId = "restaurant_sameVendor@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
     r.setLocation(List.of(1.2,3.4));
     r.setDeliveryZone(10.0);
+    r.setCouriers(List.of("example_courier@testmail.com"));
     sut.insert(r);
 
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
