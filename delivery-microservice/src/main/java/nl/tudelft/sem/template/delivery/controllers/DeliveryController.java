@@ -552,6 +552,10 @@ public class DeliveryController implements DeliveriesApi {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User lacks valid authentication credentials.");
     }
 
+    public UUID getNextDelivery() {
+        return availableDeliveryProxy.getAvailableDeliveries().poll();
+    }
+
     /**
      * Updates the courier ID of an order
      * @param deliveryId ID of the Delivery entity (required)

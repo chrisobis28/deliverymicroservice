@@ -57,6 +57,10 @@ public class AvailableDeliveryProxy {
       available_deliveries.remove(deliveryId);
     }
   }
+
+  public Queue<UUID> getAvailableDeliveries() {
+    return available_deliveries;
+  }
 //May not be necessary if we just call checkIfAvailable on a Delivery after its status is updated
 //  /**
 //   * Update queue of available deliveries.
