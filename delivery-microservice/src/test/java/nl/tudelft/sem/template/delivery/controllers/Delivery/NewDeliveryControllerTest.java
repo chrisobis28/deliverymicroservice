@@ -312,7 +312,6 @@ class NewDeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
-        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
         assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
@@ -414,7 +413,6 @@ class NewDeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
-        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, cID);
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
@@ -451,7 +449,6 @@ class NewDeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
-        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<String> res = sut1.deliveriesDeliveryIdCustomerGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
