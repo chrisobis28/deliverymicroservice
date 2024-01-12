@@ -344,10 +344,13 @@ class NewDeliveryControllerTest {
 
         sut1.insert(delivery);
 
+        when(usersCommunication.getUserAccountType(cID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(coID)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vID)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(true);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
-        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<OffsetDateTime> res = sut1.deliveriesDeliveryIdDeliveredTimeGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -513,7 +516,6 @@ class NewDeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(false);
-        when(usersCommunication.checkUserAccessToDelivery(invalid, delivery)).thenReturn(false);
 
         ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, cID);
         assertEquals(HttpStatus.FORBIDDEN, res.getStatusCode());
@@ -551,7 +553,6 @@ class NewDeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(cID, delivery)).thenReturn(false);
         when(usersCommunication.checkUserAccessToDelivery(coID, delivery)).thenReturn(true);
         when(usersCommunication.checkUserAccessToDelivery(vID, delivery)).thenReturn(true);
-        when(usersCommunication.checkUserAccessToDelivery(admin, delivery)).thenReturn(true);
 
         ResponseEntity<List<Double>> res = sut1.deliveriesDeliveryIdCurrentLocationGet(del_id, coID);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
@@ -675,6 +676,8 @@ class NewDeliveryControllerTest {
         delivery.setCustomerID(userId);
         sut1.insert(delivery);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.checkUserAccessToDelivery(userId, delivery)).thenReturn(true);
+
         List<Double> deliveryAddress = sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getBody();
         assertThat(deliveryAddress).isEqualTo(new ArrayList<>(Arrays.asList(100.0, 100.0)));
         assertThat(sut1.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId).getStatusCode()).isEqualTo(HttpStatus.OK);
