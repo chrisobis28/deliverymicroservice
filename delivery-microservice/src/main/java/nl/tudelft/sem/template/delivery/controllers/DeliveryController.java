@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.time.OffsetDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import org.springframework.web.server.ResponseStatusException;
@@ -500,13 +499,12 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || accountType.equals(UsersAuthenticationService.AccountType.COURIER))
-            return ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
-        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR) || accountType.equals(UsersAuthenticationService.AccountType.CLIENT))
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
 
-        // Account type is "in-existent"
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
+        return switch(accountType) {
+            case ADMIN, COURIER -> ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
+            case VENDOR, CLIENT -> ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            default -> ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        };
     }
 
     /**
