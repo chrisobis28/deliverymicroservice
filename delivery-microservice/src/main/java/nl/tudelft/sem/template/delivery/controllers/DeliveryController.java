@@ -56,8 +56,10 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
         UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
+        System.out.println(user);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+        System.out.println(check);
         String customer_id = delivery.getCustomerID();
         String c_id = delivery.getCourierID();
         String r_id = delivery.getRestaurantID();

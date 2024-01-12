@@ -1,4 +1,4 @@
-package nl.tudelft.sem.template.delivery.integration;
+package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.controllers.CustomerController;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @DataJpaTest
-public class CustomerIntegrationTest {
+public class CustomerControllerTest {
 
     @Autowired
     private DeliveryRepository deliveryRepository;

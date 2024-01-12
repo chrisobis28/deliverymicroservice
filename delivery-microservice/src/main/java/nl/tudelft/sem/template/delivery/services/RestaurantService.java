@@ -39,6 +39,7 @@ public class RestaurantService {
      * @return the restaurant
      */
     public Restaurant getRestaurant(String restaurantId) {
+        if(restaurantId==null) throw new RestaurantNotFoundException();
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
     }
 
@@ -120,7 +121,7 @@ public class RestaurantService {
      */
     public Restaurant setListOfCouriers(String restaurantId, List<String> couriers){
         Restaurant r = getRestaurant(restaurantId);
-        r.setCouriers(couriers);
+        r.couriers(couriers);
         restaurantRepository.save(r);
         return r;
     }
