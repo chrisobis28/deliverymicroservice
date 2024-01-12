@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -8,9 +9,16 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -21,8 +29,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 //@ExtendWith(MockitoExtension.class)
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 class StatisticsControllerTest {
-    private StatisticsService statisticsService;
+    @Mock
     private UsersAuthenticationService usersCommunication;
 
     private StatisticsController sut;
@@ -36,7 +48,8 @@ class StatisticsControllerTest {
     UUID orderId5;
     UUID orderId6;
     List<UUID> orderIds;
-    private TestDeliveryRepository repo1;
+    @Autowired
+    private DeliveryRepository repo1;
 
     Delivery d1 = new Delivery();
     Delivery d2 = new Delivery();
@@ -62,15 +75,13 @@ class StatisticsControllerTest {
         d4.setDeliveryID(orderId4);
         d5.setDeliveryID(orderId5);
         d6.setDeliveryID(orderId6);
-        repo1 = new TestDeliveryRepository();
         usersCommunication = mock(UsersAuthenticationService.class);
-        statisticsService = new StatisticsService(repo1);
+        StatisticsService statisticsService = new StatisticsService(repo1);
         sut = new StatisticsController(statisticsService,usersCommunication);
     }
 
     @Test
     void testForDeliveriesPerHrEmptyID() {
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet("", "");
         assertEquals(HttpStatus.BAD_REQUEST, actual.getStatusCode());
@@ -87,9 +98,7 @@ class StatisticsControllerTest {
     @Test
     void testForDeliveriesPerHrUnauthorized2() {
         String userId2 = userId.concat("impostor");
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
         when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId2, userId);
         assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
     }
@@ -111,7 +120,6 @@ class StatisticsControllerTest {
 
         String userId2 = userId.concat("vendor");
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
-        when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId2);
         assertEquals(HttpStatus.OK, actual.getStatusCode());

@@ -3,6 +3,9 @@ package nl.tudelft.sem.template.delivery.controllers;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestErrorRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
+import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -12,17 +15,33 @@ import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 class ErrorControllerTest {
-
+    @Mock
     private UsersAuthenticationService usersCommunication;
+    @Autowired
+    private ErrorRepository repo1;
+    @Autowired
+    private DeliveryRepository repo2;
+    @Autowired
+    private RestaurantRepository repo3;
     private ErrorController sut;
     private DeliveryController deliveryController;
 
@@ -51,7 +70,7 @@ class ErrorControllerTest {
         error = new Error();
         delivery = new Delivery();
         error.setErrorId(deliveryId);
-        error.setDelivery(delivery);
+
         delivery.setDeliveryID(deliveryId);
         delivery.setError(error);
 
@@ -64,11 +83,6 @@ class ErrorControllerTest {
         updateError.setType(updateType);
         updateError.setReason(updateReason);
         updateError.setValue(updateValue);
-
-        // Repositories
-        TestErrorRepository repo1 = new TestErrorRepository();
-        TestDeliveryRepository repo2 = new TestDeliveryRepository();
-        TestRestaurantRepository repo3 = new TestRestaurantRepository();
 
         // Services and dependency injections
         DeliveryService deliveryService = new DeliveryService(repo2, repo3);
@@ -256,7 +270,6 @@ class ErrorControllerTest {
         reason = "Payment was unsuccessful. Customer intervention expected.";
         error.setType(errorType);
         error.setReason(reason);
-        when(usersCommunication.getUserAccountType(any(String.class))).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);
@@ -430,7 +443,6 @@ class ErrorControllerTest {
         error.setReason(reason);
         delivery.setStatus(DeliveryStatus.ON_TRANSIT);
         delivery.setCourierID(userId);
-        when(usersCommunication.getUserAccountType(any(String.class))).thenReturn(userType);
 
         // Persist in Test Repos
         sut.insert(error);

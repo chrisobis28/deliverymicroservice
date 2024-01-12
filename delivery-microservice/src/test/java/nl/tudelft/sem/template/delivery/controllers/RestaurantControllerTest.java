@@ -1,10 +1,13 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import nl.tudelft.sem.template.delivery.AddressAdapter;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -14,11 +17,19 @@ import nl.tudelft.sem.template.model.RestaurantsPostRequest;
 import org.h2.engine.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
 import org.springframework.web.server.ResponseStatusException;
+
+import javax.transaction.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,12 +38,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 //import static org.mockito.Mockito.when;
-
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 class RestaurantControllerTest {
-
-  private TestDeliveryRepository repo1;
-  private TestRestaurantRepository repo2;
+  @Autowired
+  private DeliveryRepository repo1;
+  @Autowired
+  private RestaurantRepository repo2;
   private RestaurantController sut;
+  private RestaurantService rs;
   private UsersAuthenticationService usersCommunication;
 
   List<String> addr;
@@ -45,10 +61,8 @@ class RestaurantControllerTest {
     co_ord = List.of(32.6, 50.4);
 
     usersCommunication = mock(UsersAuthenticationService.class);
-
-    repo1 = new TestDeliveryRepository();
-    repo2 = new TestRestaurantRepository();
-    sut = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
+    rs = new RestaurantService(repo2, repo1);
+    sut = new RestaurantController(rs, new AddressAdapter(new GPS()), usersCommunication);
   }
 
   @Test
@@ -126,14 +140,21 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_admin@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
-    r.setLocation(List.of(0.0, 0.0));
+    List<Double> list = new ArrayList<>();
+    list.add(0.0);
+    list.add(0.0);
+    List<Double> list2 = new ArrayList<>();
+    list2.add(0.1);
+    list2.add(0.1);
+    r.setLocation(list);
     sut.insert(r);
 
     String userId = "user_admin@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
     when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1));
+
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId,list2);
     assertEquals(HttpStatus.OK, res.getStatusCode());
     assertNotNull(res.getBody());
     assertEquals(res.getBody().getLocation(), List.of(0.1, 0.1));
@@ -144,13 +165,19 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_sameVendor@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
-    r.setLocation(List.of(0.0, 0.0));
-    sut.insert(r);
+    List<Double> list = new ArrayList<>();
+    list.add(0.0);
+    list.add(0.0);
+    List<Double> list2 = new ArrayList<>();
+    list2.add(0.1);
+    list2.add(0.1);
+    r.setLocation(list);
+    rs.insert(r);
 
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
     when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
 
-    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, restaurantId, List.of(0.1, 0.1));
+    ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, restaurantId, list2);
     assertEquals(HttpStatus.OK, res.getStatusCode());
     assertNotNull(res.getBody());
     assertEquals(res.getBody().getLocation(), List.of(0.1, 0.1));
@@ -267,7 +294,7 @@ class RestaurantControllerTest {
     sut.insert(r);
 
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
-    when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
+    //when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
     when(usersCommunication.getUserAccountType(otherRestaurantId)).thenReturn(type);
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));

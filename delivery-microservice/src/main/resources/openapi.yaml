@@ -2354,8 +2354,7 @@ components:
           description: optional field to indicate delay in minutes
         type:
           $ref: "#/components/schemas/ErrorType"
-        Delivery:
-          $ref: "#/components/schemas/Delivery"
+
     ErrorType:
       type: string
       description: Type of problem with delivery (i.e., cancellation/delay). Can be scaled later. Potentially, delayed deliveries will also have a specified numeric delay.
@@ -2379,6 +2378,7 @@ components:
           items:
             type: string
             description: List of couriers the restaurant prefers
+
         location:
           x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"location\")"
           type: array
