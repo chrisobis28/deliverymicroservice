@@ -545,6 +545,10 @@ public class DeliveryController implements DeliveriesApi {
 
         if (!courier.equals(UsersAuthenticationService.AccountType.COURIER))
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
+            deliveryService.updateDeliveryCourier(deliveryId, courierId);
+            return ResponseEntity.ok(delivery);
+        }
         if (delivery.getCourierID() != null)
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
 
@@ -553,15 +557,11 @@ public class DeliveryController implements DeliveriesApi {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             case INVALID:
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-            case ADMIN: {
-                deliveryService.updateDeliveryCourier(deliveryId, courierId);
-                break;
-            }
             case COURIER: {
                 if (userId.equals(courierId)){
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
                     availableDeliveryProxy.checkIfAvailable(delivery);
-                    break;
+                    return ResponseEntity.ok(delivery);
                 }
                 // Courier is not allowed to assign other couriers to orders or assign themselves over someone
                 else
@@ -576,7 +576,7 @@ public class DeliveryController implements DeliveriesApi {
                 if (restaurant.getCouriers() == null || !restaurant.getCouriers().contains(courierId))
                     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
                 deliveryService.updateDeliveryCourier(deliveryId, courierId);
-                break;
+                return ResponseEntity.ok(delivery);
             }
         }
         return ResponseEntity.ok(delivery);
