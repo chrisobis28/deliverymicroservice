@@ -2,25 +2,38 @@ package nl.tudelft.sem.template.delivery.services;
 
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 public class RestaurantServiceTest {
-    private TestRestaurantRepository rr;
+    @Autowired
+    private RestaurantRepository rr;
     private RestaurantService rs;
-    private TestDeliveryRepository dr;
+    @Autowired
+    private DeliveryRepository dr;
     private DeliveryService ds;
 
     @BeforeEach
     public void setup() {
-        rr = new TestRestaurantRepository();
-        dr = new TestDeliveryRepository();
         rs = new RestaurantService(rr,dr);
         ds = new DeliveryService(dr,rr);
 
@@ -96,9 +109,11 @@ public class RestaurantServiceTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
         r.setLocation(List.of(11.1,12.2));
+        List<String> list = new ArrayList<>();
+        list.add("sjdfhbuwfbieg");
         rs.insert(r);
-        rs.setListOfCouriers("bla", List.of("bdsjkbds"));
-        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(List.of("bdsjkbds"));
+        rs.setListOfCouriers("bla", list);
+        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(List.of("sjdfhbuwfbieg"));
     }
 
 

@@ -12,22 +12,33 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Objects;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 public class StatisticsControllerTestWithRepo {
     private StatisticsService statisticsService;
+    @Mock
     private UsersCommunication usersCommunication;
     private UsersAuthenticationService usersAuthenticationService;
     @Autowired
@@ -37,8 +48,7 @@ public class StatisticsControllerTestWithRepo {
     private StatisticsController sut;
     @BeforeEach
     void setUp() {
-        repo1 = new TestDeliveryRepository();
-        repo2 = new TestRestaurantRepository();
+
         usersCommunication = mock(UsersCommunication.class);
         statisticsService = new StatisticsService(repo1);
         usersAuthenticationService = new UsersAuthenticationService(usersCommunication);
@@ -89,6 +99,7 @@ public class StatisticsControllerTestWithRepo {
         testDelivery.setRatingCourier(4);
         testDelivery.setStatus(DeliveryStatus.DELIVERED);
         testDelivery.setDeliveredTime(end);
+        testDelivery.setDeliveryID(UUID.randomUUID());
         repo1.save(testDelivery);
         when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
 
@@ -119,12 +130,14 @@ public class StatisticsControllerTestWithRepo {
         testDelivery1.setRatingCourier(4);
         testDelivery1.setStatus(DeliveryStatus.DELIVERED);
         testDelivery1.setDeliveredTime(end1);
+        testDelivery1.setDeliveryID(UUID.randomUUID());
 
         Delivery testDelivery2 = new Delivery();
         testDelivery2.setCourierID(courierId);
         testDelivery2.setRatingCourier(5);
         testDelivery2.setStatus(DeliveryStatus.DELIVERED);
         testDelivery2.setDeliveredTime(end2);
+        testDelivery2.setDeliveryID(UUID.randomUUID());
         when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
 
         Delivery testDelivery3 = new Delivery();
@@ -132,6 +145,7 @@ public class StatisticsControllerTestWithRepo {
         testDelivery3.setRatingCourier(3);
         testDelivery3.setStatus(DeliveryStatus.REJECTED);
         testDelivery3.setDeliveredTime(end3);
+        testDelivery3.setDeliveryID(UUID.randomUUID());
         when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
 
         repo1.save(testDelivery1);

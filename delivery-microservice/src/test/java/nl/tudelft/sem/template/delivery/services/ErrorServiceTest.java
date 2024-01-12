@@ -3,29 +3,44 @@ package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestErrorRepository;
 import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
+import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+
+import javax.transaction.Transactional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-
+@EntityScan("nl.tudelft.sem.template.*")
+@ExtendWith(MockitoExtension.class)
+@Transactional
+@DataJpaTest
 class ErrorServiceTest {
-
+    @Autowired
+    private DeliveryRepository dr;
+    @Autowired
+    private ErrorRepository er;
+    @Autowired
+    private RestaurantRepository rr;
     private ErrorService sut;
     private DeliveryService deliveryService;
 
 
     @BeforeEach
     void setUp() {
-        TestErrorRepository repo1 = new TestErrorRepository();
-        TestDeliveryRepository repo2 = new TestDeliveryRepository();
-        TestRestaurantRepository repo3 = new TestRestaurantRepository();
-        sut = new ErrorService(repo1, repo2);
-        deliveryService = new DeliveryService(repo2, repo3);
+        sut = new ErrorService(er, dr);
+        deliveryService = new DeliveryService(dr, rr);
     }
 
     @Test
@@ -59,8 +74,6 @@ class ErrorServiceTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setStatus(DeliveryStatus.DELIVERED);
         delivery.setError(error);
-        error.setDelivery(delivery);
-
         // Persist in repositories
         sut.insert(error);
         deliveryService.insert(delivery);
@@ -93,7 +106,6 @@ class ErrorServiceTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setStatus(DeliveryStatus.ACCEPTED);
         delivery.setError(error);
-        error.setDelivery(delivery);
 
         // Persist in repositories
         sut.insert(error);
