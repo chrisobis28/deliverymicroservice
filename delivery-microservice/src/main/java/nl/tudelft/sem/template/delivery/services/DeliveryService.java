@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    @Lazy
     private final RestaurantRepository restaurantRepository;
 
     @Autowired
@@ -301,6 +303,20 @@ public class DeliveryService {
      */
     public Restaurant getRestaurant(String restaurantId) {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+
+    }
+
+    /**
+     * Retrieves a list of all deliveries assigned to a courier
+     * @param courierId the id of the courier
+     * @return the list of delivery ids
+     */
+    public List<UUID> getDeliveriesForACourier(String courierId){
+        List<UUID> list = deliveryRepository.findAllByCourierID(courierId)
+                .stream()
+                .map(Delivery::getDeliveryID)
+                .collect(Collectors.toList());
+        return list;
 
     }
 }

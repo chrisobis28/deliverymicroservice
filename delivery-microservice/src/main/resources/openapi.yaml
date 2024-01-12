@@ -1861,65 +1861,6 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-  /restaurants/default-delivery-zone:
-    put:
-      tags:
-        - Restaurant
-      summary: Set delivery zone
-      description: Admin sets the default zone.
-      parameters:
-        - $ref: "#/components/parameters/UserId"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: number
-              format: double
-              description: Radius of delivery zone
-      responses:
-        '200':
-          description: Delivery zone update successful
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
-        '401':
-          description: Unauthorized access.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
-        '403':
-          description: Forbidden. User lacks necessary permissions. Only admins and vendors can update the delivery zone.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
-        '404':
-          description: Restaurant not found
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
 
   /errors/{deliveryId}:
     get:
@@ -2452,6 +2393,7 @@ components:
           type: number
           format: double
           description: Radius of the delivery zone
+          default: 30
     Statistics:
       type: object
       description: The average delay ratio for the specified courier and time period.

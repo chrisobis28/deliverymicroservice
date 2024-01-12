@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.models.Response;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 import java.util.UUID;
 import nl.tudelft.sem.template.api.RestaurantsApi;
 import nl.tudelft.sem.template.delivery.AddressAdapter;
@@ -57,7 +58,7 @@ public class RestaurantController implements RestaurantsApi {
         try {
             restaurantService.insert(restaurant);
             return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
+        } catch (RestaurantService.IllegalRestaurantParametersException e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -91,11 +92,45 @@ public class RestaurantController implements RestaurantsApi {
         if (isNullOrEmpty(email) || isInvalidAddress(address)) {
             return ResponseEntity.badRequest().build();
         }
-        Restaurant restaurant = new Restaurant();
-        restaurant.setRestaurantID(email);
-        restaurant.setLocation(addressAdapter.convertStringAddressToDouble(address));
-        restaurantService.insert(restaurant);
+        Restaurant r = new Restaurant();
+        r.setLocation(addressAdapter.convertStringAddressToDouble(address));
+        r.setRestaurantID(email);
+        Restaurant restaurant = restaurantService.insert(r);
         return ResponseEntity.ok(restaurant);
+    }
+
+    /**
+     * Retrieves the restaurant with the specified visibility
+     * @param restaurantId ID of the Restaurant entity (required)
+     * @param userId User ID for authorization (required)
+     * @return the restaurant entity adn the specified error codes
+     */
+    @Override
+    public ResponseEntity<Restaurant> restaurantsRestaurantIdGet( @PathVariable("restaurantId") String restaurantId,@RequestHeader String userId) {
+        //check user ID
+        if(userId==null || restaurantId==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+            Restaurant r = restaurantService.getRestaurant(restaurantId);
+            switch (accountType) {
+                case COURIER, CLIENT:
+                    r.setCouriers(null);
+                    r.setDeliveryZone(null);
+                    r.setRestaurantID(null);
+                    return ResponseEntity.status(HttpStatus.OK).body(r);
+                case VENDOR:
+                    if (!Objects.equals(userId, restaurantId)) {
+                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    } else {
+                        return ResponseEntity.status(HttpStatus.OK).body(r);
+                    }
+
+                case ADMIN:
+                    return ResponseEntity.status(HttpStatus.OK).body(r);
+
+                default:
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+
+            }
     }
 
     /**
@@ -146,7 +181,7 @@ public class RestaurantController implements RestaurantsApi {
                     return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                 }
                 case VENDOR -> {
-                    if (userId.equals(restaurantId)){
+                    if (userId.equals(restaurantId) && !restaurantService.getRestaurant(restaurantId).getCouriers().isEmpty()){
                         restaurantService.updateDeliverZone(restaurantId, requestBody);
                         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                     }
@@ -182,6 +217,55 @@ public class RestaurantController implements RestaurantsApi {
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
     }
+
+    /**
+     * Sets the list of couriers and returns the correct response codes
+     * @param restaurantId ID of the Restaurant entity (required)
+     * @param userId User ID for authorization (required)
+     * @param requestBody Put a preferred set of couriers for the restaurant (required)
+     * @return the modified restaurant entity
+     */
+    @Override
+    public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut( @PathVariable("restaurantId") String restaurantId, @RequestHeader String userId,  @RequestBody @Valid List<String> requestBody)   {
+        //check user ID
+        if(userId==null || restaurantId==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        switch(accountType){
+            case COURIER,CLIENT: return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            case  VENDOR:
+                if(!Objects.equals(userId, restaurantId)){
+                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                }
+                else break;
+
+            case ADMIN : break;
+            default : return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+
+        }
+        // check couriers
+        if(requestBody!=null) {
+            for(String id : requestBody){
+                UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(id);
+                if(Objects.equals(account,"non-existent")){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                }
+                if(!Objects.equals(account,"courier")){
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                }
+            }
+        }
+        try{
+            Restaurant r = restaurantService.setListOfCouriers(restaurantId,requestBody);
+            return ResponseEntity.status(HttpStatus.OK).body(r);
+        }catch(RestaurantService.RestaurantNotFoundException e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+
+
+
+    }
+
+
 
 
     /**

@@ -6,6 +6,7 @@ import nl.tudelft.sem.template.api.DeliveriesApi;
 //import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.*;
@@ -19,6 +20,7 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 public class DeliveryController implements DeliveriesApi {
@@ -168,56 +170,46 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
         if (deliveriesPostRequest == null) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
+
         Delivery delivery = new Delivery();
+        String status = deliveriesPostRequest.getStatus().toUpperCase();
         String orderId = deliveriesPostRequest.getOrderId();
         String customerId = deliveriesPostRequest.getCustomerId();
         String vendorId = deliveriesPostRequest.getVendorId();
         List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
+
+        delivery.setStatus(DeliveryStatus.fromValue(status));
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
+
         if (addr == null || addr.size() != 2) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
+        }
+
+        Restaurant r;
+        try{
+            r = deliveryService.getRestaurant(vendorId);
+        }
+        catch(RestaurantService.RestaurantNotFoundException e){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VENDOR NOT FOUND.");
+        }
+
+        if(deliveryService.computeHaversine(r.getLocation().get(0), r.getLocation().get(1), addr.get(0), addr.get(1)) > r.getDeliveryZone()){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
         UUID deliveryId = UUID.fromString(orderId);
         delivery.deliveryID(deliveryId);
         delivery.setCustomerID(customerId);
         delivery.setRestaurantID(vendorId);
-        String status = deliveriesPostRequest.getStatus().toUpperCase();
-        switch (status) {
-            case "PENDING":
-                delivery.setStatus(DeliveryStatus.PENDING);
-                break;
-            case "ACCEPTED":
-                delivery.setStatus(DeliveryStatus.ACCEPTED);
-                break;
-            case "REJECTED":
-                delivery.setStatus(DeliveryStatus.REJECTED);
-                break;
-            case "PREPARING":
-                delivery.setStatus(DeliveryStatus.PREPARING);
-                break;
-            case "GIVEN_TO_COURIER":
-                delivery.setStatus(DeliveryStatus.GIVEN_TO_COURIER);
-                break;
-            case "ON_TRANSIT":
-                delivery.setStatus(DeliveryStatus.ON_TRANSIT);
-                break;
-            case "DELIVERED":
-                delivery.setStatus(DeliveryStatus.DELIVERED);
-                break;
-            default:
-                return ResponseEntity.badRequest().build();
-        }
         delivery.setDeliveryAddress(addr);
-        Error e = new Error().errorId(UUID.randomUUID());
-        e.setType(ErrorType.NONE);
-        delivery.setError(e);
+        delivery.setError(null);
         delivery = deliveryService.insert(delivery);
         return ResponseEntity.ok(delivery);
     }
+
 
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
