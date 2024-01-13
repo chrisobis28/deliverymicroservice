@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -67,9 +66,7 @@ public class AvailableDeliveryProxy {
    * Update and return queue of available delivery ids
    * @return updated queue of delivery ids
    */
-  public Queue<UUID> updateQueue() {
-    List<Delivery> all = deliveryService.all();
-    all.forEach(this::checkIfAvailable);
+  public Queue<UUID> getQueue() {
     return available_deliveries;
   }
 }

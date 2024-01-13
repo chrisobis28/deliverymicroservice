@@ -63,6 +63,10 @@ public class CouriersController implements CouriersApi {
 
     }
 
+    public AvailableDeliveryProxy testMethod() {
+        return availableDeliveryProxy;
+    }
+
     /**
      * Assign the order next in the queue to the courier
      * @param courierId The id of a courier we want to assign the next order to (required)
@@ -74,7 +78,7 @@ public class CouriersController implements CouriersApi {
         if (!Objects.equals(account, COURIER)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no such courier");
         if (couriersService.courierBelongsToRestaurant(courierId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This courier works for a specific restaurant");
 
-        Queue<UUID> deliveries = availableDeliveryProxy.updateQueue();
+        Queue<UUID> deliveries = availableDeliveryProxy.getQueue();
         if (deliveries.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries at the moment");
 
         UUID id = deliveries.poll();

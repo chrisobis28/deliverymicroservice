@@ -152,11 +152,12 @@ class CouriersControllerTest {
         .collect(Collectors.toList());
     deliveries.forEach(y -> y.setStatus(DeliveryStatus.ACCEPTED));
     deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
-    dr.saveAll(deliveries);
-
     Restaurant r = new Restaurant();
     r.setRestaurantID("vendor@testmail.com");
     rr.save(r);
+    deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+    dr.saveAll(deliveries);
+
     when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
     ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
@@ -199,12 +200,14 @@ class CouriersControllerTest {
         .collect(Collectors.toList());
     deliveries.forEach(y -> y.setStatus(DeliveryStatus.ACCEPTED));
     deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
-    dr.saveAll(deliveries);
-
     Restaurant r = new Restaurant();
     r.setCouriers(List.of("courier@testmail.com"));
     r.setRestaurantID("vendor@testmail.com");
     rr.save(r);
+
+    deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+    dr.saveAll(deliveries);
+
     when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
     assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
