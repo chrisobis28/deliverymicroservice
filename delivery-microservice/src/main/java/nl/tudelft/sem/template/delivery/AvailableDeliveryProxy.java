@@ -24,13 +24,13 @@ public class AvailableDeliveryProxy {
 
   /**
    * Check if delivery is available for courier
-   * @param delivery delivery to be added/updated
+   * @param d delivery to be added/updated
    * @return return boolean value indicating whether it's available
    */
-  public boolean checkStatus(Delivery delivery) {
-    DeliveryStatus status = delivery.getStatus();
-    if (status == null || isNullOrEmpty(delivery.getRestaurantID())) return false;
-    boolean ownCouriers = deliveryService.restaurantUsesOwnCouriers(delivery);
+  public boolean checkStatus(Delivery d) {
+    DeliveryStatus status = d.getStatus();
+    if (status == null || isNullOrEmpty(d.getRestaurantID()) || !isNullOrEmpty(d.getCourierID())) return false;
+    boolean ownCouriers = deliveryService.restaurantUsesOwnCouriers(d);
     if (ownCouriers) return false;
     else return status.equals(DeliveryStatus.ACCEPTED) || status.equals(DeliveryStatus.PREPARING);
   }
@@ -54,7 +54,7 @@ public class AvailableDeliveryProxy {
     if (isAvailable && !available_deliveries.contains(deliveryId)) {
       available_deliveries.offer(deliveryId);
     }
-    if (!isAvailable && available_deliveries.contains(deliveryId)) {
+    if (!isAvailable/* && available_deliveries.contains(deliveryId)*/) {
       available_deliveries.remove(deliveryId);
     }
   }

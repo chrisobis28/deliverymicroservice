@@ -157,6 +157,9 @@ class CouriersControllerTest {
 
     ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
     assertEquals(HttpStatus.OK, res.getStatusCode());
+
+    res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
+    assertEquals(HttpStatus.OK, res.getStatusCode());
   }
 
   @Test
