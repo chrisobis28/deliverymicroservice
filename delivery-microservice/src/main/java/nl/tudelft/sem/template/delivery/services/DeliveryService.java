@@ -33,14 +33,6 @@ public class DeliveryService {
         this.restaurantRepository = restaurantRepository;
     }
 
-//    /**
-//     * Get all deliveries in db
-//     * @return list of deliveries
-//     */
-//    public List<Delivery> findAll() {
-//        return deliveryRepository.findAll();
-//    }
-
     /**
      * Check if restaurant uses own couriers
      * @param delivery delivery being assigned
@@ -306,17 +298,16 @@ public class DeliveryService {
 
     }
 
-    /**
-     * Retrieves a list of all deliveries assigned to a courier
-     * @param courierId the id of the courier
-     * @return the list of delivery ids
-     */
-    public List<UUID> getDeliveriesForACourier(String courierId){
-        List<UUID> list = deliveryRepository.findAllByCourierID(courierId)
-                .stream()
-                .map(Delivery::getDeliveryID)
-                .collect(Collectors.toList());
-        return list;
-
-    }
+//    /**
+//     * Retrieves a list of all deliveries assigned to a courier
+//     * @param courierId the id of the courier
+//     * @return the list of delivery ids
+//     */
+//    public List<UUID> getDeliveriesForACourier(String courierId){
+//        List<UUID> list = deliveryRepository.findAllByCourierID(courierId)
+//                .stream()
+//                .map(Delivery::getDeliveryID)
+//                .collect(Collectors.toList());
+//        return list;
+//    }
 }

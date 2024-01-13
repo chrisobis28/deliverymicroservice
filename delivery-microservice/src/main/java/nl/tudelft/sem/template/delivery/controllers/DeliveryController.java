@@ -523,10 +523,6 @@ public class DeliveryController implements DeliveriesApi {
         }
     }
 
-    public UUID getNextDelivery() {
-        return availableDeliveryProxy.getAvailableDeliveries().poll();
-    }
-
     /**
      * Updates the courier ID of an order
      * @param deliveryId ID of the Delivery entity (required)
