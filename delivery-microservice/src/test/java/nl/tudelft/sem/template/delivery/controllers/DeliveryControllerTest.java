@@ -29,6 +29,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
@@ -1774,13 +1775,13 @@ class DeliveryControllerTest {
     }
 
     @Test
-    void pickup_time_get() {
+    void deliveriesDeliveryIdPickupGetAdmin() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
-        String customerID = "user@user.com";
+        String customerID = "customer@testmail.com";
         delivery.setCustomerID(customerID);
-        String restaurantId = "pizzahut@yahoo.com";
+        String restaurantId = "restaurant@testmail.com";
         Restaurant restaurant = new Restaurant();
         restaurant.setRestaurantID(restaurantId);
         restaurant.setLocation(new ArrayList<>(Arrays.asList(100.0, 100.0)));
@@ -1890,4 +1891,221 @@ class DeliveryControllerTest {
         assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId, null));
     }
 
+    @Test
+    void deliveriesDeliveryIdPickupGetNotFound() {
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "user@testmail.com";
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseStatusException exception = assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut.deliveriesDeliveryIdPickupGet(deliveryId, userId));
+        assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+        assertEquals(exception.getReason(), "Delivery with specified id not found");
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupGetCourier() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        String courierId = "actual_courier@testmail.com";
+        delivery.setCourierID(courierId);
+        String fakeCourierId = "another_courier@testmail.com";
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(fakeCourierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupGet(deliveryId, fakeCourierId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "Courier does not correspond to the order.");
+
+        OffsetDateTime pickupTime = sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), courierId).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        assertThat(sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), courierId).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupGetVendor() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        String fakeRestaurantId = "another_restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(fakeRestaurantId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupGet(deliveryId, fakeRestaurantId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "Vendor does not correspond to the order.");
+
+        OffsetDateTime pickupTime = sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), restaurantId).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        assertThat(sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), restaurantId).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupGetClient() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        String fakeCustomerId = "another_customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(fakeCustomerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupGet(deliveryId, fakeCustomerId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "Client does not correspond to the order.");
+
+        OffsetDateTime pickupTime = sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getBody();
+        assertThat(pickupTime).isEqualTo(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        assertThat(sut.deliveriesDeliveryIdPickupGet(delivery.getDeliveryID(), customerID).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupGetUnauthorized() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        delivery.setPickupTime(OffsetDateTime.parse("2021-09-30T15:30:00+01:00"));
+        sut.insert(delivery);
+        String userId = "user@testmail.com";
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupGet(deliveryId, userId));
+        assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(exception.getReason(), "Account could not be verified.");
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupPutNotFound() {
+        OffsetDateTime time = OffsetDateTime.parse("2021-09-30T15:30:00+01:00");
+        UUID deliveryId = UUID.randomUUID();
+        String customerID = "customer@testmail.com";
+
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseStatusException exception = assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut.deliveriesDeliveryIdPickupPut(deliveryId, customerID, time));
+        assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+        assertEquals(exception.getReason(), "Delivery with specified id not found");
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupPutAdmin() {
+        OffsetDateTime time = OffsetDateTime.parse("2021-09-30T15:30:00+01:00");
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        sut.insert(delivery);
+        String userId = "user@testmail.com";
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        OffsetDateTime pickupTime = Objects.requireNonNull(
+            sut.deliveriesDeliveryIdPickupPut(deliveryId, userId, time).getBody()).getPickupTime();
+        assertThat(pickupTime).isEqualTo(time);
+        assertThat(sut.deliveriesDeliveryIdPickupPut(deliveryId, userId, time).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupPutCourier() {
+        OffsetDateTime time = OffsetDateTime.parse("2021-09-30T15:30:00+01:00");
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        String courierId = "courier@testmail.com";
+        delivery.setCourierID(courierId);
+        String fakeCourierId = "another_courier@testmail.com";
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(fakeCourierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupPut(deliveryId, fakeCourierId, time));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "Courier does not correspond to the order.");
+
+        OffsetDateTime pickupTime = Objects.requireNonNull(
+            sut.deliveriesDeliveryIdPickupPut(deliveryId, courierId, time).getBody()).getPickupTime();
+        assertThat(pickupTime).isEqualTo(time);
+        assertThat(sut.deliveriesDeliveryIdPickupPut(deliveryId, courierId, time).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupPutVendor() {
+        OffsetDateTime time = OffsetDateTime.parse("2021-09-30T15:30:00+01:00");
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        String fakeRestaurantId = "another_restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType(fakeRestaurantId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupPut(deliveryId, fakeRestaurantId, time));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "Vendor does not correspond to the order.");
+
+        OffsetDateTime pickupTime = Objects.requireNonNull(
+            sut.deliveriesDeliveryIdPickupPut(deliveryId, restaurantId, time).getBody()).getPickupTime();
+        assertThat(pickupTime).isEqualTo(time);
+        assertThat(sut.deliveriesDeliveryIdPickupPut(deliveryId, restaurantId, time).getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    void deliveriesDeliveryIdPickupPutUnauthorized() {
+        OffsetDateTime time = OffsetDateTime.parse("2021-09-30T15:30:00+01:00");
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        String fakeRestaurantId = "another_restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+        sut.insert(delivery);
+        String userId = "user@testmail.com";
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPickupPut(deliveryId, userId, time));
+        assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(exception.getReason(), "Account could not be verified.");
+    }
 }
