@@ -2228,8 +2228,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
+                type: object
+                additionalProperties:
                   type: integer
         '404':
           description: Requested Order ID not found.
@@ -2339,6 +2339,12 @@ components:
           type: string
           format: date-time
           description: Delivered time in YYYY-MM-DD HH:mm format
+          example: "2023-11-19 18:20"
+        order_time:
+          x-field-extra-annotation: "@javax.persistence.Column(name = \"orderTime\")"
+          type: string
+          format: date-time
+          description: Time when the order is placed in YYYY-MM-DD HH:mm format
           example: "2023-11-19 18:20"
         deliveryAddress:
           x-field-extra-annotation: "@javax.persistence.ElementCollection @javax.persistence.Column(name = \"deliveryAddress\")"

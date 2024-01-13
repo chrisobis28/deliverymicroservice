@@ -1,11 +1,12 @@
 package nl.tudelft.sem.template.delivery.services;
+
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class RestaurantServiceTest {
     @BeforeEach
     public void setup() {
         rs = new RestaurantService(rr,dr);
-        ds = new DeliveryService(dr,rr);
+        ds = new DeliveryService(dr, new GPS(), rr);
 
     }
     @Test

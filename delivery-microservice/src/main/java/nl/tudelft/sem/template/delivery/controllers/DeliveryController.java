@@ -176,6 +176,7 @@ public class DeliveryController implements DeliveriesApi {
         String customerId = deliveriesPostRequest.getCustomerId();
         String vendorId = deliveriesPostRequest.getVendorId();
         List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
+        OffsetDateTime now = OffsetDateTime.now();
 
         delivery.setStatus(DeliveryStatus.fromValue(status));
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
@@ -203,6 +204,7 @@ public class DeliveryController implements DeliveriesApi {
         delivery.setRestaurantID(vendorId);
         delivery.setDeliveryAddress(addr);
         delivery.setError(null);
+        delivery.setOrderTime(now);
         delivery = deliveryService.insert(delivery);
         return ResponseEntity.ok(delivery);
     }
@@ -526,7 +528,6 @@ public class DeliveryController implements DeliveriesApi {
      * @param courierId  ID of the courier for updating the Delivery (required)
      * @return a Delivery Object with the updates that took place
      */
-    @PostMapping("/deliveries/{deliveryId}/courier")
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdCourierPut(@PathVariable UUID deliveryId,
                                                                    @RequestHeader String userId,
@@ -615,48 +616,26 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is null or empty");
         }
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
 
         switch (userType) {
-            case ADMIN: {
-                OffsetDateTime now = OffsetDateTime.now();
-                OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId, now);
-                return ResponseEntity.ok(estimate);
-            }
-            case CLIENT, COURIER, VENDOR: {
+            case ADMIN, CLIENT, COURIER, VENDOR: {
                 if (check) {
-                    OffsetDateTime now = OffsetDateTime.now();
-                    OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId, now);
+                    OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId);
                     return ResponseEntity.ok(estimate);
                 }
-                else return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                else  {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permission levels.");
+                }
             }
-            default: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            default: {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access. User cannot be authorized.");
+            }
         }
-//        // Vendors can see estimations for their orders only
-//        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
-//        // Couriers can see estimations for their deliveries only
-//        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
-//        // Customers can see estimations for their orders only
-//        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
-//        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-//                allowedVendor ||
-//                allowedCourier ||
-//                allowedCustomer) {
-//            OffsetDateTime now = OffsetDateTime.now();
-//            OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId, now);
-//            return ResponseEntity.ok(estimate);
-//        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-//                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-//                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//        }
     }
 
     /**

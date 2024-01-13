@@ -62,24 +62,25 @@ public class StatisticsController implements StatisticsApi {
      */
     @GetMapping("/ratings-for-orders")
     @Override
-    public ResponseEntity<List<Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId, @RequestBody List<UUID> orderIds) {
+    public ResponseEntity<Map<String, Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId, @RequestBody List<UUID> orderIds) {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            List<Integer> ratings = new ArrayList<>();
-            for (UUID orderId : orderIds) {
-                ratings.add(statisticsService.getOrderRating(orderId));
-            }
-            return ResponseEntity.ok(ratings);
-        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+        // After second consideration I changed the permission levels of this endpoint,
+        // so that everyone can see the ratings for transparency reasons.
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
+                userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
                 userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
                 userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            // User lacks necessary permission levels.
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.emptyList());
+            Map<String, Integer> ratings = new HashMap<>();
+            for (UUID orderId : orderIds) {
+                ratings.put(orderId.toString(), statisticsService.getOrderRating(orderId));
+            }
+            return ResponseEntity.ok(ratings);
         } else {
             // User lacks valid authentication credentials.
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Collections.emptyList());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
     }
+
 
     /**
      * Get no. of deliveries made in each hour bracket of a day averaged over no. of days delivered for

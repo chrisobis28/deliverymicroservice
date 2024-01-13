@@ -1,6 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -83,7 +83,7 @@ class ErrorControllerTest {
         updateError.setValue(updateValue);
 
         // Services and dependency injections
-        DeliveryService deliveryService = new DeliveryService(repo2, repo3);
+        DeliveryService deliveryService = new DeliveryService(repo2, new GPS(), repo3);
         ErrorService errorService = new ErrorService(repo1, repo2);
         usersCommunication = mock(UsersAuthenticationService.class);
 

@@ -4,12 +4,13 @@ package nl.tudelft.sem.template.delivery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Service;
 
-//import javax.persistence.Tuple;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-//Mock of Geocoding
+/** Mock of Geocoding
+ *
+ */
 @Service
 public class GPS {
   List<Pair<List<Double>, String>> addresses = new ArrayList<>();
@@ -62,24 +63,40 @@ public class GPS {
    * @return location in string format
    */
   public String getAddressFromCoordinates(List<Double> coords) {
-    String loc;
-    if (coords.get(0) > 50.00) {
-      int c = (int) (coords.get(0)*100000);
-      int c2 = (int) (coords.get(1)*100000);
-      int index = isInNL(c, c2).indexOf(0);
-      switch (index) {
-        case 0 -> loc = addresses.get((c - delft_lat)).getRight();
-        case 1 -> loc = addresses.get((c - rotterdam_lat)).getRight();
-        case 2 -> loc = addresses.get((c - amsterdam_lat)).getRight();
-        default -> loc = addresses.get((c - eindhoven_lat)).getRight();
-      }
+      String loc;
+      if (coords.get(0) > 50.00) {
+          int c = (int) (coords.get(0)*100000);
+          int c2 = (int) (coords.get(1)*100000);
+          int index = isInNL(c, c2).indexOf(0);
+          switch (index) {
+              case 0 -> loc = addresses.get((c - delft_lat)).getRight();
+              case 1 -> loc = addresses.get((c - rotterdam_lat)).getRight();
+              case 2 -> loc = addresses.get((c - amsterdam_lat)).getRight();
+              default -> loc = addresses.get((c - eindhoven_lat)).getRight();
+          }
 
-    } else {
-      int c = (int) (coords.get(0)*1000);
-      loc = addresses.get((c - other_lat)).getRight();
-    }
-    return loc;
+      } else {
+          int c = (int) (coords.get(0)*1000);
+          loc = addresses.get((c - other_lat)).getRight();
+      }
+      return loc;
   }
+
+
+    /**
+     * Get current coordinates as a list of latitude and longitude.
+     *
+     * @return list of current coordinates
+     */
+    public List<Double> getCurrentCoordinates() {
+        // Mock the current coordinates as the "Other" coordinates for simplicity
+        DecimalFormat df = new DecimalFormat("##.###");
+        List<Double> currentCoords = List.of(
+                Double.parseDouble(df.format((other.get(0)))),
+                Double.parseDouble(df.format((other.get(1))))
+        );
+        return currentCoords;
+    }
 
   /**
    * Checks if coordinates are in NL

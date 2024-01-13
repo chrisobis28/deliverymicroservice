@@ -6,14 +6,13 @@ import java.util.*;
 
 import nl.tudelft.sem.template.delivery.AddressAdapter;
 import nl.tudelft.sem.template.delivery.GPS;
-//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-import nl.tudelft.sem.template.delivery.controllers.DeliveryController;
-import nl.tudelft.sem.template.delivery.controllers.RestaurantController;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
+import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.ErrorType;
@@ -27,7 +26,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.backoff.BackOffExecution;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
@@ -58,6 +56,7 @@ class DeliveryControllerTest {
     Delivery delivery;
     List<Double> coords;
 
+
     @BeforeEach
     void setUp() {
         coords = List.of(100.0, 100.0);
@@ -69,7 +68,7 @@ class DeliveryControllerTest {
         delivery.setEstimatedPrepTime(prepTime);
         usersCommunication = mock(UsersAuthenticationService.class);
         restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
-        sut = new DeliveryController(new DeliveryService(repo1, repo2), usersCommunication, null);
+        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication, null);
     }
 
     @Test
@@ -1901,7 +1900,6 @@ class DeliveryControllerTest {
     void getDeliveryAuthorized() {
         UUID deliveryUUID = UUID.randomUUID();
         String customerID = "test@test.com";
-
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryUUID);
         delivery.setRestaurantID(customerID);
@@ -1915,6 +1913,249 @@ class DeliveryControllerTest {
         assertEquals(res.getBody(),delivery);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
     }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_AdminAccess() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "admin@example.org";
+        String vendorId = "vendor@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersCommunication.checkUserAccessToDelivery(eq(userId), any(Delivery.class))).thenReturn(true);
+
+        // Act
+        ResponseEntity<OffsetDateTime> response = sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(time.plusMinutes(61), response.getBody());
+    }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_VendorAccess() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "vendor@example.org";
+        String vendorId = "vendor@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(eq(userId), any(Delivery.class))).thenReturn(true);
+
+        // Act
+        ResponseEntity<OffsetDateTime> response = sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(time.plusMinutes(61), response.getBody());
+    }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_CourierAccess() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "courier@example.org";
+        String vendorId = "vendor@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        delivery.setCourierID(userId);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.checkUserAccessToDelivery(eq(userId), any(Delivery.class))).thenReturn(true);
+
+        // Act
+        ResponseEntity<OffsetDateTime> response = sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(time.plusMinutes(61), response.getBody());
+    }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_CustomerAccess() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "customer@example.org";
+        String vendorId = "vendor@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        delivery.setCustomerID(userId);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.checkUserAccessToDelivery(eq(userId), any(Delivery.class))).thenReturn(true);
+
+        // Act
+        ResponseEntity<OffsetDateTime> response = sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId);
+
+        // Assert
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(time.plusMinutes(61), response.getBody());
+    }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_Forbidden() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "vendor1@example.org";
+        String vendorId = "vendor2@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        // Act
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertEquals("403 FORBIDDEN \"User lacks necessary permission levels.\"", exception.getMessage());
+    }
+
+    @Test
+    void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_Unauthorized() {
+        // Arrange
+        UUID deliveryId = UUID.randomUUID();
+        String userId = "invalid@example.org";
+        String vendorId = "vendor@example.org";
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 0, 0, 0, ZoneOffset.UTC);
+        // Define default delivery error
+        Error error = new Error();
+        error.setType(ErrorType.NONE);
+
+        // Create a Delivery object
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(vendorId);
+        delivery.setEstimatedPrepTime(0);
+        delivery.setRatingRestaurant(5);
+        delivery.setDeliveryAddress(List.of(1d, 2d));
+        delivery.setOrderTime(time);
+        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setError(error);
+        sut.insert(delivery);
+
+        // Create a corresponding restaurant
+        Restaurant restaurant = new Restaurant();
+        restaurant.setRestaurantID(vendorId);
+        restaurant.setLocation(List.of(0.9, 1.9d));
+        restaurantController.insert(restaurant);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+
+        // Act
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdEstimatedDeliveryTimeGet(deliveryId, userId));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("401 UNAUTHORIZED \"Unauthorized access. User cannot be authorized.\"", exception.getMessage());
+    }
+
     @Test
     void getDeliveryForbidden() {
         UUID deliveryUUID = UUID.randomUUID();
