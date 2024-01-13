@@ -3,12 +3,15 @@ package nl.tudelft.sem.template.delivery;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 
+@Service
 public class AvailableDeliveryProxy {
 
   private final DeliveryService deliveryService;
@@ -18,6 +21,7 @@ public class AvailableDeliveryProxy {
    * Constructor for Proxy design pattern that keeps track of available deliveries
    * @param deliveryService delivery service (for access to the Delivery database)
    */
+  @Autowired
   public AvailableDeliveryProxy(DeliveryService deliveryService) {
     this.deliveryService = deliveryService;
   }

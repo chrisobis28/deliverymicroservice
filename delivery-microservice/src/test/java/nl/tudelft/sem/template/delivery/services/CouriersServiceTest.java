@@ -47,7 +47,7 @@ class CouriersServiceTest {
     r.setRestaurantID("bla");
     r.setCouriers(List.of("courier@testmail.com"));
     r.setLocation(List.of(12.2,13.3));
-    cs.insert(r);
+    rr.save(r);
     assertTrue(cs.courierBelongsToRestaurant("courier@testmail.com"));
   }
 
@@ -56,7 +56,7 @@ class CouriersServiceTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID("bla");
     r.setLocation(List.of(12.2,13.3));
-    cs.insert(r);
+    rr.save(r);
     assertFalse(cs.courierBelongsToRestaurant("courier@testmail.com"));
   }
 
@@ -73,9 +73,9 @@ class CouriersServiceTest {
     Delivery d3 = new Delivery();
     d3.setDeliveryID(id3);
     d3.setCourierID("courier@testmail.com");
-    cs.insert(d);
-    cs.insert(d2);
-    cs.insert(d3);
+    dr.save(d);
+    dr.save(d2);
+    dr.save(d3);
 
     assertEquals(List.of(id, id3), cs.getDeliveriesForACourier("courier@testmail.com"));
     assertEquals(List.of(id2), cs.getDeliveriesForACourier("other_courier@testmail.com"));

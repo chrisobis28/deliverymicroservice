@@ -135,8 +135,12 @@ class CouriersControllerTest {
     dr.saveAll(deliveries);
     when(usersAuth.getUserAccountType("not_a_courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
-    ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("not_a_courier@testmail.com");
-    assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("not_a_courier@testmail.com"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("not_a_courier@testmail.com"))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"There is no such courier\"");
   }
 
   @Test
@@ -178,8 +182,12 @@ class CouriersControllerTest {
     rr.save(r);
     when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
-    ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
-    assertEquals(HttpStatus.NOT_FOUND, res.getStatusCode());
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.NOT_FOUND);
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+        .message()
+        .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment\"");
   }
 
   @Test
@@ -199,7 +207,11 @@ class CouriersControllerTest {
     rr.save(r);
     when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
-    ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
-    assertEquals(HttpStatus.BAD_REQUEST, res.getStatusCode());
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"This courier works for a specific restaurant\"");
   }
 }

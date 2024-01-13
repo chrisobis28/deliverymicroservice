@@ -29,7 +29,7 @@ public class GPS {
     DecimalFormat df = new DecimalFormat("#.#####");
     DecimalFormat df2 = new DecimalFormat("##.#####");
     List<Double> coords;
-    Pair<List<Double>, String> p;
+    Pair<List<Double>, String> coord_loc_pair;
     double i = addresses.size();
 
     if (location.contains("NL")) {
@@ -39,13 +39,13 @@ public class GPS {
         case ("Amsterdam") -> coords = amsterdam_coords;
         default -> coords = eindhoven_coords;
       }
-      p = Pair.of(List.of(Double.parseDouble(df2.format((coords.get(0)+(i/100000)))), Double.parseDouble(df.format((coords.get(1)+(i/100000))))), location);
+      coord_loc_pair = Pair.of(List.of(Double.parseDouble(df2.format((coords.get(0)+(i/100000)))), Double.parseDouble(df.format((coords.get(1)+(i/100000))))), location);
     } else {
       df = new DecimalFormat("##.###");
-      p = Pair.of(List.of(Double.parseDouble(df.format((other.get(0)+(i/1000)))), Double.parseDouble(df.format((other.get(1)+(i/1000))))), location);
+      coord_loc_pair = Pair.of(List.of(Double.parseDouble(df.format((other.get(0)+(i/1000)))), Double.parseDouble(df.format((other.get(1)+(i/1000))))), location);
     }
-    addresses.add(p);
-    return p;
+    addresses.add(coord_loc_pair);
+    return coord_loc_pair;
   }
 
   /**

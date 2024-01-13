@@ -27,6 +27,11 @@ public class DeliveryService {
     @Lazy
     private final RestaurantRepository restaurantRepository;
 
+    /**
+     * Constructor for DeliveryService
+     * @param deliveryRepository database for deliveries
+     * @param restaurantRepository database for restaurants
+     */
     @Autowired
     public DeliveryService(DeliveryRepository deliveryRepository, RestaurantRepository restaurantRepository) {
         this.deliveryRepository = deliveryRepository;

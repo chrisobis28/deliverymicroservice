@@ -71,10 +71,11 @@ public class CouriersController implements CouriersApi {
     @Override
     public ResponseEntity<Delivery> couriersCourierIdNextOrderPut(@Parameter(name = "courierId",required = true,in = ParameterIn.PATH) @PathVariable String courierId) {
         UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(courierId);
-        if (!Objects.equals(account, COURIER) || couriersService.courierBelongsToRestaurant(courierId)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (!Objects.equals(account, COURIER)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "There is no such courier");
+        if (couriersService.courierBelongsToRestaurant(courierId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This courier works for a specific restaurant");
 
         Queue<UUID> deliveries = availableDeliveryProxy.updateQueue();
-        if (deliveries.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        if (deliveries.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries at the moment");
 
         UUID id = deliveries.poll();
         deliveryService.updateDeliveryCourier(id, courierId);
