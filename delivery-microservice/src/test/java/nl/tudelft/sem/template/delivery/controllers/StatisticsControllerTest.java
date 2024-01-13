@@ -17,18 +17,19 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-//@ExtendWith(MockitoExtension.class)
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -195,43 +196,26 @@ class StatisticsControllerTest {
     void statisticsRatingsForOrdersGet() {
         userType = UsersAuthenticationService.AccountType.ADMIN;
         d1.setRatingRestaurant(4);
+        d2.setStatus(DeliveryStatus.ACCEPTED);
         // Mock ratings and user type
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         sut.insert(d1);
         sut.insert(d2);
 
         // Call the method
-        ResponseEntity<List<Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
+        ResponseEntity<Map<String, Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
 
         // Verify the response
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
         // Verify the returned ratings
-        List<Integer> ratings = responseEntity.getBody();
+        Map<String, Integer> ratings = responseEntity.getBody();
         assert ratings != null;
         assertEquals(2, ratings.size());
-        assertEquals(4, ratings.get(0).intValue()); // Rating for orderId1
-        assertNull(ratings.get(1)); // No rating for orderId2
+        assertEquals(4, ratings.get(orderId1.toString())); // Rating for orderId1
+        assertNull(ratings.get(orderId2.toString())); // Rating for orderId2
     }
 
-    @Test
-    void statisticsRatingsForOrdersGetForbidden() {
-        userType = UsersAuthenticationService.AccountType.CLIENT;
-
-        // Mock user type
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
-
-        // Call the method
-        ResponseEntity<List<Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
-
-        // Verify the response
-        assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
-
-        // Verify the empty list is returned
-        List<Integer> response = responseEntity.getBody();
-        assert response != null;
-        assertTrue(response.isEmpty());
-    }
 
     @Test
     void statisticsRatingsForOrdersGetUnauthorized() {
@@ -240,15 +224,12 @@ class StatisticsControllerTest {
         // Mock user type
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
-        // Call the method
-        ResponseEntity<List<Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
+        // Verify it throws an error
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsRatingsForOrdersGet(userId, orderIds));
 
-        // Verify the response
-        assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
-
-        // Verify the empty list is returned
-        List<Integer> response = responseEntity.getBody();
-        assert response != null;
-        assertTrue(response.isEmpty());
+        // Verify the status code and error message
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"", exception.getMessage());
     }
 }

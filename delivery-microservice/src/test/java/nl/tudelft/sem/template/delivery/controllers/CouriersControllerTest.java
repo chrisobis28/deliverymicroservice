@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
@@ -49,7 +50,7 @@ class CouriersControllerTest {
 
   @BeforeEach
   void setUp() {
-    ds = new DeliveryService(dr, rr);
+    ds = new DeliveryService(dr, new GPS(), rr);
     cs = new CouriersService(dr, rr);
     sut = new CouriersController(ds, usersAuth, cs);
   }

@@ -94,18 +94,33 @@ public class RestaurantService {
         }
     }
 
+    /**
+     * Updates the location
+     * @param restaurantId
+     * @param requestBody
+     */
     public void updateLocation(String restaurantId, List<Double> requestBody){
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
         r.setLocation(requestBody);
         restaurantRepository.save(r);
     }
 
+    /**
+     * Updates the delivery zone
+     * @param restaurantId
+     * @param requestBody
+     */
     public void updateDeliverZone(String restaurantId, Double requestBody){
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
         r.setDeliveryZone(requestBody);
         restaurantRepository.save(r);
     }
 
+    /**
+     * Gets all orders with status Preparing or Accepted
+     * @param restaurantId given restaurant for which we retrieve the new orders
+     * @return a list of new orders
+     */
     public List<Delivery> getAllNewOrders(String restaurantId){
         Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
         return deliveryRepository.findAllByrestaurantID(restaurantId).stream().filter(d -> d.getCourierID() == null)
@@ -117,7 +132,7 @@ public class RestaurantService {
      * sets the new list of couriers or throws  an exception
      * @param restaurantId the id of the restaurant
      * @param couriers the new couriers
-     * @return the changed restairant entity
+     * @return the changed restaurant entity
      */
     public Restaurant setListOfCouriers(String restaurantId, List<String> couriers){
         Restaurant r = getRestaurant(restaurantId);

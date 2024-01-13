@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+
+    private final GPS gps;
     @Lazy
     private final RestaurantRepository restaurantRepository;
 
@@ -33,8 +36,9 @@ public class DeliveryService {
      * @param restaurantRepository database for restaurants
      */
     @Autowired
-    public DeliveryService(DeliveryRepository deliveryRepository, RestaurantRepository restaurantRepository) {
+    public DeliveryService(DeliveryRepository deliveryRepository, GPS gps, RestaurantRepository restaurantRepository) {
         this.deliveryRepository = deliveryRepository;
+        this.gps = gps;
         this.restaurantRepository = restaurantRepository;
     }
 
@@ -185,33 +189,36 @@ public class DeliveryService {
      * Compute an estimate of the delivery time of an order
      *
      * @param deliveryId ID of the order
-     * @param now        when was the estimate requested
      * @return date indicating the estimated delivery time
      */
-    public OffsetDateTime computeEstimatedDeliveryTime(UUID deliveryId, OffsetDateTime now) {
+    public OffsetDateTime computeEstimatedDeliveryTime(UUID deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         OffsetDateTime pickup = delivery.getPickupTime();
+        OffsetDateTime order = delivery.getOrderTime();
         DeliveryStatus status = delivery.getStatus();
 
         Integer minutes = 60; // default value
-        OffsetDateTime estimate = now.plusMinutes(minutes);
+        OffsetDateTime estimate = order.plusMinutes(minutes);
 
         switch (status) {
             case PENDING, ACCEPTED, PREPARING -> {
-                minutes = this.computeTimeStillInRestaurant(delivery);
-                estimate = now.plusMinutes(minutes);
+                Restaurant restaurant = getRestaurant(delivery.getRestaurantID());
+                List<Double> restaurantCoordinates = restaurant.getLocation();
+
+                minutes = this.computeTimeStillInRestaurant(delivery.getEstimatedPrepTime(), restaurantCoordinates, delivery.getDeliveryAddress());
+                estimate = order.plusMinutes(minutes);
             }
             case GIVEN_TO_COURIER -> {
-                // TODO: how to get restaurant coordinates
-                List<Double> restaurantCoordinates = List.of(0.0, 0.0);
+                Restaurant restaurant = getRestaurant(delivery.getRestaurantID());
+                List<Double> restaurantCoordinates = restaurant.getLocation();
+
                 minutes = this.computeTransitTime(restaurantCoordinates, delivery.getDeliveryAddress());
                 estimate = pickup.plusMinutes(minutes);
             }
             case ON_TRANSIT -> {
-                // TODO: how to get current coordinates
-                List<Double> currentCoordinates = List.of(0.0, 0.0);
+                List<Double> currentCoordinates = gps.getCurrentCoordinates();
                 minutes = this.computeTransitTime(currentCoordinates, delivery.getDeliveryAddress());
-                estimate = now.plusMinutes(minutes);
+                estimate = OffsetDateTime.now().plusMinutes(minutes);
             }
             case DELIVERED -> throw new OrderAlreadyDeliveredException();
             case REJECTED -> throw new OrderRejectedException();
@@ -229,18 +236,17 @@ public class DeliveryService {
      * Compute an estimate for the delivery time of an order
      * that is pending, accepted, or being prepared
      *
-     * @param delivery given delivery
+     * @param prepTime time for preparation
+     * @param restaurantCoordinates coordinates of the restaurant
+     * @param deliveryAddress address where the order needs to be delivered
      * @return an integer indicating the estimated time to delivery
      */
-    public Integer computeTimeStillInRestaurant(Delivery delivery) {
-        Integer prepTime = delivery.getEstimatedPrepTime();
+    public Integer computeTimeStillInRestaurant(Integer prepTime, List<Double> restaurantCoordinates, List<Double> deliveryAddress) {
         if (prepTime == null || prepTime == 0) {
             // Assign a default value if no such is provided by the vendor
             prepTime = 30;
         }
-        // TODO: get restaurant Coordinates
-        List<Double> restaurantCoordinates = List.of(0.0, 0.0);
-        Integer transitTime = this.computeTransitTime(restaurantCoordinates, delivery.getDeliveryAddress());
+        Integer transitTime = this.computeTransitTime(restaurantCoordinates, deliveryAddress);
         return prepTime + transitTime;
     }
 
@@ -259,9 +265,10 @@ public class DeliveryService {
         double lat2 = coordB.get(0);
         double lon2 = coordB.get(1);
         double distance = computeHaversine(lat1, lon1, lat2, lon2);
-        // Average car speed worldwide
-        double velocity = 30;
-        return (int) Math.round(distance / velocity);
+        // Average car speed worldwide km/h
+        double AVG_VELOCITY = 30;
+        // Return minutes
+        return (int) Math.round(60 * distance / AVG_VELOCITY);
     }
 
     /**
