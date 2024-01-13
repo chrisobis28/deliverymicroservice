@@ -27,14 +27,33 @@ public class DeliveryService {
     @Lazy
     private final RestaurantRepository restaurantRepository;
 
+    /**
+     * Constructor for DeliveryService
+     * @param deliveryRepository database for deliveries
+     * @param restaurantRepository database for restaurants
+     */
     @Autowired
     public DeliveryService(DeliveryRepository deliveryRepository, RestaurantRepository restaurantRepository) {
         this.deliveryRepository = deliveryRepository;
         this.restaurantRepository = restaurantRepository;
     }
 
+    /**
+     * Check if restaurant uses own couriers
+     * @param delivery delivery being assigned
+     * @return boolean value showing whether restaurant uses own couriers
+     */
+    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
+        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
+        return !(couriers == null || couriers.isEmpty());
+    }
+
     public Delivery getDelivery(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+    }
+
+    public List<Delivery> all() {
+        return deliveryRepository.findAll();
     }
 
     public Delivery insert(Delivery delivery) {
@@ -288,17 +307,4 @@ public class DeliveryService {
 
     }
 
-    /**
-     * Retrieves a list of all deliveries assigned to a courier
-     * @param courierId the id of the courier
-     * @return the list of delivery ids
-     */
-    public List<UUID> getDeliveriesForACourier(String courierId){
-        List<UUID> list = deliveryRepository.findAllByCourierID(courierId)
-                .stream()
-                .map(Delivery::getDeliveryID)
-                .collect(Collectors.toList());
-        return list;
-
-    }
 }

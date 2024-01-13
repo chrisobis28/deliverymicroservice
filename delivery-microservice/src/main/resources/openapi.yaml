@@ -1520,6 +1520,50 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
+  /couriers/{courierId}/next-order:
+    put:
+      summary: Assigns the next available order to a courier
+      description: Returns the delivery assigned to a specific courier Id. You must specify the courier id.
+      tags:
+        - Delivery
+      parameters:
+        - name: courierId
+          in: path
+          description: The id of a courier we want to assign the next order to
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Delivery'
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "BAD_REQUEST"
+        '404':
+          description: Delivery not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating delivery not found
+                example: "DELIVERY_NOT_FOUND"
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating server error
+                example: "SERVER_ERROR"
   /restaurants:
     post:
       tags:
