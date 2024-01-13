@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -34,6 +35,21 @@ public class CouriersService {
         .collect(Collectors.toList());
   }
 
+  public Restaurant insert(Restaurant restaurant) {
+    if (restaurant.getRestaurantID() == null || restaurant.getLocation() ==null ||
+        restaurant.getLocation().size()!=2 ) {
+      throw new RestaurantService.IllegalRestaurantParametersException();
+    }
+    return restaurantRepository.save(restaurant);
+  }
+
+  public Delivery insert(Delivery delivery) {
+    if (delivery == null) {
+      throw new IllegalArgumentException();
+    }
+    return deliveryRepository.save(delivery);
+  }
+
   /**
    * Checks if courier belongs to a restaurant
    * @param courierId id of courier being checked
@@ -41,7 +57,9 @@ public class CouriersService {
    */
   public boolean courierBelongsToRestaurant(String courierId) {
     List<String> list = new ArrayList<>();
-    restaurantRepository.findAll().forEach(r -> list.addAll(r.getCouriers()));
+    restaurantRepository.findAll().forEach(r -> {
+      if (r.getCouriers() != null) list.addAll(r.getCouriers());
+    });
     return list.contains(courierId);
   }
 }
