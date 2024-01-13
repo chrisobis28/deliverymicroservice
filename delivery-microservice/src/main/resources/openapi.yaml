@@ -1664,7 +1664,6 @@ paths:
       description: Deletes a restaurant by ID. This is an internal endpoint that ensures consistency among microservices. Should be called by others when deleting a restaurant.
       parameters:
         - $ref: '#/components/parameters/RestaurantId'
-        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
           description: Deletion successful

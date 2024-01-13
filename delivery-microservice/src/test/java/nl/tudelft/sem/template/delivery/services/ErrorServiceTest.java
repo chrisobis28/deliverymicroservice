@@ -1,8 +1,5 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestErrorRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;

@@ -125,4 +125,21 @@ public class RestaurantService {
         restaurantRepository.save(r);
         return r;
     }
+
+    /**
+     * Deletes the restaurant
+     * @param restaurantId the id of the restaurant
+     */
+    public void delete(String restaurantId){
+        restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
+        List<Delivery> deliveries = deliveryRepository.findAllByrestaurantID(restaurantId);
+
+        for(Delivery d : deliveries){
+            d.setRestaurantID(null);
+            deliveryRepository.save(d);
+        }
+        restaurantRepository.deleteById(restaurantId);
+
+    }
+
 }

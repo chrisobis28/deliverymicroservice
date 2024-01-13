@@ -27,6 +27,9 @@ import javax.validation.Valid;
 import java.util.List;
 import org.springframework.web.server.ResponseStatusException;
 
+import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
+import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.INVALID;
+
 //import static org.mockito.Mockito.mock;
 
 @RestController
@@ -246,10 +249,7 @@ public class RestaurantController implements RestaurantsApi {
         if(requestBody!=null) {
             for(String id : requestBody){
                 UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(id);
-                if(Objects.equals(account,"non-existent")){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-                }
-                if(!Objects.equals(account,"courier")){
+                if(!Objects.equals(account,COURIER)){
                     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
                 }
             }
@@ -265,8 +265,17 @@ public class RestaurantController implements RestaurantsApi {
 
     }
 
+    /**
+     * deletes a restaurant from the system
+     * @param restaurantId ID of the Restaurant entity (required)
+     * @return a string with a message
+     */
+    @Override
+    public ResponseEntity<String> restaurantsRestaurantIdDelete(@PathVariable("restaurantId") String restaurantId) {
+            restaurantService.delete(restaurantId);
+            return ResponseEntity.status(HttpStatus.OK).body("deletion_successful");
 
-
+    }
 
     /**
      * Checks if a string is null or empty
