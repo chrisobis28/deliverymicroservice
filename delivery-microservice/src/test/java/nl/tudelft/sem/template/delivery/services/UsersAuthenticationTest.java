@@ -65,4 +65,9 @@ class UsersAuthenticationTest {
         assertThat(usersAuthentication.checkUserAccessToDelivery("userId", delivery)).isFalse();
     }
 
+    @Test
+    public void Returns_false_when_user_is_null() {
+        assertThat(usersAuthentication.checkUserAccessToDelivery(null, delivery)).isFalse();
+    }
+
 }
