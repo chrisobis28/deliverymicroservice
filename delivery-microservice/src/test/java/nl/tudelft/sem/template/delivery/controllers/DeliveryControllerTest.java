@@ -1921,10 +1921,9 @@ class DeliveryControllerTest {
         sut.insert(delivery);
         when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
-        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryUUID, customerID);
-
-        assertEquals(res.getBody(),null);
-        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdGet(deliveryUUID, customerID));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "THIS ACTION IS FORBIDDEN");
     }
     @Test
     void getDeliveryUnauthorized() {
@@ -1940,10 +1939,67 @@ class DeliveryControllerTest {
         sut.insert(delivery);
         when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.fromValue("UNAUTHORIZED"));
 
-        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryUUID, customerID);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdGet(deliveryUUID, customerID));
+        assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(exception.getReason(), "YOU ARE NOT AUTHORIZED");
+    }
 
-        assertEquals(res.getBody(),null);
-        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    @Test
+    void getDeliveryPrepTimeAuthorized() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID(customerID);
+        delivery.setCustomerID(customerID);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryUUID, customerID);
+
+        assertEquals(res.getBody(),30);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+    @Test
+    void getDeliveryPrepTimeForbidden() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+        String newCustomerID = "newtest@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setCourierID(customerID);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCustomerID(newCustomerID);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPrepGet(deliveryUUID, customerID));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "THIS ACTION IS FORBIDDEN");
+    }
+    @Test
+    void getDeliveryPrepTimeUnauthorized() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+        String newCustomerID = "newtest@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setCourierID(customerID);
+        delivery.setCustomerID(newCustomerID);
+        delivery.setEstimatedPrepTime(30);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.fromValue("UNAUTHORIZED"));
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPrepGet(deliveryUUID, customerID));
+        assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(exception.getReason(), "YOU ARE NOT AUTHORIZED");
     }
 
 }
