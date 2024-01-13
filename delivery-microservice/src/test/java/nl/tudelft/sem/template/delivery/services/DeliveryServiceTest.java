@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.time.OffsetDateTime;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -12,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.time.OffsetDateTime.now;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.*;
@@ -105,5 +107,35 @@ class DeliveryServiceTest {
         when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
                 .isThrownBy(() -> deliveryService.updateEstimatedPrepTime(invalidDeliveryId, prepTime));
+    }
+
+    @Test
+    void updatePickUpTime() {
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRatingRestaurant(5);
+        delivery.setCourierID("courier@example.org");
+        delivery.setStatus(DeliveryStatus.DELIVERED);
+        delivery.setCustomerID("customer@example.org");
+
+        OffsetDateTime pickUpTime = now();
+
+        Delivery expected = new Delivery();
+        expected.setDeliveryID(deliveryId);
+        expected.setPickupTime(pickUpTime);
+        expected.setRatingRestaurant(5);
+        expected.setCourierID("courier@example.org");
+        expected.setStatus(DeliveryStatus.DELIVERED);
+        expected.setCustomerID("customer@example.org");
+
+        when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
+        deliveryService.updatePickupTime(deliveryId, pickUpTime);
+
+        verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
+            x.getDeliveryID().equals(deliveryId) &&
+                x.getPickupTime().equals(pickUpTime)));
+
+        assertEquals(expected, delivery);
     }
 }

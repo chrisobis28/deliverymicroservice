@@ -99,30 +99,28 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if(delivery == null)
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             return ResponseEntity.ok(delivery.getPickupTime());
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
         {
             if(!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-            return ResponseEntity.ok(delivery.getPickupTime());
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
+            return ResponseEntity.ok().body(delivery.getPickupTime());
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
         {
             if(!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
             return ResponseEntity.ok(delivery.getPickupTime());
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.CLIENT))
         {
             if(!delivery.getCustomerID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Client does not correspond to the order.");
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
     }
 
     /**
@@ -136,8 +134,6 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId, @RequestHeader String userId,@RequestBody OffsetDateTime pickupTime) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if(delivery == null)
-            return  ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) ) {
             deliveryService.updatePickupTime(deliveryId,pickupTime);
             return ResponseEntity.ok(delivery);
@@ -145,18 +141,18 @@ public class DeliveryController implements DeliveriesApi {
         if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
         {
             if(!delivery.getCourierID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
             deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
         {
             if(!delivery.getRestaurantID().equals(userId))
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
             deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
     }
 
     /**
