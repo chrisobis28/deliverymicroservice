@@ -1889,5 +1889,61 @@ class DeliveryControllerTest {
         UUID invalidDeliveryId = UUID.randomUUID();
         assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressGet(invalidDeliveryId, null));
     }
+    @Test
+    void getDeliveryAuthorized() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setCourierID(customerID);
+        delivery.setCustomerID(customerID);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryUUID, customerID);
+
+        assertEquals(res.getBody(),delivery);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+    @Test
+    void getDeliveryForbidden() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+        String newCustomerID = "newtest@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setCourierID(customerID);
+        delivery.setCustomerID(newCustomerID);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryUUID, customerID);
+
+        assertEquals(res.getBody(),null);
+        assertEquals(res.getStatusCode(), HttpStatus.FORBIDDEN);
+    }
+    @Test
+    void getDeliveryUnauthorized() {
+        UUID deliveryUUID = UUID.randomUUID();
+        String customerID = "test@test.com";
+        String newCustomerID = "newtest@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryUUID);
+        delivery.setRestaurantID(customerID);
+        delivery.setCourierID(customerID);
+        delivery.setCustomerID(newCustomerID);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.fromValue("UNAUTHORIZED"));
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryUUID, customerID);
+
+        assertEquals(res.getBody(),null);
+        assertEquals(res.getStatusCode(), HttpStatus.UNAUTHORIZED);
+    }
 
 }
