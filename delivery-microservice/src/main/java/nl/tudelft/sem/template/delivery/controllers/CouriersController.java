@@ -16,6 +16,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.UUID;
 
 import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
@@ -70,12 +71,14 @@ public class CouriersController implements CouriersApi {
     @Override
     public ResponseEntity<Delivery> couriersCourierIdNextOrderPut(@Parameter(name = "courierId",required = true,in = ParameterIn.PATH) @PathVariable String courierId) {
         UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(courierId);
-        if (!Objects.equals(account, COURIER)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        if (couriersService.courierBelongsToRestaurant(courierId)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (!Objects.equals(account, COURIER) || couriersService.courierBelongsToRestaurant(courierId)) return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
 
-        UUID deliveryId = availableDeliveryProxy.getAvailableDeliveries().poll();
-        deliveryService.updateDeliveryCourier(deliveryId, courierId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        Queue<UUID> deliveries = availableDeliveryProxy.updateQueue();
+        if (deliveries.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        UUID id = deliveries.poll();
+        deliveryService.updateDeliveryCourier(id, courierId);
+        Delivery delivery = deliveryService.getDelivery(id);
         availableDeliveryProxy.checkIfAvailable(delivery);
 
         return ResponseEntity.ok(delivery);

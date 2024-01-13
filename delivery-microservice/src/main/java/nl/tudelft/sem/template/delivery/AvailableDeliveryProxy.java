@@ -5,6 +5,7 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.UUID;
 
@@ -58,15 +59,13 @@ public class AvailableDeliveryProxy {
     }
   }
 
-  public Queue<UUID> getAvailableDeliveries() {
+  /**
+   * Update and return queue of available delivery ids
+   * @return updated queue of delivery ids
+   */
+  public Queue<UUID> updateQueue() {
+    List<Delivery> all = deliveryService.all();
+    all.forEach(this::checkIfAvailable);
     return available_deliveries;
   }
-//May not be necessary if we just call checkIfAvailable on a Delivery after its status is updated
-//  /**
-//   * Update queue of available deliveries.
-//   */
-//  public void updateQueue() {
-//    List<Delivery> all = deliveryService.findAll();
-//    all.forEach(delivery -> checkIfAvailable(delivery));
-//  }
 }
