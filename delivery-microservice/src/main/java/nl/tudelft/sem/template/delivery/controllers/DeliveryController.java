@@ -680,4 +680,32 @@ public class DeliveryController implements DeliveriesApi {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
         }
     }
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdGet(@PathVariable UUID deliveryId, @RequestHeader String userId)
+    {
+        if (isNullOrEmpty(userId)) {
+            return ResponseEntity.badRequest().build();
+        }
+        System.out.println(userId);
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        // Vendors can see estimations for their orders only
+        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
+        // Couriers can see estimations for their deliveries only
+        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
+        // Customers can see estimations for their orders only
+        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
+        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
+                allowedVendor ||
+                allowedCourier ||
+                allowedCustomer) {
+            return ResponseEntity.ok(delivery);
+        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
+                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
+                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+    }
 }
