@@ -1,9 +1,7 @@
 package nl.tudelft.sem.template.delivery.services;
-
-import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
+import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -114,6 +113,43 @@ public class RestaurantServiceTest {
         rs.insert(r);
         rs.setListOfCouriers("bla", list);
         assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(List.of("sjdfhbuwfbieg"));
+    }
+
+    @Test
+    public void deleteRestaurantWithoutDeliveries(){
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1,12.2));
+        List<String> list = new ArrayList<>();
+        list.add("sjdfhbuwfbieg");
+        rs.insert(r);
+        rs.delete("bla");
+        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
+            rs.getRestaurant("bla");
+        });
+
+        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
+            rs.delete("bla");
+        });
+
+    }
+
+    @Test
+    public void deleteRestaurantWithDeliveries(){
+        Restaurant r = new Restaurant();
+        Delivery d = new Delivery();
+        UUID deliveryId = UUID.randomUUID();
+        d.setDeliveryID(deliveryId);
+        d.setRestaurantID("bla");
+        ds.insert(d);
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1,12.2));
+        List<String> list = new ArrayList<>();
+        list.add("sjdfhbuwfbieg");
+        rs.insert(r);
+        rs.delete("bla");
+        assertThat(ds.getDelivery(deliveryId).getRestaurantID()).isNull();
+
     }
 
 

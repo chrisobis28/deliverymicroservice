@@ -1,7 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.TestRepos.TestDeliveryRepository;
-import nl.tudelft.sem.template.delivery.TestRepos.TestRestaurantRepository;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
