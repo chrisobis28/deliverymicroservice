@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import java.util.ArrayList;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 //import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
@@ -708,4 +709,34 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU ARE NOT AUTHORIZED");
         }
     }
+
+    /**
+     * Updates the delivery address of an order
+     *
+     * @param deliveryId  ID of the Delivery entity (required)
+     * @param userId      ID of the User for authorization (required)
+     * @param requestBody new address to be used in the future (required)
+     * @return a Delivery Object with the updates that took place
+     */
+    @PutMapping("/deliveries/{deliveryId}/delivery-address")
+    @Override
+    public ResponseEntity<Delivery> deliveriesDeliveryIdDeliveryAddressPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody List<Double> requestBody) {
+        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        if (requestBody == null || requestBody.size() != 2)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery Address not set correctly.");
+        switch (userType) {
+            case CLIENT, ADMIN -> {
+                if (userType.equals(UsersAuthenticationService.AccountType.CLIENT) && !delivery.getCustomerID().equals(userId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Customer does not correspond to the order.");
+                }
+                deliveryService.updateDeliveryAddress(deliveryId, new ArrayList<>(requestBody));
+                return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
+            }
+            case COURIER, VENDOR -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customers can update the delivery address.");
+            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
+        }
+    }
+
 }
+

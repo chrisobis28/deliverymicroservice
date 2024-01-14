@@ -2468,4 +2468,130 @@ class DeliveryControllerTest {
         assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
         assertEquals(exception.getReason(), "Account could not be verified.");
     }
+
+    @Test
+    void deliveriesDeliveryIdDeliveryAddressPutRequestNullOrSizeOrNotFound(){
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setDeliveryAddress(List.of(0.1, 0.2));
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setCustomerID(restaurantId);
+
+        sut.insert(delivery);
+
+        String userId = "user@testmail.com";
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseStatusException exception1 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, userId, null));
+        assertEquals(exception1.getStatus(), HttpStatus.BAD_REQUEST);
+        assertEquals(exception1.getReason(), "Delivery Address not set correctly.");
+
+        ResponseStatusException exception2 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, userId, List.of(0.1)));
+        assertEquals(exception2.getStatus(), HttpStatus.BAD_REQUEST);
+        assertEquals(exception2.getReason(), "Delivery Address not set correctly.");
+
+        ResponseStatusException exception3 = assertThrows(DeliveryService.DeliveryNotFoundException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(UUID.randomUUID(), userId, List.of(0.1, 0.2)));
+        assertEquals(exception3.getStatus(), HttpStatus.NOT_FOUND);
+        assertEquals(exception3.getReason(), "Delivery with specified id not found");
+    }
+
+    @Test
+    void deliveriesDeliveryIdDeliveryAddressPutNotSameClient(){
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setDeliveryAddress(List.of(0.1, 0.2));
+        String customerID = "customer@testmail.com";
+        String otherCustomerID = "other_customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setCustomerID(restaurantId);
+
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(otherCustomerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseStatusException exception1 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, otherCustomerID, List.of(0.1, 0.2)));
+        assertEquals(exception1.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception1.getReason(), "Customer does not correspond to the order.");
+    }
+
+    @Test
+    void deliveriesDeliveryIdDeliveryAddressPutCourierVendor(){
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setDeliveryAddress(List.of(0.1, 0.2));
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setCustomerID(restaurantId);
+
+        String courierId = "courier@testmail.com";
+        String vendorId = "vendor@testmail.com";
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(vendorId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseStatusException exception1 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, courierId, List.of(0.1, 0.2)));
+        assertEquals(exception1.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception1.getReason(), "Only customers can update the delivery address.");
+
+        ResponseStatusException exception2 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, vendorId, List.of(0.1, 0.2)));
+        assertEquals(exception2.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception2.getReason(), "Only customers can update the delivery address.");
+    }
+
+    @Test
+    void deliveriesDeliveryIdDeliveryAddressPutInvalid(){
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setDeliveryAddress(List.of(0.1, 0.2));
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setCustomerID(restaurantId);
+
+        String userId = "user@testmail.com";
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+
+        ResponseStatusException exception1 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, userId, List.of(0.1, 0.2)));
+        assertEquals(exception1.getStatus(), HttpStatus.UNAUTHORIZED);
+        assertEquals(exception1.getReason(), "Account could not be verified.");
+    }
+
+    @Test
+    void deliveriesDeliveryIdDeliveryAddressPutSameClientAdmin(){
+        UUID deliveryId = UUID.randomUUID();
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setDeliveryAddress(List.of(0.1, 0.2));
+        String customerID = "customer@testmail.com";
+        delivery.setCustomerID(customerID);
+        String restaurantId = "restaurant@testmail.com";
+        delivery.setRestaurantID(restaurantId);
+
+        String admin = "admin@testmail.com";
+
+        sut.insert(delivery);
+
+        when(usersCommunication.getUserAccountType(customerID)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(admin)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+
+        ResponseEntity<Delivery> res2 = sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, customerID, List.of(0.1, 0.4));
+        assertEquals(HttpStatus.OK, res2.getStatusCode());
+        assertTrue(Objects.requireNonNull(res2.getBody()).getDeliveryAddress().containsAll(List.of(0.1, 0.4)));
+
+        ResponseEntity<Delivery> res1 = sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, admin, List.of(0.1, 0.3));
+        assertEquals(HttpStatus.OK, res1.getStatusCode());
+        assertTrue(Objects.requireNonNull(res1.getBody()).getDeliveryAddress().containsAll(List.of(0.1, 0.3)));
+    }
 }

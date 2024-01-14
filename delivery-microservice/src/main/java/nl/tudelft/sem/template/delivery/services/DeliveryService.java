@@ -314,4 +314,10 @@ public class DeliveryService {
 
     }
 
+    public void updateDeliveryAddress(UUID deliveryId, List<Double> newAddress){
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        delivery.setDeliveryAddress(newAddress);
+        deliveryRepository.save(delivery);
+    }
+
 }
