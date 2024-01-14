@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 
+import java.util.Objects;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
@@ -27,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.time.OffsetTime.now;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -106,25 +108,64 @@ class StatisticsControllerTest {
 
     @Test
     void testForDeliveriesPerHrNotVendor() {
+        String userId2 = userId.concat("vendor");
+
         d1.setStatus(DeliveryStatus.DELIVERED);
         d2.setStatus(DeliveryStatus.DELIVERED);
         d3.setStatus(DeliveryStatus.DELIVERED);
         d4.setStatus(DeliveryStatus.DELIVERED);
         d5.setStatus(DeliveryStatus.DELIVERED);
         d6.setStatus(DeliveryStatus.DELIVERED);
-        sut.insert(d1);
+
+        Delivery d7 = new Delivery();
+        d7.setDeliveryID(UUID.randomUUID());
+        d7.setStatus(DeliveryStatus.ACCEPTED);
+        Delivery d8 = new Delivery();
+        d8.setDeliveryID(UUID.randomUUID());
+        d8.setStatus(DeliveryStatus.DELIVERED);
+        Delivery d9 = new Delivery();
+        d9.setDeliveryID(UUID.randomUUID());
+        d9.setStatus(null);
+
+        d1.setRestaurantID(userId2);
+        d2.setRestaurantID(userId2);
+        d3.setRestaurantID(userId2);
+        d4.setRestaurantID(userId2);
+        d5.setRestaurantID(userId2);
+        d6.setRestaurantID(userId2);
+        d7.setRestaurantID(userId2);
+        d8.setRestaurantID("some_other_vendor@testmail.com");
+        d9.setRestaurantID(userId2);
+
+        OffsetDateTime time = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+
+        d1.setDeliveredTime(time);
+        d2.setDeliveredTime(time);
+        d3.setDeliveredTime(time);
+        d4.setDeliveredTime(time);
+        d5.setDeliveredTime(time);
+        d6.setDeliveredTime(time);
+        d7.setDeliveredTime(time);
+        d8.setDeliveredTime(time);
+        d9.setDeliveredTime(time);
+
+        ResponseEntity<Void> result = sut.insert(d1);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(HttpStatus.BAD_REQUEST, sut.insert(null).getStatusCode());
         sut.insert(d2);
         sut.insert(d3);
         sut.insert(d4);
         sut.insert(d5);
         sut.insert(d6);
+        sut.insert(d7);
+        sut.insert(d8);
+        sut.insert(d9);
 
-        String userId2 = userId.concat("vendor");
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
 
         ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId2);
         assertEquals(HttpStatus.OK, actual.getStatusCode());
-        assertEquals(new ArrayList<>(), actual.getBody());
+        assertEquals(6.0, Objects.requireNonNull(actual.getBody()).get(14));
     }
 
     @Test
@@ -158,7 +199,7 @@ class StatisticsControllerTest {
         OffsetDateTime date4 = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date5 = OffsetDateTime.of(2023, 12, 12, 18, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date6 = OffsetDateTime.of(2023, 12, 12, 19, 32, 23, 0, ZoneOffset.ofHours(0));
-        List<Double> expected = List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.0);
+        List<Double> expected = List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0);
         d1.setStatus(DeliveryStatus.DELIVERED);
         d2.setStatus(DeliveryStatus.DELIVERED);
         d3.setStatus(DeliveryStatus.DELIVERED);
@@ -170,7 +211,7 @@ class StatisticsControllerTest {
         d3.setRestaurantID(userId);
         d4.setRestaurantID(userId);
         d5.setRestaurantID(userId);
-        d6.setRestaurantID(userId);
+        d6.setRestaurantID("someNewUser@testmail.com");
         d1.setDeliveredTime(date1);
         d2.setDeliveredTime(date2);
         d3.setDeliveredTime(date3);

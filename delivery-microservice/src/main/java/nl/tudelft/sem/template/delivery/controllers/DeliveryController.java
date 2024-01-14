@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.util.ArrayList;
 import nl.tudelft.sem.template.api.DeliveriesApi;
-//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
@@ -57,10 +56,8 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) return ResponseEntity.badRequest().build();
         UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        System.out.println(user);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-        System.out.println(check);
         String customer_id = delivery.getCustomerID();
         String c_id = delivery.getCourierID();
         String r_id = delivery.getRestaurantID();
@@ -347,9 +344,6 @@ public class DeliveryController implements DeliveriesApi {
         //try {
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-
-        if (delivery == null)
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(List.of());
 
         // Check user access based on account type and association with the delivery
         if (usersCommunication.checkUserAccessToDelivery(userId, delivery)) {

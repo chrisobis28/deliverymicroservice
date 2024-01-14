@@ -56,10 +56,6 @@ public class DeliveryService {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
     }
 
-    public List<Delivery> all() {
-        return deliveryRepository.findAll();
-    }
-
     public Delivery insert(Delivery delivery) {
         if (delivery == null || delivery.getDeliveryID() == null) {
             throw new IllegalArgumentException();
@@ -96,15 +92,10 @@ public class DeliveryService {
      * @return the address
      */
     public List<Double> getPickupLocation(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
+        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+        Restaurant restaurant = restaurantRepository.findById(delivery.getRestaurantID()).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
 
-        if (delivery.isEmpty()) {
-            throw new DeliveryNotFoundException();
-        }
-
-        Optional<Restaurant> restaurant = restaurantRepository.findById(delivery.get().getRestaurantID());
-
-        return restaurant.map(Restaurant::getLocation).orElseThrow(DeliveryNotFoundException::new);
+        return restaurant.getLocation();
     }
 
 

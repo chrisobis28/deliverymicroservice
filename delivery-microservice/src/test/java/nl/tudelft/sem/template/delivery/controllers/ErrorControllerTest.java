@@ -135,7 +135,8 @@ class ErrorControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         // Persist in Test Repos
-        sut.insert(error);
+        ResponseEntity<Void> res = sut.insert(error);
+        assertEquals(HttpStatus.OK, res.getStatusCode());
         deliveryController.insert(delivery);
 
         // Act

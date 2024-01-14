@@ -128,5 +128,4 @@ public class DeliveryStatusHandlerTest {
                 .extracting("status")
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }
-
 }

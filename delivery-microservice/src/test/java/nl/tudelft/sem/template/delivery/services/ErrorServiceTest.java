@@ -55,7 +55,8 @@ class ErrorServiceTest {
         error.setErrorId(deliveryId);
         error.setReason("Some compelling reason to get no food.");
         error.setType(ErrorType.OTHER);
-        sut.insert(error);
+        Error test = sut.insert(error);
+        assertEquals(error, test);
         assertEquals(error, sut.getError(deliveryId));
     }
 
