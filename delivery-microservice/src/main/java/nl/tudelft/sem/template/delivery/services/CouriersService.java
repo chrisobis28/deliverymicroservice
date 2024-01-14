@@ -51,4 +51,8 @@ public class CouriersService {
     Optional<Restaurant> restaurant = restaurantRepository.findRestaurantByCouriersContains(courierId);
     return restaurant.isPresent();
   }
+
+  public List<Delivery> getDeliveriesForCourierRatings(String courierId){
+    return deliveryRepository.findAllByCourierID(courierId);
+  }
 }

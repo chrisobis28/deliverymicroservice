@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.Objects;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,77 +55,6 @@ class CouriersControllerTest {
     ds = new DeliveryService(dr, new GPS(), rr);
     cs = new CouriersService(dr, rr);
     sut = new CouriersController(ds, usersAuth, cs);
-  }
-
-  @Test
-  void couriersCourierIdOrdersGet() {
-    List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-    List<Delivery> deliveries = deliveryUUIDs
-        .stream()
-        .map(x -> new Delivery().deliveryID(x))
-        .collect(Collectors.toList());
-    deliveries.forEach(x -> x.setCourierID("courier@testmail.com"));
-    dr.saveAll(deliveries);
-
-    when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-
-    ResponseEntity<List<UUID>> res = sut.couriersCourierIdOrdersGet("courier@testmail.com");
-    assertEquals(HttpStatus.OK, res.getStatusCode());
-    assertNotNull(res.getBody());
-    assertEquals(3, res.getBody().size());
-  }
-
-  @Test
-  void couriersCourierIdOrdersGet_OtherCourier() {
-    List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-    List<Delivery> deliveries = deliveryUUIDs
-        .stream()
-        .map(x -> new Delivery().deliveryID(x))
-        .collect(Collectors.toList());
-    deliveries.forEach(x -> x.setCourierID("othercourier@testmail.com"));
-    dr.saveAll(deliveries);
-
-    when(usersAuth.getUserAccountType("courier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-
-    ResponseEntity<List<UUID>> res = sut.couriersCourierIdOrdersGet("courier@testmail.com");
-    assertEquals(HttpStatus.OK, res.getStatusCode());
-    assertEquals(List.of(), res.getBody());
-  }
-
-  @Test
-  void couriersCourierIdOrdersGet_NullId() {
-    List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-    List<Delivery> deliveries = deliveryUUIDs
-        .stream()
-        .map(x -> new Delivery().deliveryID(x))
-        .collect(Collectors.toList());
-    dr.saveAll(deliveries);
-
-    assertThatThrownBy(() -> sut.couriersCourierIdOrdersGet(null))
-        .extracting("status")
-        .isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThatThrownBy(() -> sut.couriersCourierIdOrdersGet(null))
-        .message()
-        .isEqualTo("400 BAD_REQUEST \"Courier ID cannot be NULL\"");
-  }
-
-  @Test
-  void couriersCourierIdOrdersGet_NotFound() {
-    List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-    List<Delivery> deliveries = deliveryUUIDs
-        .stream()
-        .map(x -> new Delivery().deliveryID(x))
-        .collect(Collectors.toList());
-    dr.saveAll(deliveries);
-
-    when(usersAuth.getUserAccountType("notcourier@testmail.com")).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-
-    assertThatThrownBy(() -> sut.couriersCourierIdOrdersGet("notcourier@testmail.com"))
-        .extracting("status")
-        .isEqualTo(HttpStatus.NOT_FOUND);
-    assertThatThrownBy(() -> sut.couriersCourierIdOrdersGet("notcourier@testmail.com"))
-        .message()
-        .isEqualTo("404 NOT_FOUND \"There is no such courier\"");
   }
 
   @Test
@@ -217,5 +148,161 @@ class CouriersControllerTest {
     assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
         .message()
         .isEqualTo("400 BAD_REQUEST \"This courier works for a specific restaurant\"");
+  }
+
+  @Test
+  void couriersCourierIdRatingsGetNull(){
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdRatingsGet(null, "user@testmail.com"));
+    assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    assertEquals(exception.getReason(), "Courier ID cannot be NULL.");
+  }
+
+  @Test
+  void couriersCourierIdRatingsGetInvalid(){
+    String userId = "invalid@testmail.com";
+    String courierId = "courier@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdRatingsGet(courierId, userId));
+    assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+    assertEquals(exception.getReason(), "Account could not be verified.");
+  }
+
+  @Test
+  void couriersCourierIdRatingsGetNoCourier(){
+    String userId = "invalid@testmail.com";
+    String vendorId = "vendor@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+    when(usersAuth.getUserAccountType(vendorId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdRatingsGet(vendorId, userId));
+    assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+    assertEquals(exception.getReason(), "The id is not recognised as courier.");
+  }
+
+  @Test
+  void couriersCourierIdRatingsGetOK(){
+    String userId = "invalid@testmail.com";
+    String courierId = "courier@testmail.com";
+    String otherCourierId = "other_courier@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+    when(usersAuth.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+    Delivery d1 = new Delivery();
+    UUID orderId = UUID.randomUUID();
+    d1.setStatus(DeliveryStatus.DELIVERED);
+    d1.setCustomerID("user@testmail.com");
+    d1.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d1.setCourierID(courierId);
+    d1.setDeliveryID(orderId);
+    d1.setRatingCourier(3);
+    d1.setDeliveryAddress(List.of(50.4, 32.6));
+
+    Delivery d2 = new Delivery();
+    orderId = UUID.randomUUID();
+    d2.setStatus(DeliveryStatus.DELIVERED);
+    d2.setCustomerID("user@testmail.com");
+    d2.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d2.setCourierID(courierId);
+    d2.setDeliveryID(orderId);
+    d2.setRatingCourier(4);
+    d2.setDeliveryAddress(List.of(50.4, 32.6));
+
+    Delivery d3 = new Delivery();
+    orderId = UUID.randomUUID();
+    d3.setStatus(DeliveryStatus.DELIVERED);
+    d3.setCustomerID("user@testmail.com");
+    d3.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d3.setCourierID(otherCourierId);
+    d3.setDeliveryID(orderId);
+    d3.setRatingCourier(2);
+    d3.setDeliveryAddress(List.of(50.4, 32.6));
+
+    dr.save(d1);
+    dr.save(d2);
+    dr.save(d3);
+
+    ResponseEntity<List<Integer>> result = sut.couriersCourierIdRatingsGet(courierId, userId);
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(2, result.getBody().size());
+    assertTrue(result.getBody().containsAll(List.of(3, 4)));
+  }
+
+  @Test
+  void couriersCourierIdOrdersGetNull(){
+    String userId = "user@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdOrdersGet(null, userId));
+    assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    assertEquals(exception.getReason(), "Courier ID cannot be NULL.");
+  }
+
+  @Test
+  void couriersCourierIdOrdersGetInvalid(){
+    String userId = "invalid@testmail.com";
+    String courierId = "courier@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+    when(usersAuth.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdOrdersGet(courierId, userId));
+    assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+    assertEquals(exception.getReason(), "Account could not be verified.");
+  }
+
+  @Test
+  void couriersCourierIdOrdersGetNoCourier(){
+    String userId = "invalid@testmail.com";
+    String vendorId = "vendor@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+    when(usersAuth.getUserAccountType(vendorId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.couriersCourierIdOrdersGet(vendorId, userId));
+    assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
+    assertEquals(exception.getReason(), "The id is not recognised as courier.");
+  }
+
+  @Test
+  void couriersCourierIdOrdersGetOK(){
+    String userId = "invalid@testmail.com";
+    String courierId = "courier@testmail.com";
+    String otherCourierId = "other_courier@testmail.com";
+    when(usersAuth.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+    when(usersAuth.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+    Delivery d1 = new Delivery();
+    UUID orderId1 = UUID.randomUUID();
+    d1.setStatus(DeliveryStatus.DELIVERED);
+    d1.setCustomerID("user@testmail.com");
+    d1.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d1.setCourierID(courierId);
+    d1.setDeliveryID(orderId1);
+    d1.setDeliveryAddress(List.of(50.4, 32.6));
+
+    Delivery d2 = new Delivery();
+    UUID orderId2 = UUID.randomUUID();
+    d2.setStatus(DeliveryStatus.DELIVERED);
+    d2.setCustomerID("user@testmail.com");
+    d2.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d2.setCourierID(courierId);
+    d2.setDeliveryID(orderId2);
+    d2.setDeliveryAddress(List.of(50.4, 32.6));
+
+    Delivery d3 = new Delivery();
+    UUID orderId3 = UUID.randomUUID();
+    d3.setStatus(DeliveryStatus.DELIVERED);
+    d3.setCustomerID("user@testmail.com");
+    d3.setRestaurantID("hi_im_a_vendor@testmail.com");
+    d3.setCourierID(otherCourierId);
+    d3.setDeliveryID(orderId3);
+    d3.setDeliveryAddress(List.of(50.4, 32.6));
+
+    dr.save(d1);
+    dr.save(d2);
+    dr.save(d3);
+
+    ResponseEntity<List<UUID>> result = sut.couriersCourierIdOrdersGet(courierId, userId);
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(2, Objects.requireNonNull(result.getBody()).size());
+    assertTrue(result.getBody().containsAll(List.of(orderId1, orderId2)));
   }
 }

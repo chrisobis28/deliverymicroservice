@@ -1437,6 +1437,7 @@ paths:
           schema:
             type: string
           required: true
+        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
           description: Successful response
@@ -1485,6 +1486,7 @@ paths:
           schema:
             type: string
           required: true
+        - $ref: '#/components/parameters/UserId'
       responses:
         '200':
           description: Successful response
