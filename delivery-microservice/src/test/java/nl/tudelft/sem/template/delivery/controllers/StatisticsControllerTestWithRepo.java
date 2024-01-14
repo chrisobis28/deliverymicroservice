@@ -110,6 +110,8 @@ public class StatisticsControllerTestWithRepo {
     void authorizedFunctionalMultiple() {
         String userID = "user@user.com";
         String courierId = "dominos@dominos.com";
+        OffsetDateTime outTime = OffsetDateTime.of(2022, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+
         OffsetDateTime start1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0,30));
 
@@ -136,7 +138,6 @@ public class StatisticsControllerTestWithRepo {
         testDelivery2.setStatus(DeliveryStatus.DELIVERED);
         testDelivery2.setDeliveredTime(end2);
         testDelivery2.setDeliveryID(UUID.randomUUID());
-        when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
 
         Delivery testDelivery3 = new Delivery();
         testDelivery3.setCourierID(courierId);
@@ -144,7 +145,16 @@ public class StatisticsControllerTestWithRepo {
         testDelivery3.setStatus(DeliveryStatus.REJECTED);
         testDelivery3.setDeliveredTime(end3);
         testDelivery3.setDeliveryID(UUID.randomUUID());
+
+        Delivery testDelivery4 = new Delivery();
+        testDelivery4.setCourierID(courierId);
+        testDelivery4.setRatingCourier(4);
+        testDelivery4.setStatus(DeliveryStatus.DELIVERED);
+        testDelivery4.setDeliveredTime(outTime);
+        testDelivery4.setDeliveryID(UUID.randomUUID());
+
         when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
+        repo1.save(testDelivery4);
 
         repo1.save(testDelivery1);
         assertThat(sut.statisticsCourierOverviewGet(userID,courierId,start_interval,end_interval).getStatusCode()).isEqualTo(HttpStatus.OK);

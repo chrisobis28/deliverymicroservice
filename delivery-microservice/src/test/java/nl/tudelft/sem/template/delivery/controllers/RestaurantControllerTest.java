@@ -343,7 +343,8 @@ class RestaurantControllerTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
     r.setDeliveryZone(10.0);
-    sut.insert(r);
+    ResponseEntity<Void> result = sut.insert(r);
+    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 
     String userId = "user_courier@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
@@ -359,8 +360,10 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_client@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(List.of(0.1, 0.2));
     r.setDeliveryZone(10.0);
-    sut.insert(r);
+    ResponseEntity<Void> result = sut.insert(r);
+    assertEquals(HttpStatus.OK, result.getStatusCode());
 
     String userId = "user_client@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
@@ -414,7 +417,9 @@ class RestaurantControllerTest {
     d1.setDeliveryID(deliveryId1);
     d1.setRestaurantID(restaurantId);
     d1.setStatus(DeliveryStatus.ON_TRANSIT);
-    sut.insert(d1);
+    ResponseEntity<Void> result = sut.insert(d1);
+    assertEquals(HttpStatus.OK, result.getStatusCode());
+    assertEquals(HttpStatus.BAD_REQUEST, sut.insert((Delivery) null).getStatusCode());
 
     // SECOND DELIVERY ACCEPTED
     UUID deliveryId2 = UUID.randomUUID();
@@ -599,6 +604,29 @@ class RestaurantControllerTest {
   }
 
   @Test
+  void restaurantsRestaurantIdNewOrdersGetInvalid(){
+    String restaurantId = "restaurant_neworders_courier@testmail.com";
+    Restaurant r = new Restaurant();
+    r.setRestaurantID(restaurantId);
+    sut.insert(r);
+    // FIRST DELIVERY ACCEPTED
+    UUID deliveryId1 = UUID.randomUUID();
+    Delivery d1 = new Delivery();
+    d1.setDeliveryID(deliveryId1);
+    d1.setRestaurantID(restaurantId);
+    d1.setStatus(DeliveryStatus.ACCEPTED);
+    sut.insert(d1);
+
+    String userId = "user_admin@testmail.com";
+    UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
+    when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+
+    ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
+    assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
+    assertEquals(exception.getReason(), "UNAUTHORIZED");
+  }
+
+  @Test
   void restaurantDeleteFound() {
     RestaurantsPostRequest rpr = new RestaurantsPostRequest();
     rpr.setRestaurantID("hi_im_a_vendor@testmail.com");
@@ -606,6 +634,7 @@ class RestaurantControllerTest {
 
     sut.restaurantsPost(rpr);
     ResponseEntity<String> result = sut.restaurantsRestaurantIdDelete("hi_im_a_vendor@testmail.com");
+    assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> sut.restaurantsRestaurantIdDelete("hi_im_a_vendor@testmail.com"));
     assertEquals(HttpStatus.OK, result.getStatusCode());
   }
 
@@ -626,7 +655,6 @@ class RestaurantControllerTest {
     assertThat(r.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(r.getBody().getRestaurantID()).isNull();
     assertThat(r.getBody().getDeliveryZone()).isNull();
-    assertThat(r.getBody().getCouriers()).isNull();
   }
   @Test
   void restaurantsRestaurantIdCustomer(){
@@ -636,7 +664,6 @@ class RestaurantControllerTest {
     assertThat(r.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(r.getBody().getRestaurantID()).isNull();
     assertThat(r.getBody().getDeliveryZone()).isNull();
-    assertThat(r.getBody().getCouriers()).isNull();
   }
   @Test
   void restaurantsRestaurantIdVENDORnotTheSame(){
@@ -748,7 +775,5 @@ class RestaurantControllerTest {
     ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","bla", null);
     assertThat(r.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
   }
-
-
 
 }

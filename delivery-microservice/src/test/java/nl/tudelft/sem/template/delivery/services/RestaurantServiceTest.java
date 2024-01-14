@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -110,10 +112,14 @@ public class RestaurantServiceTest {
         r.setRestaurantID("bla");
         r.setLocation(List.of(11.1,12.2));
         List<String> list = new ArrayList<>();
-        list.add("sjdfhbuwfbieg");
+        list.add("courier1@testmail.com");
         rs.insert(r);
         rs.setListOfCouriers("bla", list);
-        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(List.of("sjdfhbuwfbieg"));
+        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(list);
+
+        list.add("courier2@testmail.com");
+        Restaurant rest = rs.setListOfCouriers("bla", list);
+        assertEquals(rest.getCouriers(), list);
     }
 
     @Test
@@ -150,11 +156,17 @@ public class RestaurantServiceTest {
         rs.insert(r);
         rs.delete("bla");
         assertThat(ds.getDelivery(deliveryId).getRestaurantID()).isNull();
-
     }
 
-
-
-
+    @Test
+    void insertTestNotNull(){
+        Delivery d = new Delivery();
+        d.setDeliveryID(UUID.randomUUID());
+        d.setRestaurantID("restaurant@testmail.com");
+        d.setCustomerID("customer@testmail.com");
+        assertNotNull(rs.insert(d));
+        Delivery newD = ds.getDelivery(d.getDeliveryID());
+        assertEquals(newD, d);
+    }
 
 }

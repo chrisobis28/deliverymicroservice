@@ -28,7 +28,6 @@ public class UsersAuthenticationService {
     public boolean checkUserAccessToDelivery(String userId, Delivery delivery) {
         if (userId == null) return false;
         AccountType accountType = getUserAccountType(userId);
-        System.out.println(accountType);
 
         return switch (accountType) {
             case INVALID -> false;

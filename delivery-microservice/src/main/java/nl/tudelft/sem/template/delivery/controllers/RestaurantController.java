@@ -116,7 +116,6 @@ public class RestaurantController implements RestaurantsApi {
             Restaurant r = restaurantService.getRestaurant(restaurantId);
             switch (accountType) {
                 case COURIER, CLIENT:
-                    r.setCouriers(null);
                     r.setDeliveryZone(null);
                     r.setRestaurantID(null);
                     return ResponseEntity.status(HttpStatus.OK).body(r);
