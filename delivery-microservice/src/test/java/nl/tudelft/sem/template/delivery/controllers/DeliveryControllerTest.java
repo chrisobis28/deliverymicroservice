@@ -2826,7 +2826,6 @@ class DeliveryControllerTest {
         String customerID = "customer@testmail.com";
         delivery.setCustomerID(customerID);
         String restaurantId = "restaurant@testmail.com";
-        //String fakeRestaurantId = "another_restaurant@testmail.com";
         delivery.setRestaurantID(restaurantId);
         sut.insert(delivery);
         String userId = "user@testmail.com";
