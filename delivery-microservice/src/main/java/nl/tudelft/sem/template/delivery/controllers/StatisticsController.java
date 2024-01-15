@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import nl.tudelft.sem.template.api.StatisticsApi;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -15,8 +14,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.time.OffsetDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @RequestMapping("/statistics")
 @RestController
@@ -48,7 +45,7 @@ public class StatisticsController implements StatisticsApi {
             statisticsService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
     }
 
@@ -93,12 +90,21 @@ public class StatisticsController implements StatisticsApi {
     @Override
     public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId, @Parameter String vendorId) {
         if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or restaurant ID is invalid.");
         }
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-        boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && vendorId.equals(userId);
-        if (!isVendor && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && ;
+//        if (!isVendor && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
+//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+//        }
+        switch (type) {
+            case ADMIN: break;
+            case COURIER, CLIENT: throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            case VENDOR: {
+                if (vendorId.equals(userId)) break;
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            }
+            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
@@ -125,7 +131,7 @@ public class StatisticsController implements StatisticsApi {
         {
 
             Statistics statistics = statisticsService.getCourierStatistics(courierId,startTime,endTime);
-            return ResponseEntity.status(HttpStatus.OK).body(statistics);
+            return ResponseEntity.ok(statistics);
 
         }
 

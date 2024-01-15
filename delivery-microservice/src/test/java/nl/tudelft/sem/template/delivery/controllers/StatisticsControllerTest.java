@@ -3,7 +3,6 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import java.util.Objects;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -28,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.time.OffsetTime.now;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -85,25 +84,50 @@ class StatisticsControllerTest {
 
     @Test
     void testForDeliveriesPerHrEmptyID() {
-
-        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet("", "");
-        assertEquals(HttpStatus.BAD_REQUEST, actual.getStatusCode());
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet("", ""))
+            .extracting("status")
+            .isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet("", ""))
+            .message()
+            .isEqualTo("400 BAD_REQUEST \"User ID or restaurant ID is invalid.\"");
     }
 
     @Test
     void testForDeliveriesPerHrUnauthorized() {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
-        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
-        assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
+//        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId, userId);
+//        assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
+            .message()
+            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
 
     @Test
     void testForDeliveriesPerHrUnauthorized2() {
         String userId2 = userId.concat("impostor");
         when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        ResponseEntity<List<Double>> actual = sut.statisticsDeliveriesPerHourGet(userId2, userId);
-        assertEquals(HttpStatus.UNAUTHORIZED, actual.getStatusCode());
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
+            .message()
+            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+    }
+
+    @Test
+    void testForDeliveriesPerHrInvalid() {
+        String userId2 = "impostor";
+        when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.INVALID);
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
+            .extracting("status")
+            .isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
+            .message()
+            .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
     }
 
     @Test
@@ -151,7 +175,14 @@ class StatisticsControllerTest {
 
         ResponseEntity<Void> result = sut.insert(d1);
         assertEquals(HttpStatus.OK, result.getStatusCode());
-        assertEquals(HttpStatus.BAD_REQUEST, sut.insert(null).getStatusCode());
+        //assertEquals(HttpStatus.BAD_REQUEST, sut.insert(null).getStatusCode());
+        assertThatThrownBy(() -> sut.insert(null))
+            .extracting("status")
+            .isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThatThrownBy(() -> sut.insert(null))
+            .message()
+            .isEqualTo("400 BAD_REQUEST \"BAD REQUEST\"");
+
         sut.insert(d2);
         sut.insert(d3);
         sut.insert(d4);
