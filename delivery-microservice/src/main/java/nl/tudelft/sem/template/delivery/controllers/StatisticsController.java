@@ -63,10 +63,7 @@ public class StatisticsController implements StatisticsApi {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         // After second consideration I changed the permission levels of this endpoint,
         // so that everyone can see the ratings for transparency reasons.
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-                userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+        if (!userType.equals(UsersAuthenticationService.AccountType.INVALID)) {
             Map<String, Integer> ratings = new HashMap<>();
             for (UUID orderId : orderIds) {
                 ratings.put(orderId.toString(), statisticsService.getOrderRating(orderId));
@@ -93,10 +90,6 @@ public class StatisticsController implements StatisticsApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or restaurant ID is invalid.");
         }
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-//        boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && ;
-//        if (!isVendor && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-//        }
         switch (type) {
             case ADMIN: break;
             case COURIER, CLIENT: throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
@@ -127,7 +120,7 @@ public class StatisticsController implements StatisticsApi {
     {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        if(accountType.equals(UsersAuthenticationService.AccountType.CLIENT) || accountType.equals(UsersAuthenticationService.AccountType.VENDOR) || accountType.equals(UsersAuthenticationService.AccountType.ADMIN) || accountType.equals(UsersAuthenticationService.AccountType.COURIER))
+        if(!accountType.equals(UsersAuthenticationService.AccountType.INVALID))
         {
 
             Statistics statistics = statisticsService.getCourierStatistics(courierId,startTime,endTime);
@@ -143,6 +136,6 @@ public class StatisticsController implements StatisticsApi {
      * @return boolean value indicating whether string is empty or not
      */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.equals(" ");
+        return str == null || str.isEmpty() || str.isBlank();
     }
 }

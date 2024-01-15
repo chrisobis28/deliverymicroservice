@@ -649,23 +649,18 @@ public class DeliveryController implements DeliveriesApi {
         System.out.println(userId);
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
+        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+
         // Vendors can see estimations for their orders only
-        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
         // Couriers can see estimations for their deliveries only
-        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
         // Customers can see estimations for their orders only
-        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-                allowedVendor ||
-                allowedCourier ||
-                allowedCustomer) {
-            return ResponseEntity.ok(delivery);
-        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "THIS ACTION IS FORBIDDEN");
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU ARE NOT AUTHORIZED");
+        switch (userType) {
+            case ADMIN: return ResponseEntity.ok(delivery);
+            case CLIENT, COURIER, VENDOR: {
+                if (check) return ResponseEntity.ok(delivery);
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "THIS ACTION IS FORBIDDEN");
+            }
+            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU ARE NOT AUTHORIZED");
         }
     }
 
@@ -683,24 +678,18 @@ public class DeliveryController implements DeliveriesApi {
         }
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        // Vendors can see estimations for their orders only
-        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
-        // Couriers can see estimations for their deliveries only
-        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
-        // Customers can see estimations for their orders only
-        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-                allowedVendor ||
-                allowedCourier ||
-                allowedCustomer) {
-            return ResponseEntity.ok(delivery.getEstimatedPrepTime());
-        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "THIS ACTION IS FORBIDDEN");
+        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
 
-        } else {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU ARE NOT AUTHORIZED");
+        // Vendors can see estimations for their orders only
+        // Couriers can see estimations for their deliveries only
+        // Customers can see estimations for their orders only
+        switch (userType) {
+            case ADMIN: return ResponseEntity.ok(delivery.getEstimatedPrepTime());
+            case CLIENT, COURIER, VENDOR: {
+                if (check) return ResponseEntity.ok(delivery.getEstimatedPrepTime());
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "THIS ACTION IS FORBIDDEN");
+            }
+            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "YOU ARE NOT AUTHORIZED");
         }
     }
 
