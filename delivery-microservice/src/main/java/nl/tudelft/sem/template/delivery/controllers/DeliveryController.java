@@ -630,9 +630,7 @@ public class DeliveryController implements DeliveriesApi {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permission levels.");
                 }
             }
-            default -> {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access. User cannot be authorized.");
-            }
+            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized access. User cannot be authorized.");
         }
     }
 
@@ -681,9 +679,8 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Integer> deliveriesDeliveryIdPrepGet(@PathVariable UUID deliveryId, @RequestHeader String userId)
     {
         if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "BAD REQUEST");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
-        System.out.println(userId);
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         // Vendors can see estimations for their orders only

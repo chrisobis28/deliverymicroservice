@@ -1,18 +1,13 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import io.swagger.models.Response;
-import java.time.OffsetDateTime;
 import java.util.Objects;
-import java.util.UUID;
 import nl.tudelft.sem.template.api.RestaurantsApi;
 import nl.tudelft.sem.template.delivery.AddressAdapter;
-//import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
-import org.h2.engine.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +23,8 @@ import java.util.List;
 import org.springframework.web.server.ResponseStatusException;
 
 import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
-import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.INVALID;
+//import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.INVALID;
 
-//import static org.mockito.Mockito.mock;
 
 @RestController
 public class RestaurantController implements RestaurantsApi {
@@ -62,7 +56,7 @@ public class RestaurantController implements RestaurantsApi {
             restaurantService.insert(restaurant);
             return ResponseEntity.ok().build();
         } catch (RestaurantService.IllegalRestaurantParametersException e) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST.");
         }
     }
 
@@ -76,7 +70,7 @@ public class RestaurantController implements RestaurantsApi {
             restaurantService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
     }
 
@@ -87,14 +81,12 @@ public class RestaurantController implements RestaurantsApi {
      */
     @Override
     public ResponseEntity<Restaurant> restaurantsPost(@Valid RestaurantsPostRequest restaurantsPostRequest) {
-        if (restaurantsPostRequest == null) {
-            return ResponseEntity.badRequest().build();
-        }
+        if (restaurantsPostRequest == null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Restaurant could not be created.");
+
         String email = restaurantsPostRequest.getRestaurantID();
         List<String> address = restaurantsPostRequest.getLocation();
-        if (isNullOrEmpty(email) || isInvalidAddress(address)) {
-            return ResponseEntity.badRequest().build();
-        }
+        if (isNullOrEmpty(email) || isInvalidAddress(address)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Restaurant ID or location is invalid.");
+
         Restaurant r = new Restaurant();
         r.setLocation(addressAdapter.convertStringAddressToDouble(address));
         r.setRestaurantID(email);
@@ -111,26 +103,26 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<Restaurant> restaurantsRestaurantIdGet( @PathVariable("restaurantId") String restaurantId,@RequestHeader String userId) {
         //check user ID
-        if(userId==null || restaurantId==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if(userId==null || restaurantId==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid.");
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
             Restaurant r = restaurantService.getRestaurant(restaurantId);
             switch (accountType) {
                 case COURIER, CLIENT:
                     r.setDeliveryZone(null);
                     r.setRestaurantID(null);
-                    return ResponseEntity.status(HttpStatus.OK).body(r);
+                    return ResponseEntity.ok(r);
                 case VENDOR:
                     if (!Objects.equals(userId, restaurantId)) {
-                        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
                     } else {
-                        return ResponseEntity.status(HttpStatus.OK).body(r);
+                        return ResponseEntity.ok(r);
                     }
 
                 case ADMIN:
-                    return ResponseEntity.status(HttpStatus.OK).body(r);
+                    return ResponseEntity.ok(r);
 
                 default:
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
 
             }
     }
@@ -230,18 +222,18 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut( @PathVariable("restaurantId") String restaurantId, @RequestHeader String userId,  @RequestBody @Valid List<String> requestBody)   {
         //check user ID
-        if(userId==null || restaurantId==null) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        if(userId==null || restaurantId==null) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid.");
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         switch(accountType){
-            case COURIER,CLIENT: return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            case COURIER,CLIENT: throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             case  VENDOR:
                 if(!Objects.equals(userId, restaurantId)){
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
                 }
                 else break;
 
             case ADMIN : break;
-            default : return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+            default : throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
 
         }
         // check couriers
@@ -249,15 +241,15 @@ public class RestaurantController implements RestaurantsApi {
             for(String id : requestBody){
                 UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(id);
                 if(!Objects.equals(account,COURIER)){
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "List contains the id of someone who isn't a courier.");
                 }
             }
         }
         try{
             Restaurant r = restaurantService.setListOfCouriers(restaurantId,requestBody);
-            return ResponseEntity.status(HttpStatus.OK).body(r);
+            return ResponseEntity.ok(r);
         }catch(RestaurantService.RestaurantNotFoundException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Server error");
         }
 
 
@@ -272,7 +264,7 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<String> restaurantsRestaurantIdDelete(@PathVariable("restaurantId") String restaurantId) {
             restaurantService.delete(restaurantId);
-            return ResponseEntity.status(HttpStatus.OK).body("deletion_successful");
+            return ResponseEntity.ok("deletion_successful");
 
     }
 

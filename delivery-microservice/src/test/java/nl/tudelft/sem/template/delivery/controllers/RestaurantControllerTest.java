@@ -12,11 +12,9 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
-import org.h2.engine.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -29,12 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
 
-import static org.assertj.core.api.Java6Assertions.assertThat;
+//import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 //import static org.mockito.Mockito.when;
 @EntityScan("nl.tudelft.sem.template.*")
@@ -66,9 +64,15 @@ class RestaurantControllerTest {
 
   @Test
   void restaurantsPostNullRpr() {
-    ResponseEntity<Restaurant> result = sut.restaurantsPost(null);
-
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+//    ResponseEntity<Restaurant> result = sut.restaurantsPost(null);
+//
+//    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.restaurantsPost(null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsPost(null))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"Restaurant could not be created.\"");
   }
 
   @Test
@@ -77,9 +81,16 @@ class RestaurantControllerTest {
     rpr.setRestaurantID("hi_im_a_vendor@testmail.com");
     rpr.setLocation(List.of());
 
-    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
+//    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
+//
+//    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
 
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"Restaurant ID or location is invalid.\"");
   }
 
   @Test
@@ -88,9 +99,15 @@ class RestaurantControllerTest {
     rpr.setRestaurantID(null);
     rpr.setLocation(addr);
 
-    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
+//    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
 
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+//    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"Restaurant ID or location is invalid.\"");
   }
 
   @Test
@@ -99,9 +116,12 @@ class RestaurantControllerTest {
     rpr.setRestaurantID("");
     rpr.setLocation(addr);
 
-    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
-
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"Restaurant ID or location is invalid.\"");
   }
 
   @Test
@@ -110,9 +130,12 @@ class RestaurantControllerTest {
     rpr.setRestaurantID("hi_im_a_vendor@testmail.com");
     rpr.setLocation(List.of("NL","1234AB","Amsterdam",""," "));
 
-    ResponseEntity<Restaurant> result = sut.restaurantsPost(rpr);
-
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsPost(rpr))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"Restaurant ID or location is invalid.\"");
   }
 
   @Test
@@ -289,6 +312,7 @@ class RestaurantControllerTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
     r.setDeliveryZone(10.0);
+    r.setLocation(co_ord);
     r.setCouriers(List.of());
     sut.insert(r);
 
@@ -326,6 +350,7 @@ class RestaurantControllerTest {
     String otherRestaurantId = "other_restaurant_diffVendor@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(co_ord);
     r.setDeliveryZone(10.0);
     sut.insert(r);
 
@@ -343,8 +368,14 @@ class RestaurantControllerTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
     r.setDeliveryZone(10.0);
-    ResponseEntity<Void> result = sut.insert(r);
-    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+//    ResponseEntity<Void> result = sut.insert(r);
+//    assertEquals(HttpStatus.BAD_REQUEST, result.getStatusCode());
+    assertThatThrownBy(() -> sut.insert(r))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.insert(r))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"BAD REQUEST.\"");
 
     String userId = "user_courier@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
@@ -380,6 +411,7 @@ class RestaurantControllerTest {
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
     r.setDeliveryZone(10.0);
+    r.setLocation(co_ord);
     sut.insert(r);
 
     String userId = "user_invalid@testmail.com";
@@ -409,6 +441,7 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_neworders_admin@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setDeliveryZone(10.0);
     r.setLocation(List.of(6.7,6.7));
     sut.insert(r);
     // FIRST DELIVERY ON TRANSIT
@@ -417,9 +450,16 @@ class RestaurantControllerTest {
     d1.setDeliveryID(deliveryId1);
     d1.setRestaurantID(restaurantId);
     d1.setStatus(DeliveryStatus.ON_TRANSIT);
-    ResponseEntity<Void> result = sut.insert(d1);
-    assertEquals(HttpStatus.OK, result.getStatusCode());
-    assertEquals(HttpStatus.BAD_REQUEST, sut.insert((Delivery) null).getStatusCode());
+
+//    ResponseEntity<Void> result = sut.insert(d1);
+//    assertEquals(HttpStatus.OK, result.getStatusCode());
+//    assertEquals(HttpStatus.BAD_REQUEST, sut.insert((Delivery) null).getStatusCode());
+    assertThatThrownBy(() -> sut.insert((Delivery) null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.insert((Delivery) null))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"BAD REQUEST\"");
 
     // SECOND DELIVERY ACCEPTED
     UUID deliveryId2 = UUID.randomUUID();
@@ -484,7 +524,7 @@ class RestaurantControllerTest {
     d3.setCourierID("courier@testmail.com");
     sut.insert(d3);
 
-    String userId = "user_admin@testmail.com";
+    //String userId = "user_admin@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
     when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
 
@@ -501,6 +541,8 @@ class RestaurantControllerTest {
     String other_restaurant = "restaurant_neworders_diff_vendor_other@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(co_ord);
+    r.setDeliveryZone(10.0);
     sut.insert(r);
 
     // FIRST DELIVERY ON TRANSIT
@@ -542,6 +584,8 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_neworders_client@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(co_ord);
+    r.setDeliveryZone(10.0);
     sut.insert(r);
     // FIRST DELIVERY ACCEPTED
     UUID deliveryId1 = UUID.randomUUID();
@@ -565,6 +609,8 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_neworders_courier@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(co_ord);
+    r.setDeliveryZone(10.0);
     sut.insert(r);
     // FIRST DELIVERY ACCEPTED
     UUID deliveryId1 = UUID.randomUUID();
@@ -608,6 +654,8 @@ class RestaurantControllerTest {
     String restaurantId = "restaurant_neworders_courier@testmail.com";
     Restaurant r = new Restaurant();
     r.setRestaurantID(restaurantId);
+    r.setLocation(co_ord);
+    r.setDeliveryZone(10.0);
     sut.insert(r);
     // FIRST DELIVERY ACCEPTED
     UUID deliveryId1 = UUID.randomUUID();
@@ -639,12 +687,19 @@ class RestaurantControllerTest {
   }
 
   @Test
-  void restaurantsRestaurantIdnull(){
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdGet("jhbf", null);
-    ResponseEntity<Restaurant> s = sut.restaurantsRestaurantIdGet(null, "");
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(s.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
+  void restaurantsRestaurantIdGetNull(){
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla", null))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet(null, "bla"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet(null, "bla"))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
   }
 
   @Test
@@ -666,12 +721,17 @@ class RestaurantControllerTest {
     assertThat(r.getBody().getDeliveryZone()).isNull();
   }
   @Test
-  void restaurantsRestaurantIdVENDORnotTheSame(){
+  void restaurantsRestaurantIdVENDORNotTheSame(){
     sut.restaurantsPost(new RestaurantsPostRequest().restaurantID("bla").location(List.of("x","x", "x","x","x")));
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdGet("bla", "thtrff");
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdGet("bla", "thtrff");
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla","duf"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla", "duf"))
+        .message()
+        .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
   }
   @Test
   void restaurantsRestaurantIdVENDORTheSame(){
@@ -695,9 +755,14 @@ class RestaurantControllerTest {
   void restaurantsRestaurantIdINVALID(){
     sut.restaurantsPost(new RestaurantsPostRequest().restaurantID("bla").location(List.of("x","x", "x","x","x")));
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.INVALID);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdGet("bla", "bla");
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
-
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdGet("bla", "bla");
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla","bla"))
+        .extracting("status")
+        .isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla", "bla"))
+        .message()
+        .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
   }
   @Test
   void restaurantsRestaurantIdNOTFOUND(){
@@ -707,34 +772,59 @@ class RestaurantControllerTest {
   }
   @Test
   void restaurantsRestaurantCourierPutNull(){
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut(null,"duf", null);
-    ResponseEntity<Restaurant> s = sut.restaurantsRestaurantIdCouriersPut("hwfwd",null, null);
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut(null,"duf", null);
+//    ResponseEntity<Restaurant> s = sut.restaurantsRestaurantIdCouriersPut("hwfwd",null, null);
+//
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+//    assertThat(s.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
 
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    assertThat(s.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut(null, "bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut(null, "bla", null))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla",null, null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", null, null))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
   }
   @Test
   void restaurantsRestaurantCourierCLIENT(){
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
-
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        .message()
+        .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
   }
   @Test
   void restaurantsRestaurantCourierCOURIER(){
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
+    //ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
 
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
-
+    //assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        .message()
+        .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
   }
   @Test
   void restaurantsRestaurantCourierVENDORNotTheSame(){
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "duf",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.FORBIDDEN);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "duf", null))
+        .message()
+        .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
   }
   @Test
   void restaurantsRestaurantCourierVENDORTheSame(){
@@ -746,8 +836,12 @@ class RestaurantControllerTest {
   @Test
   void restaurantsRestaurantCourierINVALID(){
     when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.INVALID);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","duf", null);
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.UNAUTHORIZED);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        .message()
+        .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
   }
   @Test
   void restaurantsRestaurantCourierADMINOk(){
@@ -766,14 +860,26 @@ class RestaurantControllerTest {
     when(usersCommunication.getUserAccountType("bl")).thenReturn(UsersAuthenticationService.AccountType.INVALID);
     List<String> list = new ArrayList<>();
     list.add("bl");
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","bla", list);
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","bla", list);
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla","bla", list))
+        .extracting("status")
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla","bla", list))
+        .message()
+        .isEqualTo("400 BAD_REQUEST \"List contains the id of someone who isn't a courier.\"");
   }
   @Test
   void restaurantsRestaurantCourierNoRestaurant(){
     when(usersCommunication.getUserAccountType("bla")).thenReturn(UsersAuthenticationService.AccountType.ADMIN);
-    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","bla", null);
-    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+//    ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla","bla", null);
+//    assertThat(r.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla","bla",null))
+        .extracting("status")
+        .isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+    assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        .message()
+        .isEqualTo("500 INTERNAL_SERVER_ERROR \"Server error\"");
   }
 
 }
