@@ -12,6 +12,7 @@ import nl.tudelft.sem.template.model.Error;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -46,30 +47,25 @@ public class ErrorController implements ErrorsApi {
     @GetMapping("/{deliveryId}/")
     @Override
     public ResponseEntity<Error> errorsDeliveryIdGet(@RequestHeader String userId, @PathVariable UUID deliveryId) {
-        if (isNullOrEmpty(userId)) {
-            return ResponseEntity.badRequest().build();
-        }
+        if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
+
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        // Vendors can see errors only in their orders
-        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
-        // Couriers can see errors only in orders they deliver
-        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
-        // Customers can see errors only in orders they made
-        boolean allowedCustomer = userType.equals(UsersAuthenticationService.AccountType.CLIENT) && userId.equals(delivery.getCustomerID());
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-                allowedVendor ||
-                allowedCourier ||
-                allowedCustomer) {
-            Error error = errorService.getError(deliveryId);
-            return ResponseEntity.ok(error);
-        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+
+        switch (userType) {
+            case ADMIN: break;
+            // Customers can see errors only in orders they made
+            // Couriers can see errors only in orders they deliver
+            // Vendors can see errors only in their orders
+            case CLIENT, COURIER, VENDOR: {
+                if (check) break;
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            }
+            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
+        Error error = errorService.getError(deliveryId);
+        return ResponseEntity.ok(error);
     }
 
     /**
@@ -85,28 +81,26 @@ public class ErrorController implements ErrorsApi {
     @PutMapping("/{deliveryId}/")
     @Override
     public ResponseEntity<Error> errorsDeliveryIdPut(@RequestHeader String userId, @PathVariable UUID deliveryId, @RequestBody Error error) {
-        if (isNullOrEmpty(userId)) {
-            return ResponseEntity.badRequest().build();
-        }
+        if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
+
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Error deliveryError = errorService.getError(deliveryId);
+        //Error deliveryError = errorService.getError(deliveryId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        // Vendors can edit errors only in their orders
-        boolean allowedVendor = userType.equals(UsersAuthenticationService.AccountType.VENDOR) && userId.equals(delivery.getRestaurantID());
-        // Couriers can edit errors only in orders they deliver
-        boolean allowedCourier = userType.equals(UsersAuthenticationService.AccountType.COURIER) && userId.equals(delivery.getCourierID());
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN) ||
-                allowedVendor ||
-                allowedCourier) {
-            deliveryError = errorService.updateError(deliveryId, error);
-            return ResponseEntity.ok(deliveryError);
-        } else if (userType.equals(UsersAuthenticationService.AccountType.VENDOR) ||
-                userType.equals(UsersAuthenticationService.AccountType.COURIER) ||
-                userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+
+        switch (userType) {
+            case ADMIN: break;
+            // Vendors can edit errors only in their orders
+            // Couriers can edit errors only in orders they deliver
+            case VENDOR, COURIER: {
+                if (check) break;
+                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            }
+            case CLIENT: throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
+        Error deliveryError = errorService.updateError(deliveryId, error);
+        return ResponseEntity.ok(deliveryError);
     }
 
     /**
@@ -130,7 +124,7 @@ public class ErrorController implements ErrorsApi {
             errorService.insert(error);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
     }
 }
