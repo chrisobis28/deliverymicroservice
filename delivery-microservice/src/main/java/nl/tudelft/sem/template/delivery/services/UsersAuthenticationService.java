@@ -1,6 +1,8 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import java.util.Arrays;
+import java.util.UUID;
+
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,17 @@ public class UsersAuthenticationService {
         String accountTypeString = usersCommunication.getAccountType(userId);
         return AccountType.fromValue(accountTypeString);
     }
+
+    /**
+     * Update status in order people microservice.
+     *
+     * @param orderId order id
+     * @param status status
+     */
+    public void updateOrderStatus(UUID orderId, String status) {
+        usersCommunication.updateOrderStatus(orderId, status);
+    }
+
 
     /**
      * The method checks if a user should have permission to view delivery.

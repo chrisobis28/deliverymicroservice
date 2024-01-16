@@ -21,7 +21,8 @@ import org.springframework.http.HttpStatus;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -94,6 +95,7 @@ public class DeliveryStatusHandlerTest {
                 .get()
                 .extracting("status")
                 .isEqualTo(DeliveryStatus.DELIVERED);
+        verify(usersAuthentication, times(1)).updateOrderStatus(any(), any());
     }
 
     @Test
