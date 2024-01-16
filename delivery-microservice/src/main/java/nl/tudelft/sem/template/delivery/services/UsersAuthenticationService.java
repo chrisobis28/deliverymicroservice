@@ -22,16 +22,6 @@ public class UsersAuthenticationService {
         return AccountType.fromValue(accountTypeString);
     }
 
-    /**
-     * Update status in order people microservice.
-     *
-     * @param orderId order id
-     * @param status status
-     */
-    public void updateOrderStatus(UUID orderId, String status) {
-        usersCommunication.updateOrderStatus(orderId, status);
-    }
-
 
     /**
      * The method checks if a user should have permission to view delivery.

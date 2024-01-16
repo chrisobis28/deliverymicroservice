@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import java.util.UUID;
 import nl.tudelft.sem.template.delivery.GPS;
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -33,12 +34,14 @@ public class DeliveryStatusHandlerTest {
     private DeliveryRepository deliveryRepository;
     @Mock
     private UsersAuthenticationService usersAuthentication;
+    @Mock
+    private UsersCommunication usersCommunication;
     private DeliveryStatusHandler statusHandler;
 
     @BeforeEach
     public void init() {
         DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
-        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication);
+        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication );
     }
 
     private Delivery insertExampleDelivery() {
@@ -95,7 +98,7 @@ public class DeliveryStatusHandlerTest {
                 .get()
                 .extracting("status")
                 .isEqualTo(DeliveryStatus.DELIVERED);
-        verify(usersAuthentication, times(1)).updateOrderStatus(any(), any());
+        verify(usersCommunication, times(1)).updateOrderStatus(any(), any());
     }
 
     @Test

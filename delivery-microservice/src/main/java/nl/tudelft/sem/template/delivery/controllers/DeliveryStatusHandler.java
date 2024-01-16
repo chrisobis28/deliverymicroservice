@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -21,11 +21,15 @@ public class DeliveryStatusHandler {
 
     private final transient DeliveryService deliveryService;
     private final transient UsersAuthenticationService usersAuthenticationService;
+    private final transient UsersCommunication usersCommunication;
 
 
-    public DeliveryStatusHandler(DeliveryService deliveryService, UsersAuthenticationService usersAuthenticationService) {
+    public DeliveryStatusHandler(DeliveryService deliveryService,
+                                 UsersAuthenticationService usersAuthenticationService,
+                                 UsersCommunication usersCommunication) {
         this.deliveryService = deliveryService;
         this.usersAuthenticationService = usersAuthenticationService;
+        this.usersCommunication = usersCommunication;
     }
 
     /**
@@ -64,7 +68,7 @@ public class DeliveryStatusHandler {
         }
 
         deliveryService.updateDeliveryStatus(deliveryId, newStatus);
-        usersAuthenticationService.updateOrderStatus(deliveryId, newStatus.toString());
+        usersCommunication.updateOrderStatus(deliveryId, newStatus.toString());
         return ResponseEntity.ok(delivery);
     }
 
