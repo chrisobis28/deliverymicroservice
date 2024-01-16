@@ -3,6 +3,8 @@ package nl.tudelft.sem.template.delivery.controllers;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
@@ -19,18 +21,22 @@ public class DeliveryStatusHandler {
 
     private final transient DeliveryService deliveryService;
     private final transient UsersAuthenticationService usersAuthenticationService;
+    private final transient UsersCommunication usersCommunication;
 
 
-    public DeliveryStatusHandler(DeliveryService deliveryService, UsersAuthenticationService usersAuthenticationService) {
+    public DeliveryStatusHandler(DeliveryService deliveryService,
+                                 UsersAuthenticationService usersAuthenticationService,
+                                 UsersCommunication usersCommunication) {
         this.deliveryService = deliveryService;
         this.usersAuthenticationService = usersAuthenticationService;
+        this.usersCommunication = usersCommunication;
     }
 
     /**
      * Endpoint for getting the delivery status.
      *
      * @param deliveryId ID of delivery
-     * @param userId ID of user making the request
+     * @param userId     ID of user making the request
      * @return a string representing the status name
      */
     public ResponseEntity<String> getDeliveryStatus(UUID deliveryId, String userId) {
@@ -46,8 +52,8 @@ public class DeliveryStatusHandler {
      * Updates the delivery status of an order.
      *
      * @param deliveryId ID of delivery
-     * @param userId ID of user calling the endpoint
-     * @param status new status to update with
+     * @param userId     ID of user calling the endpoint
+     * @param status     new status to update with
      * @return the updated Delivery object
      */
     public ResponseEntity<Delivery> updateDeliveryStatus(UUID deliveryId, String userId, String status) {
@@ -60,8 +66,9 @@ public class DeliveryStatusHandler {
         if (!StatusValidity.isStatusUpdateLegal(accountType, oldStatus, newStatus)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-
+        usersCommunication.updateOrderStatus(deliveryId, newStatus.toString());
         deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+
         return ResponseEntity.ok(delivery);
     }
 
