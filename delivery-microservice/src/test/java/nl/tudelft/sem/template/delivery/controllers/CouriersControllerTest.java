@@ -122,7 +122,7 @@ class CouriersControllerTest {
                 .isEqualTo(HttpStatus.NOT_FOUND);
         assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
                 .message()
-                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment\"");
+                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment.\"");
     }
 
     @Test
@@ -230,6 +230,7 @@ class CouriersControllerTest {
 
         ResponseEntity<List<Integer>> result = sut.couriersCourierIdRatingsGet(courierId, userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
         assertEquals(2, result.getBody().size());
         assertTrue(result.getBody().containsAll(List.of(3, 4)));
     }

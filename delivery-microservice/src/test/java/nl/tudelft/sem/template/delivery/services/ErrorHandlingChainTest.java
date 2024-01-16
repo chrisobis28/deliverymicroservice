@@ -54,7 +54,7 @@ public class ErrorHandlingChainTest {
     }
 
     @Test
-    void CANCELLED_BY_CLIENT_error_handling_chain_test() {
+    void cancelledByClientErrorHandlingChainTest() {
 
         Delivery delivery = createDeliveryWithErrorType(ErrorType.CANCELLED_BY_CLIENT);
 
@@ -64,7 +64,7 @@ public class ErrorHandlingChainTest {
     }
 
     @Test
-    void CANCELLED_BY_RESTAURANT_error_handling_chain_test() {
+    void cancelledByRestaurantErrorHandlingChainTest() {
 
         Delivery delivery = createDeliveryWithErrorType(ErrorType.CANCELLED_BY_RESTAURANT);
 
@@ -74,7 +74,7 @@ public class ErrorHandlingChainTest {
     }
 
     @Test
-    void DELIVERY_UNSUCCESSFUL_error_handling_chain_test() {
+    void deliveryUnsuccessfulErrorHandlingChainTest() {
 
         Delivery delivery = createDeliveryWithErrorType(ErrorType.DELIVERY_UNSUCCESSFUL);
 
@@ -84,7 +84,7 @@ public class ErrorHandlingChainTest {
     }
 
     @Test
-    void DELIVERY_DELAYED_error_handling_chain_test() {
+    void deliveryDelayedErrorHandlingChainTest() {
 
         Delivery delivery = createDeliveryWithErrorType(ErrorType.DELIVERY_DELAYED);
 
@@ -93,7 +93,7 @@ public class ErrorHandlingChainTest {
     }
 
     @Test
-    void OTHER_error_handling_chain_test() {
+    void otherErrorHandlingChainTest() {
 
         Delivery delivery = createDeliveryWithErrorType(ErrorType.OTHER);
 

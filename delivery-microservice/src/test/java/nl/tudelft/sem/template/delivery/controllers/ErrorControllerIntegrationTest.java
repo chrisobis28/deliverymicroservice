@@ -121,7 +121,8 @@ class ErrorControllerIntegrationTest {
 
         Error updatedError = new Error().type(ErrorType.DELIVERY_DELAYED);
 
-        assertThatThrownBy(() -> errorController.errorsDeliveryIdPut("user@gmail.com", delivery.getDeliveryID(), updatedError))
+        assertThatThrownBy(() -> errorController.errorsDeliveryIdPut("user@gmail.com",
+            delivery.getDeliveryID(), updatedError))
                 .extracting("status")
                 .isEqualTo(HttpStatus.CONFLICT);
     }

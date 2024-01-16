@@ -58,7 +58,7 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
     }
 
     /**
-     * Check if delivery is available for couriers.
+     * Check if delivery should be added to the queue.
      *
      * @param delivery delivery to be added/updated
      */
@@ -74,9 +74,9 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
     }
 
     /**
-     * Update and return queue of available delivery ids.
+     * Get the first available Delivery ID in the queue.
      *
-     * @return updated queue of delivery ids
+     * @return UUID of first available Delivery
      */
     public UUID getAvailableDeliveryId() {
         Delivery delivery;
@@ -87,6 +87,6 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
                 return deliveryId;
             }
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries at the moment.");
     }
 }
