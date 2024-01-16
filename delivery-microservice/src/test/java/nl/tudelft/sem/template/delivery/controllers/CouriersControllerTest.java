@@ -87,7 +87,7 @@ class CouriersControllerTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
-        deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))
@@ -139,7 +139,7 @@ class CouriersControllerTest {
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
 
-        deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))

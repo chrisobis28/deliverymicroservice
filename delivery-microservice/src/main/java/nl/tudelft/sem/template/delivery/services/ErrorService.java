@@ -1,7 +1,5 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import java.util.UUID;
-import javax.transaction.Transactional;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.model.Delivery;
@@ -12,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.Serial;
+import java.util.UUID;
 
 
 @Service
@@ -50,7 +50,6 @@ public class ErrorService {
      * @param error      updated error item
      * @return the error of the delivery
      */
-    @Transactional
     public Error updateError(UUID deliveryId, Error error) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
                 .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
@@ -69,24 +68,11 @@ public class ErrorService {
      * Exception to be used when an Error entity with a given ID is not found.
      */
     static public class ErrorNotFoundException extends ResponseStatusException {
+        @Serial
         private static final long serialVersionUID = 1L;
 
         public ErrorNotFoundException() {
             super(HttpStatus.NOT_FOUND, "Error with specified id not found");
         }
-    }
-
-    /**
-     * Persists an entity in the database.
-     * Used for testing purposes.
-     *
-     * @param error error to add to repository
-     * @return the inserted error
-     */
-    public Error insert(Error error) {
-        if (error == null || error.getErrorId() == null) {
-            throw new IllegalArgumentException();
-        }
-        return errorRepository.save(error);
     }
 }

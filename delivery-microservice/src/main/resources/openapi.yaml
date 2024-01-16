@@ -2407,10 +2407,12 @@ components:
       type: string
       description: Type of problem with delivery (i.e., cancellation/delay). Can be scaled later. Potentially, delayed deliveries will also have a specified numeric delay.
       enum:
-        - DELAYED
-        - CANCELLED
-        - NONE
+        - CANCELLED_BY_CLIENT
+        - CANCELLED_BY_RESTAURANT
+        - DELIVERY_UNSUCCESSFUL
+        - DELIVERY_DELAYED
         - OTHER
+        - NONE
     Restaurant:
       type: object
       x-class-extra-annotation: "@javax.persistence.Entity"
