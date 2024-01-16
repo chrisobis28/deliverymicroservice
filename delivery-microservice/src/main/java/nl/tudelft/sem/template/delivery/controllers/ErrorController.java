@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
@@ -36,7 +34,8 @@ public class ErrorController implements ErrorsApi {
      * @param usersAuthentication users authentication service
      * @param errorHandlingChain chain of responsibility for error handling
      */
-    public ErrorController(ErrorService errorService, DeliveryService deliveryService, UsersAuthenticationService usersAuthentication, DeliveryErrorAction errorHandlingChain) {
+    public ErrorController(ErrorService errorService, DeliveryService deliveryService,
+                           UsersAuthenticationService usersAuthentication, DeliveryErrorAction errorHandlingChain) {
         this.errorService = errorService;
         this.deliveryService = deliveryService;
         this.usersAuthentication = usersAuthentication;
@@ -56,7 +55,8 @@ public class ErrorController implements ErrorsApi {
 
         boolean isUserAllowed = usersAuthentication.checkUserAccessToDelivery(userId, delivery);
         if (!isUserAllowed) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated to view error for this delivery");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                "User not authenticated to view error for this delivery");
         }
 
         Error error = errorService.getError(deliveryId);
@@ -74,12 +74,14 @@ public class ErrorController implements ErrorsApi {
      * @return the updated Error
      */
     @Override
-    public ResponseEntity<Error> errorsDeliveryIdPut(@RequestHeader String userId, @PathVariable UUID deliveryId, @RequestBody Error error) {
+    public ResponseEntity<Error> errorsDeliveryIdPut(@RequestHeader String userId,
+                                                     @PathVariable UUID deliveryId, @RequestBody Error error) {
         Delivery delivery = deliveryService.getDelivery(deliveryId);
 
         boolean isUserAllowed = usersAuthentication.checkUserAccessToDelivery(userId, delivery);
         if (!isUserAllowed) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated to update error for this delivery");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                "User not authenticated to update error for this delivery");
         }
 
         Error deliveryError = errorService.updateError(deliveryId, error);

@@ -105,12 +105,17 @@ public class StatisticsController implements StatisticsApi {
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
         switch (type) {
             case ADMIN: break;
-            case COURIER, CLIENT: throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            case COURIER, CLIENT:
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             case VENDOR: {
-                if (vendorId.equals(userId)) break;
-                else throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+                if (vendorId.equals(userId)) {
+                    break;
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+                }
             }
-            default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+            default:
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
@@ -136,14 +141,10 @@ public class StatisticsController implements StatisticsApi {
                                                                    @Parameter OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        if(!accountType.equals(UsersAuthenticationService.AccountType.INVALID))
-        {
-
-            Statistics statistics = statisticsService.getCourierStatistics(courierId,startTime,endTime);
+        if (!accountType.equals(UsersAuthenticationService.AccountType.INVALID)) {
+            Statistics statistics = statisticsService.getCourierStatistics(courierId, startTime, endTime);
             return ResponseEntity.ok(statistics);
-
         }
-
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
     }
 

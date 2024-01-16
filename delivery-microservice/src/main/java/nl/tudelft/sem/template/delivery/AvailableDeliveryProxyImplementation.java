@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
-public class AvailableDeliveryProxyImplementation implements AvailableDeliveryProxy{
+public class AvailableDeliveryProxyImplementation implements AvailableDeliveryProxy {
 
     private final transient DeliveryService deliveryService;
 
@@ -83,7 +83,9 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
         while (!availableDeliveries.isEmpty()) {
             UUID deliveryId = availableDeliveries.poll();
             delivery = deliveryService.getDelivery(deliveryId);
-            if (checkStatus(delivery)) return deliveryId;
+            if (checkStatus(delivery)) {
+                return deliveryId;
+            }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries");
     }
