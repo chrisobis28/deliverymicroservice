@@ -10,13 +10,9 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.integration.IntegrationProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
@@ -47,7 +43,7 @@ public class UsersCommunication {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == HttpStatus.OK.value()) {
-               JsonNode json = mapperReceive.readTree(response.body());
+                JsonNode json = mapperReceive.readTree(response.body());
                 return json.get("type").asText();
             }
         } catch (Exception e) {
@@ -58,7 +54,7 @@ public class UsersCommunication {
 
 
     /**
-     * Updates the order status in the Order people's service
+     * Updates the order status in the Order people's service.
      *
      * @param orderId ID of order
      * @param orderStatus status of order
