@@ -14,11 +14,8 @@ import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.model.DeliveriesPostRequest;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.*;
 import nl.tudelft.sem.template.model.Error;
-import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -228,11 +225,14 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
         UUID deliveryId = UUID.fromString(orderId);
+        Error none = new Error();
+        none.setErrorId(deliveryId);
+        none.setType(ErrorType.NONE);
         delivery.deliveryID(deliveryId);
         delivery.setCustomerID(customerId);
         delivery.setRestaurantID(vendorId);
         delivery.setDeliveryAddress(addr);
-        delivery.setError(null);
+        delivery.setError(none);
         delivery.setOrderTime(OffsetDateTime.now());
         delivery = deliveryService.insert(delivery);
         return ResponseEntity.ok(delivery);
@@ -754,7 +754,6 @@ public class DeliveryController implements DeliveriesApi {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID cannot be null or empty.");
         }
-        System.out.println(userId);
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         // Vendors can see estimations for their orders only

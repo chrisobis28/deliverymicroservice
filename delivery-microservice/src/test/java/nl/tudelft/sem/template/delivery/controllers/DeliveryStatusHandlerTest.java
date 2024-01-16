@@ -4,6 +4,7 @@ import java.util.UUID;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
@@ -33,6 +34,9 @@ public class DeliveryStatusHandlerTest {
 
     @Autowired
     private DeliveryRepository deliveryRepository;
+
+    @Autowired
+    private ErrorRepository errorRepository;
     @Mock
     private UsersAuthenticationService usersAuthentication;
     @Mock
@@ -41,7 +45,7 @@ public class DeliveryStatusHandlerTest {
 
     @BeforeEach
     public void init() {
-        DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
+        DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null, errorRepository);
         statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication );
     }
 

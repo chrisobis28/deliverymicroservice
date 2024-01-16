@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
@@ -40,6 +41,10 @@ class CouriersControllerTest {
     @Autowired
     private RestaurantRepository rr;
 
+
+    @Autowired
+    private ErrorRepository er;
+
     private CouriersService cs;
 
     private DeliveryService ds;
@@ -51,7 +56,7 @@ class CouriersControllerTest {
 
     @BeforeEach
     void setUp() {
-        ds = new DeliveryService(dr, new GPS(), rr);
+        ds = new DeliveryService(dr, new GPS(), rr, er);
         cs = new CouriersService(dr, rr);
         sut = new CouriersController(ds, usersAuth, cs);
     }

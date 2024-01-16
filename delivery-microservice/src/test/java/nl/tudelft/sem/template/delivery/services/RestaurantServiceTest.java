@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.services;
 
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
@@ -31,6 +32,8 @@ public class RestaurantServiceTest {
     private RestaurantService rs;
     @Autowired
     private DeliveryRepository dr;
+    @Autowired
+    private ErrorRepository er;
     private DeliveryService ds;
 
     /**
@@ -39,7 +42,7 @@ public class RestaurantServiceTest {
     @BeforeEach
     public void setup() {
         rs = new RestaurantService(rr, dr);
-        ds = new DeliveryService(dr, new GPS(), rr);
+        ds = new DeliveryService(dr, new GPS(), rr, er);
     }
 
     @Test

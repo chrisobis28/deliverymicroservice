@@ -23,6 +23,7 @@ import java.util.UUID;
 import javax.transaction.Transactional;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
@@ -57,6 +58,9 @@ class DeliveryControllerTest {
     private DeliveryRepository repo1;
     @Autowired
     private RestaurantRepository repo2;
+
+    @Autowired
+    private ErrorRepository repo3;
     private RestaurantController restaurantController;
 
     String userId;
@@ -79,7 +83,7 @@ class DeliveryControllerTest {
         usersCommunication = mock(UsersAuthenticationService.class);
 
         restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), usersCommunication);
-        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication, null);
+        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2, repo3), usersCommunication, null);
     }
 
     @Test
