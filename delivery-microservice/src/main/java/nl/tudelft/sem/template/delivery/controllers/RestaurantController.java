@@ -56,7 +56,7 @@ public class RestaurantController implements RestaurantsApi {
             restaurantService.insert(restaurant);
             return ResponseEntity.ok().build();
         } catch (RestaurantService.IllegalRestaurantParametersException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Restaurant is invalid.");
         }
     }
 
@@ -70,7 +70,7 @@ public class RestaurantController implements RestaurantsApi {
             restaurantService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
         }
     }
 
@@ -149,12 +149,12 @@ public class RestaurantController implements RestaurantsApi {
                     restaurantService.updateLocation(restaurantId, requestBody);
                     return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                 }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             }
             case COURIER, CLIENT ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
     }
 
     /**
@@ -179,12 +179,12 @@ public class RestaurantController implements RestaurantsApi {
                         restaurantService.updateDeliverZone(restaurantId, requestBody);
                         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
                     }
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
                 }
                 case COURIER, CLIENT ->
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
     }
 
     /**
@@ -204,12 +204,12 @@ public class RestaurantController implements RestaurantsApi {
             case VENDOR -> {
                 if (userId.equals(restaurantId))
                     return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             }
             case COURIER, CLIENT ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "FORBIDDEN");
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
         }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
     }
 
     /**

@@ -638,9 +638,12 @@ class DeliveryControllerTest {
 
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-        ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
+        //ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
 
-        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+        //assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesAllAcceptedGet(userId));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertEquals("User lacks necessary permissions.", exception.getReason());
 
         verify(usersCommunication, times(1)).getUserAccountType(userId);
     }
@@ -662,9 +665,12 @@ class DeliveryControllerTest {
 
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-        ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
+        //ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
 
-        assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+        //assertEquals(HttpStatus.FORBIDDEN, result.getStatusCode());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesAllAcceptedGet(userId));
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertEquals("User lacks necessary permissions.", exception.getReason());
 
         verify(usersCommunication, times(1)).getUserAccountType(userId);
     }
@@ -686,9 +692,12 @@ class DeliveryControllerTest {
 
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
-        ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
+        //ResponseEntity<List<Delivery>> result = sut.deliveriesAllAcceptedGet(userId);
 
-        assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        //assertEquals(HttpStatus.UNAUTHORIZED, result.getStatusCode());
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesAllAcceptedGet(userId));
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("User lacks valid authentication credentials.", exception.getReason());
 
         verify(usersCommunication, times(1)).getUserAccountType(userId);
     }
@@ -1120,7 +1129,7 @@ class DeliveryControllerTest {
     void deliveriesPostNull() {
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(null));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "BAD REQUEST");
+        assertEquals("Delivery is invalid.", exception.getReason());
     }
 
     @Test
@@ -1146,7 +1155,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(dpr));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "BAD REQUEST");
+        assertEquals("Restaurant ID, customer ID or Delivery ID is invalid.", exception.getReason());
     }
 
     @Test
@@ -1160,7 +1169,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(dpr));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "BAD REQUEST");
+        assertEquals("Address is invalid.", exception.getReason());
     }
 
     @Test
@@ -1174,7 +1183,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(dpr));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "BAD REQUEST");
+        assertEquals(exception.getReason(), "Address is invalid.");
     }
 
     @Test
@@ -2541,7 +2550,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdGet(deliveryUUID, customerID));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(exception.getReason(), "THIS ACTION IS FORBIDDEN");
+        assertEquals("User lacks necessary permissions.", exception.getReason());
     }
     @Test
     void getDeliveryUnauthorized() {
@@ -2559,7 +2568,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdGet(deliveryUUID, customerID));
         assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-        assertEquals(exception.getReason(), "YOU ARE NOT AUTHORIZED");
+        assertEquals("User lacks valid authentication credentials.", exception.getReason());
     }
 
     @Test
@@ -2598,7 +2607,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPrepGet(deliveryUUID, customerID));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-        assertEquals(exception.getReason(), "THIS ACTION IS FORBIDDEN");
+        assertEquals("User lacks necessary permissions.", exception.getReason());
     }
     @Test
     void getDeliveryPrepTimeUnauthorized() {
@@ -2617,7 +2626,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdPrepGet(deliveryUUID, customerID));
         assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-        assertEquals(exception.getReason(), "YOU ARE NOT AUTHORIZED");
+        assertEquals("User lacks valid authentication credentials.", exception.getReason());
     }
 
     @Test
@@ -2933,7 +2942,7 @@ class DeliveryControllerTest {
 
         ResponseStatusException exception1 = assertThrows(ResponseStatusException.class, () -> sut.deliveriesDeliveryIdDeliveryAddressPut(deliveryId, userId, List.of(0.1, 0.2)));
         assertEquals(exception1.getStatus(), HttpStatus.UNAUTHORIZED);
-        assertEquals(exception1.getReason(), "Account could not be verified.");
+        assertEquals(exception1.getReason(), "User lacks valid authentication credentials.");
     }
 
     @Test

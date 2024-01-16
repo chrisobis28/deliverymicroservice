@@ -219,7 +219,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, otherRestaurantId, List.of(0.1, 0.1)));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -236,7 +236,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -253,7 +253,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -270,7 +270,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
     assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-    assertEquals(exception.getReason(), "UNAUTHORIZED");
+    assertEquals(exception.getReason(), "User lacks valid authentication credentials.");
   }
 
   @Test
@@ -322,7 +322,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -359,7 +359,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -375,7 +375,7 @@ class RestaurantControllerTest {
         .isEqualTo(HttpStatus.BAD_REQUEST);
     assertThatThrownBy(() -> sut.insert(r))
         .message()
-        .isEqualTo("400 BAD_REQUEST \"BAD REQUEST.\"");
+        .isEqualTo("400 BAD_REQUEST \"Restaurant is invalid.\"");
 
     String userId = "user_courier@testmail.com";
     UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
@@ -383,7 +383,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -402,7 +402,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -420,7 +420,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
     assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-    assertEquals(exception.getReason(), "UNAUTHORIZED");
+    assertEquals(exception.getReason(), "User lacks valid authentication credentials.");
   }
 
   @Test
@@ -459,7 +459,7 @@ class RestaurantControllerTest {
         .isEqualTo(HttpStatus.BAD_REQUEST);
     assertThatThrownBy(() -> sut.insert((Delivery) null))
         .message()
-        .isEqualTo("400 BAD_REQUEST \"BAD REQUEST\"");
+        .isEqualTo("400 BAD_REQUEST \"Delivery is invalid.\"");
 
     // SECOND DELIVERY ACCEPTED
     UUID deliveryId2 = UUID.randomUUID();
@@ -576,7 +576,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, other_restaurant));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -601,7 +601,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -626,7 +626,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
     assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
-    assertEquals(exception.getReason(), "FORBIDDEN");
+    assertEquals(exception.getReason(), "User lacks necessary permissions.");
   }
 
   @Test
@@ -671,7 +671,7 @@ class RestaurantControllerTest {
 
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
     assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
-    assertEquals(exception.getReason(), "UNAUTHORIZED");
+    assertEquals(exception.getReason(), "User lacks valid authentication credentials.");
   }
 
   @Test
