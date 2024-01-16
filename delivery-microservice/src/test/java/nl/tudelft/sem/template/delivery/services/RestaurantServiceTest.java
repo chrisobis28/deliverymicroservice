@@ -18,10 +18,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.assertj.core.api.AssertionsForClassTypes.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -34,46 +33,51 @@ public class RestaurantServiceTest {
     private DeliveryRepository dr;
     private DeliveryService ds;
 
+    /**
+     * Set up.
+     */
     @BeforeEach
     public void setup() {
-        rs = new RestaurantService(rr,dr);
+        rs = new RestaurantService(rr, dr);
         ds = new DeliveryService(dr, new GPS(), rr);
-
     }
+
     @Test
-    public void getRestaurantThrowsExceptionTest(){
+    public void getRestaurantThrowsExceptionTest() {
         assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
             rs.getRestaurant("bla");
         });
     }
 
     @Test
-    public void getRestaurantThrowsExceptionNullTest(){
+    public void getRestaurantThrowsExceptionNullTest() {
         assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
             rs.getRestaurant(null);
         });
     }
 
     @Test
-    public void getRestaurantTest(){
+    public void getRestaurantTest() {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
-        r.setLocation(List.of(12.2,13.3));
+        r.setLocation(List.of(12.2, 13.3));
         rs.insert(r);
         assertThat(rs.getRestaurant("bla")).isEqualTo(r);
 
     }
+
     @Test
-    public void insertThrowsExceptionNullIdTest(){
+    public void insertThrowsExceptionNullIdTest() {
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
             Restaurant r = new Restaurant();
             r.setRestaurantID(null);
-            r.setLocation(List.of(12.2,13.3));
+            r.setLocation(List.of(12.2, 13.3));
             rs.insert(r);
         });
     }
+
     @Test
-    public void insertThrowsExceptionNullLocationTest(){
+    public void insertThrowsExceptionNullLocationTest() {
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
             Restaurant r = new Restaurant();
             r.setRestaurantID("bla");
@@ -82,35 +86,36 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    public void insertThrowsExceptionWrongCoordinatesTest(){
+    public void insertThrowsExceptionWrongCoordinatesTest() {
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
             Restaurant r = new Restaurant();
             r.setRestaurantID("bla");
-            r.setLocation(List.of(11.1,12.2,342.3));
+            r.setLocation(List.of(11.1, 12.2, 342.3));
             rs.insert(r);
         });
     }
+
     @Test
-    public void insertTestThrowsRestaurantAlreadyThere(){
+    public void insertTestThrowsRestaurantAlreadyThere() {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
+        r.setLocation(List.of(11.1, 12.2));
         rs.insert(r);
 
         assertThrows(RestaurantService.IllegalRestaurantParametersException.class, () -> {
             Restaurant r1 = new Restaurant();
             r1.setRestaurantID("bla");
-            r1.setLocation(List.of(11.1,12.3));
+            r1.setLocation(List.of(11.1, 12.3));
             rs.insert(r1);
         });
 
     }
 
     @Test
-    public void setListOfCouriersTest(){
+    public void setListOfCouriersTest() {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
+        r.setLocation(List.of(11.1, 12.2));
         List<String> list = new ArrayList<>();
         list.add("courier1@testmail.com");
         rs.insert(r);
@@ -123,10 +128,10 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    public void deleteRestaurantWithoutDeliveries(){
+    public void deleteRestaurantWithoutDeliveries() {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
+        r.setLocation(List.of(11.1, 12.2));
         List<String> list = new ArrayList<>();
         list.add("sjdfhbuwfbieg");
         rs.insert(r);
@@ -142,7 +147,7 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    public void deleteRestaurantWithDeliveries(){
+    public void deleteRestaurantWithDeliveries() {
         Restaurant r = new Restaurant();
         Delivery d = new Delivery();
         UUID deliveryId = UUID.randomUUID();
@@ -150,7 +155,7 @@ public class RestaurantServiceTest {
         d.setRestaurantID("bla");
         ds.insert(d);
         r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1,12.2));
+        r.setLocation(List.of(11.1, 12.2));
         List<String> list = new ArrayList<>();
         list.add("sjdfhbuwfbieg");
         rs.insert(r);
@@ -159,7 +164,7 @@ public class RestaurantServiceTest {
     }
 
     @Test
-    void insertTestNotNull(){
+    void insertTestNotNull() {
         Delivery d = new Delivery();
         d.setDeliveryID(UUID.randomUUID());
         d.setRestaurantID("restaurant@testmail.com");

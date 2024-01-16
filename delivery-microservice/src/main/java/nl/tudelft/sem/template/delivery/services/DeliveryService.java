@@ -1,5 +1,10 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -12,11 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+
 
 /**
  * This class is a Service for accessing and modifying Delivery entities.
@@ -24,15 +25,16 @@ import java.util.stream.Collectors;
 @Service
 public class DeliveryService {
 
-    private final DeliveryRepository deliveryRepository;
+    private final transient DeliveryRepository deliveryRepository;
 
-    private final GPS gps;
+    private final transient GPS gps;
     @Lazy
-    private final RestaurantRepository restaurantRepository;
+    private final transient RestaurantRepository restaurantRepository;
 
     /**
-     * Constructor for DeliveryService
-     * @param deliveryRepository database for deliveries
+     * Constructor for DeliveryService.
+     *
+     * @param deliveryRepository   database for deliveries
      * @param restaurantRepository database for restaurants
      */
     @Autowired
@@ -43,7 +45,8 @@ public class DeliveryService {
     }
 
     /**
-     * Check if restaurant uses own couriers
+     * Check if restaurant uses own couriers.
+     *
      * @param delivery delivery being assigned
      * @return boolean value showing whether restaurant uses own couriers
      */
@@ -56,6 +59,12 @@ public class DeliveryService {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
     }
 
+    /**
+     * Adds a delivery object to the database.
+     *
+     * @param delivery object to be persisted
+     * @return the saved object
+     */
     public Delivery insert(Delivery delivery) {
         if (delivery == null || delivery.getDeliveryID() == null) {
             throw new IllegalArgumentException();
@@ -68,6 +77,12 @@ public class DeliveryService {
         return delivery.map(Delivery::getStatus).orElseThrow(DeliveryNotFoundException::new);
     }
 
+    /**
+     * Updates the delivery status.
+     *
+     * @param deliveryId a delivery to update the status of
+     * @param deliveryStatus new status
+     */
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
@@ -75,7 +90,7 @@ public class DeliveryService {
     }
 
     /**
-     * Function that returns the address where the food needs to be delivered
+     * Function that returns the address where the food needs to be delivered.
      *
      * @param deliveryId the delivery entity
      * @return the address
@@ -86,26 +101,38 @@ public class DeliveryService {
     }
 
     /**
-     * Function that returns the address where the food needs to be picked up
+     * Function that returns the address where the food needs to be picked up.
      *
      * @param deliveryId the delivery entity
      * @return the address
      */
     public List<Double> getPickupLocation(UUID deliveryId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
-        Restaurant restaurant = restaurantRepository.findById(delivery.getRestaurantID()).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        Restaurant restaurant = restaurantRepository.findById(delivery.getRestaurantID())
+                .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
 
         return restaurant.getLocation();
     }
 
 
-
+    /**
+     * Update the rating of a courier.
+     *
+     * @param deliveryId delivery to update
+     * @param rating new rating score
+     */
     public void updateCourierRating(UUID deliveryId, Integer rating) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setRatingCourier(rating);
         deliveryRepository.save(delivery);
     }
 
+    /**
+     * Update the rating of a restaurant.
+     *
+     * @param deliveryId the delivery to be updated
+     * @param rating new rating of restaurant
+     */
     public void updateRestaurantRating(UUID deliveryId, Integer rating) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setRatingRestaurant(rating);
@@ -116,6 +143,8 @@ public class DeliveryService {
      * Exception to be used when a Delivery entity with a given ID is not found.
      */
     static public class DeliveryNotFoundException extends ResponseStatusException {
+        private static final long serialVersionUID = 1L;
+
         public DeliveryNotFoundException() {
             super(HttpStatus.NOT_FOUND, "Delivery with specified id not found");
         }
@@ -123,18 +152,22 @@ public class DeliveryService {
 
     /**
      * Exception to be used when a Delivery entity has a status Delivered,
-     * but processing methods that affect its state are being called
+     * but processing methods that affect its state are being called.
      */
     static public class OrderAlreadyDeliveredException extends ResponseStatusException {
+        private static final long serialVersionUID = 1L;
+
         public OrderAlreadyDeliveredException() {
             super(HttpStatus.CONFLICT, "Delivery with specified id has already been delivered.");
         }
     }
 
     /**
-     * Exception to be used when one wants to process a rejected order
+     * Exception to be used when one wants to process a rejected order.
      */
     static public class OrderRejectedException extends ResponseStatusException {
+        private static final long serialVersionUID = 1L;
+
         public OrderRejectedException() {
             super(HttpStatus.CONFLICT, "Delivery with specified id has been rejected.");
         }
@@ -145,6 +178,12 @@ public class DeliveryService {
                 .filter(delivery -> delivery.getCourierID() == null).collect(Collectors.toList());
     }
 
+    /**
+     * Given a new courier ID, assign it to a given delivery.
+     *
+     * @param deliveryId ID of a delivery to be updated
+     * @param courierId ID of a courier to be assigned
+     */
     public void updateDeliveryCourier(UUID deliveryId, String courierId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setCourierID(courierId);
@@ -153,7 +192,7 @@ public class DeliveryService {
 
     /**
      * Updates the estimated preparation time of a delivery object
-     * and persists in the database
+     * and persists in the database.
      *
      * @param deliveryId ID of delivery to be updated
      * @param prepTime   new value for the update
@@ -165,7 +204,7 @@ public class DeliveryService {
     }
 
     /**
-     * Updated a delivery pickup time
+     * Updated a delivery pickup time.
      *
      * @param deliveryId the delivery id
      * @param pickupTime the new pickup time
@@ -177,7 +216,7 @@ public class DeliveryService {
     }
 
     /**
-     * Compute an estimate of the delivery time of an order
+     * Compute an estimate of the delivery time of an order.
      *
      * @param deliveryId ID of the order
      * @return date indicating the estimated delivery time
@@ -196,7 +235,8 @@ public class DeliveryService {
                 Restaurant restaurant = getRestaurant(delivery.getRestaurantID());
                 List<Double> restaurantCoordinates = restaurant.getLocation();
 
-                minutes = this.computeTimeStillInRestaurant(delivery.getEstimatedPrepTime(), restaurantCoordinates, delivery.getDeliveryAddress());
+                minutes = this.computeTimeStillInRestaurant(delivery.getEstimatedPrepTime(),
+                        restaurantCoordinates, delivery.getDeliveryAddress());
                 estimate = order.plusMinutes(minutes);
             }
             case GIVEN_TO_COURIER -> {
@@ -213,6 +253,7 @@ public class DeliveryService {
             }
             case DELIVERED -> throw new OrderAlreadyDeliveredException();
             case REJECTED -> throw new OrderRejectedException();
+            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown delivery status.");
         }
 
         Integer unexpectedDelay = delivery.getError().getValue();
@@ -225,14 +266,15 @@ public class DeliveryService {
 
     /**
      * Compute an estimate for the delivery time of an order
-     * that is pending, accepted, or being prepared
+     * that is pending, accepted, or being prepared.
      *
-     * @param prepTime time for preparation
+     * @param prepTime              time for preparation
      * @param restaurantCoordinates coordinates of the restaurant
-     * @param deliveryAddress address where the order needs to be delivered
+     * @param deliveryAddress       address where the order needs to be delivered
      * @return an integer indicating the estimated time to delivery
      */
-    public Integer computeTimeStillInRestaurant(Integer prepTime, List<Double> restaurantCoordinates, List<Double> deliveryAddress) {
+    public Integer computeTimeStillInRestaurant(Integer prepTime,
+                                                List<Double> restaurantCoordinates, List<Double> deliveryAddress) {
         if (prepTime == null || prepTime == 0) {
             // Assign a default value if no such is provided by the vendor
             prepTime = 30;
@@ -257,13 +299,13 @@ public class DeliveryService {
         double lon2 = coordB.get(1);
         double distance = computeHaversine(lat1, lon1, lat2, lon2);
         // Average car speed worldwide km/h
-        double AVG_VELOCITY = 30;
+        double avgVelocity = 30;
         // Return minutes
-        return (int) Math.round(60 * distance / AVG_VELOCITY);
+        return (int) Math.round(60 * distance / avgVelocity);
     }
 
     /**
-     * Compute the distance between two coordinates
+     * Compute the distance between two coordinates.
      *
      * @param lat1 latitude of 1st coordinate
      * @param lon1 longitude of 1st coordinate
@@ -279,13 +321,13 @@ public class DeliveryService {
         lon2 = Math.toRadians(lon2);
 
         // Calculate differences
-        double dLat = lat2 - lat1;
-        double dLon = lon2 - lon1;
+        double diffLat = lat2 - lat1;
+        double diffLon = lon2 - lon1;
 
         // Haversine formula
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(lat1) * Math.cos(lat2) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double a = Math.sin(diffLat / 2) * Math.sin(diffLat / 2)
+                + Math.cos(lat1) * Math.cos(lat2)
+                * Math.sin(diffLon / 2) * Math.sin(diffLon / 2);
 
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
@@ -295,7 +337,7 @@ public class DeliveryService {
     }
 
     /**
-     * Get a restaurant by a given ID
+     * Get a restaurant by a given ID.
      *
      * @param restaurantId ID of restaurant
      * @return Restaurant entity from the repo
@@ -305,8 +347,15 @@ public class DeliveryService {
 
     }
 
-    public void updateDeliveryAddress(UUID deliveryId, List<Double> newAddress){
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+    /**
+     * Update the delivery address of an order.
+     *
+     * @param deliveryId ID of delivery to be updated
+     * @param newAddress the new address
+     */
+    public void updateDeliveryAddress(UUID deliveryId, List<Double> newAddress) {
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setDeliveryAddress(newAddress);
         deliveryRepository.save(delivery);
     }

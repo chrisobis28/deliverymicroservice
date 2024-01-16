@@ -1,9 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 
-import java.util.Objects;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -23,14 +21,11 @@ import org.springframework.web.server.ResponseStatusException;
 import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import static java.time.OffsetTime.now;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -80,7 +75,7 @@ class StatisticsControllerTest {
         d6.setDeliveryID(orderId6);
         usersCommunication = mock(UsersAuthenticationService.class);
         StatisticsService statisticsService = new StatisticsService(repo1);
-        sut = new StatisticsController(statisticsService,usersCommunication);
+        sut = new StatisticsController(statisticsService, usersCommunication);
     }
 
     @Test
@@ -199,7 +194,12 @@ class StatisticsControllerTest {
         OffsetDateTime date4 = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date5 = OffsetDateTime.of(2023, 12, 12, 18, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date6 = OffsetDateTime.of(2023, 12, 12, 19, 32, 23, 0, ZoneOffset.ofHours(0));
-        List<Double> expected = List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0);
+        List<Double> expected = List
+                .of(0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+                        0.0, 0.0, 0.0, 1.0, 1.0, 0.0,
+                        0.0, 0.5, 0.0, 0.0, 0.0, 0.0,
+                        0.0);
         d1.setStatus(DeliveryStatus.DELIVERED);
         d2.setStatus(DeliveryStatus.DELIVERED);
         d3.setStatus(DeliveryStatus.DELIVERED);

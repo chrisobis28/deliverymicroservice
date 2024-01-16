@@ -1,5 +1,8 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
@@ -10,15 +13,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 @Service
 public class DeliveryStatusHandler {
 
-    private final DeliveryService deliveryService;
-    private final UsersAuthenticationService usersAuthenticationService;
+    private final transient DeliveryService deliveryService;
+    private final transient UsersAuthenticationService usersAuthenticationService;
 
 
     public DeliveryStatusHandler(DeliveryService deliveryService, UsersAuthenticationService usersAuthenticationService) {
@@ -26,6 +26,13 @@ public class DeliveryStatusHandler {
         this.usersAuthenticationService = usersAuthenticationService;
     }
 
+    /**
+     * Endpoint for getting the delivery status.
+     *
+     * @param deliveryId ID of delivery
+     * @param userId ID of user making the request
+     * @return a string representing the status name
+     */
     public ResponseEntity<String> getDeliveryStatus(UUID deliveryId, String userId) {
         AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
@@ -35,6 +42,14 @@ public class DeliveryStatusHandler {
     }
 
 
+    /**
+     * Updates the delivery status of an order.
+     *
+     * @param deliveryId ID of delivery
+     * @param userId ID of user calling the endpoint
+     * @param status new status to update with
+     * @return the updated Delivery object
+     */
     public ResponseEntity<Delivery> updateDeliveryStatus(UUID deliveryId, String userId, String status) {
         AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
@@ -92,7 +107,9 @@ public class DeliveryStatusHandler {
          * <li>New value is a chronological successor of the old value</li>
          * </ul>
          */
-        public static boolean isStatusUpdateLegal(AccountType accountType, DeliveryStatus oldStatus, DeliveryStatus newStatus) {
+        public static boolean isStatusUpdateLegal(AccountType accountType,
+                                                  DeliveryStatus oldStatus,
+                                                  DeliveryStatus newStatus) {
             return accountType.equals(AccountType.ADMIN)
                     || (possibleUpdates.get(accountType).contains(newStatus)
                     && chronologicalPredecessor.get(newStatus).equals(oldStatus));

@@ -1,25 +1,25 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
-import nl.tudelft.sem.template.model.Statistics;
-import org.springframework.stereotype.Service;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.Statistics;
+import org.springframework.stereotype.Service;
+
 
 @Service
 public class StatisticsService {
 
-    private final DeliveryRepository deliveryRepository;
+    private final transient DeliveryRepository deliveryRepository;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param deliveryRepository the repository storing delivery information
      */
@@ -28,7 +28,7 @@ public class StatisticsService {
     }
 
     /**
-     * Internal method for inserting delivery into repository (used in testing)
+     * Internal method for inserting delivery into repository (used in testing).
      *
      * @param delivery - Delivery object saved in repo
      * @return Delivery object
@@ -41,24 +41,24 @@ public class StatisticsService {
     }
 
     /**
-     * Gets the restaurant rating of a given order
+     * Gets the restaurant rating of a given order.
      *
      * @param deliveryId - the order/delivery id
-     * @return an integer from 1 to 5 that represents the rating
-     * if no rating is given, returns null
+     * @return an integer from 1 to 5 that represents the rating if no rating is given, returns null
      */
     public Integer getOrderRating(UUID deliveryId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+                .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         return delivery.getRatingRestaurant();
     }
 
     /**
-     * Get all fulfilled deliveries of a specific vendor
+     * Get all fulfilled deliveries of a specific vendor.
      *
      * @param userId vendor's email
      * @return list of deliveries ordered by delivery time
      */
-    public List<Delivery> getOrdersOfAVendor(String userId) {
+    public List<Delivery> getOrdersOfVendor(String userId) {
         List<Delivery> vendorDeliveries = deliveryRepository.findAll().stream()
                 .filter(d -> userId.equals(d.getRestaurantID())).collect(Collectors.toList());
         List<Delivery> delivered = vendorDeliveries.stream().filter(d -> d.getStatus() != null)
@@ -67,7 +67,7 @@ public class StatisticsService {
     }
 
     /**
-     * Calculates the trend of deliveries per hour
+     * Calculates the trend of deliveries per hour.
      *
      * @param deliveries list of all deliveries of a specific courier
      * @return list of doubles representing avg deliveries in each hr bracket
@@ -80,12 +80,13 @@ public class StatisticsService {
         }
 
         for (Delivery d : deliveries) {
-            int hr_delivered = d.getDeliveredTime().getHour();
-            deliveriesByHr.get(hr_delivered).add(d);
+            int hrDelivered = d.getDeliveredTime().getHour();
+            deliveriesByHr.get(hrDelivered).add(d);
         }
 
         int n = deliveries.size() - 1;
-        int days = (deliveries.get(n).getDeliveredTime().getDayOfYear() - deliveries.get(0).getDeliveredTime().getDayOfYear()) + 1;
+        int days = (deliveries.get(n).getDeliveredTime().getDayOfYear()
+                - deliveries.get(0).getDeliveredTime().getDayOfYear()) + 1;
         for (List<Delivery> del : deliveriesByHr) {
             //double days = (double) del.stream().map(d -> d.getDeliveredTime().getDayOfMonth()).distinct().count();
             double d = del.size() / ((double) days);
@@ -95,11 +96,19 @@ public class StatisticsService {
         return count;
     }
 
-    public Statistics getCourierStatistics(String courierID, OffsetDateTime startTime,OffsetDateTime endTime) {
-        List<Delivery> courierDeliveries = getSuccessfulDeliveries(courierID)
+    /**
+     * Gets a statistic overview of a given courier.
+     *
+     * @param courierId ID of a courier
+     * @param startTime start time of statistic scope
+     * @param endTime end time of statistic scope
+     * @return a statistic object with different stats parameters
+     */
+    public Statistics getCourierStatistics(String courierId, OffsetDateTime startTime, OffsetDateTime endTime) {
+        List<Delivery> courierDeliveries = getSuccessfulDeliveries(courierId)
                 .stream()
-                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
-                        delivery.getDeliveredTime().isBefore(endTime)).collect(Collectors.toList());
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime)
+                        && delivery.getDeliveredTime().isBefore(endTime)).collect(Collectors.toList());
         Statistics statistics = new Statistics();
         //Average Rating
         double averageRating = 0.0;
@@ -113,19 +122,19 @@ public class StatisticsService {
                 .orElse(0.0);
 
         //SuccessRate
-        List<Delivery> successfulDeliveries = getSuccessfulDeliveries(courierID);
-        List<Delivery> rejectedDeliveries = getRejectedDeliveries(courierID);
+        List<Delivery> successfulDeliveries = getSuccessfulDeliveries(courierId);
+        List<Delivery> rejectedDeliveries = getRejectedDeliveries(courierId);
 
 
         List<Delivery> filteredSuccessfulDeliveries = successfulDeliveries.stream()
-                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
-                        delivery.getDeliveredTime().isBefore(endTime))
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime)
+                        && delivery.getDeliveredTime().isBefore(endTime))
                 .collect(Collectors.toList());
 
 
         List<Delivery> filteredRejectedDeliveries = rejectedDeliveries.stream()
-                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime) &&
-                        delivery.getDeliveredTime().isBefore(endTime))
+                .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime)
+                        && delivery.getDeliveredTime().isBefore(endTime))
                 .collect(Collectors.toList());
 
 
@@ -133,8 +142,8 @@ public class StatisticsService {
         long totalDeliveries = filteredSuccessfulDeliveries.size() + filteredRejectedDeliveries.size();
 
         // Calculate average success rate
-        double averageSuccessRate = totalDeliveries > 0 ?
-                (double) filteredSuccessfulDeliveries.size() / totalDeliveries :
+        double averageSuccessRate = totalDeliveries > 0
+                ? (double) filteredSuccessfulDeliveries.size() / totalDeliveries :
                 0.0;
 
 
@@ -146,22 +155,25 @@ public class StatisticsService {
     }
 
     /**
-     * Returns the successful deliveries of a courier
+     * Returns the successful deliveries of a courier.
      *
      * @param courierId of the courier
      * @return the deliveries
      */
     public List<Delivery> getSuccessfulDeliveries(String courierId) {
-        return deliveryRepository.findAllByCourierID(courierId).stream().filter(x -> x.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
+        return deliveryRepository.findAllByCourierID(courierId).stream()
+                .filter(x -> x.getStatus().equals(DeliveryStatus.DELIVERED)).collect(Collectors.toList());
     }
-   /**
-     * Returns the rejected deliveries of a courier
+
+    /**
+     * Returns the rejected deliveries of a courier.
+     *
      * @param courierId of the courier
      * @return the deliveries
      */
-public List<Delivery> getRejectedDeliveries(String courierId)
-{
-    return deliveryRepository.findAllByCourierID(courierId).stream().filter(x->x.getStatus().equals(DeliveryStatus.REJECTED)).collect(Collectors.toList());
-}
+    public List<Delivery> getRejectedDeliveries(String courierId) {
+        return deliveryRepository.findAllByCourierID(courierId).stream()
+                .filter(x -> x.getStatus().equals(DeliveryStatus.REJECTED)).collect(Collectors.toList());
+    }
 
 }

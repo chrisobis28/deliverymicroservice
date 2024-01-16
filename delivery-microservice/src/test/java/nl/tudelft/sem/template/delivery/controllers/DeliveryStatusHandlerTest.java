@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.UUID;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
@@ -17,7 +18,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,7 +51,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Returns_delivery_id_when_user_authenticated() {
+    void returnsDeliveryIdWhenUserAuthenticated() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("customer")).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         when(usersAuthentication.checkUserAccessToDelivery("customer", delivery)).thenReturn(true);
@@ -62,7 +62,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Throws_unauthorized_when_user_is_not_known() {
+    void throwsUnauthorizedWhenUserIsNotKnown() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("unknown")).thenReturn(AccountType.INVALID);
 
@@ -72,7 +72,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Throws_forbidden_when_user_does_not_have_access_to_delivery() {
+    void throwsForbiddenWhenUserDoesNotHaveAccessToDelivery() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("other customer")).thenReturn(AccountType.CLIENT);
 
@@ -82,7 +82,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Update_succeeds_when_authenticated_user_makes_a_legal_update() {
+    void updateSucceedsWhenAuthenticatedUserMakesALegalUpdate() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
         when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
@@ -97,7 +97,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Throws_forbidden_when_authenticated_user_makes_not_chronological_update() {
+    void throwsForbiddenWhenAuthenticatedUserMakesNotChronologicalUpdate() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("restaurant")).thenReturn(AccountType.VENDOR);
         when(usersAuthentication.checkUserAccessToDelivery("restaurant", delivery)).thenReturn(true);
@@ -108,7 +108,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Throws_forbidden_when_authenticated_user_makes_update_not_belonging_to_them() {
+    void throwsForbiddenWhenAuthenticatedUserMakesUpdateNotBelongingToThem() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("client")).thenReturn(AccountType.CLIENT);
         when(usersAuthentication.checkUserAccessToDelivery("client", delivery)).thenReturn(true);
@@ -119,7 +119,7 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void Throws_bad_request_when_authenticated_user_makes_update_with_invalid_delivery_status() {
+    void throwsBadRequestWhenAuthenticatedUserMakesUpdateWithInvalidDeliveryStatus() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
         when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
