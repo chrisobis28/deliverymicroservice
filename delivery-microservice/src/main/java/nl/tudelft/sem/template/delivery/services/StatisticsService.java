@@ -167,20 +167,22 @@ public class StatisticsService {
      * @param endTime the end of the period
      * @return the rate
      */
-    public Double getUnexpectedEventStatistics(ErrorType unexpectedEvent, OffsetDateTime startTime, OffsetDateTime endTime){
-        if(startTime==null || endTime==null){
+    public Double getUnexpectedEventStatistics(ErrorType unexpectedEvent, OffsetDateTime startTime, OffsetDateTime endTime) {
+        if (startTime == null || endTime == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more fields were null");
         }
-        if(startTime.isAfter(endTime)){
+        if (startTime.isAfter(endTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a correct input");
         }
         List<ErrorType> list = deliveryRepository.findAll().stream()
-                .filter(d ->d.getOrderTime().isAfter(startTime) && d.getOrderTime().isBefore(endTime))
+                .filter(d -> d.getOrderTime().isAfter(startTime) && d.getOrderTime().isBefore(endTime))
                 .map(d -> d.getError().getType()).collect(Collectors.toList());
-        if(list.isEmpty()) return 0.0;
+        if (list.isEmpty()) {
+            return 0.0;
+        }
 
-        double count = (double) list.stream().filter(e -> Objects.equals(e,unexpectedEvent)).count();
-        return count/(double) list.size();
+        double count = (double) list.stream().filter(e -> Objects.equals(e, unexpectedEvent)).count();
+        return count / (double) list.size();
 
     }
 

@@ -34,7 +34,7 @@ class StatisticsServiceTest {
     @Autowired
     private ErrorRepository errorRepository;
     private StatisticsService statisticsService;
-    Error e = new Error();
+    Error error = new Error();
     Delivery delivery1 = new Delivery();
     OffsetDateTime date0;
 
@@ -47,9 +47,9 @@ class StatisticsServiceTest {
         UUID dId = UUID.randomUUID();
         delivery1.setDeliveryID(dId);
         delivery1.setOrderTime(date0);
-        e.errorId(dId).type(ErrorType.OTHER);
-        errorRepository.save(e);
-        delivery1.setError(e);
+        error.errorId(dId).type(ErrorType.OTHER);
+        errorRepository.save(error);
+        delivery1.setError(error);
         deliveryRepository.save(delivery1);
 
     }
@@ -67,51 +67,53 @@ class StatisticsServiceTest {
     }
 
     @Test
-    void unexpectedEventTestNull1(){
+    void unexpectedEventTestNull1() {
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER,null,null));
+                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, null, null));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
     }
 
     @Test
-    void unexpectedEventTestNull2(){
+    void unexpectedEventTestNull2() {
         OffsetDateTime date0 = OffsetDateTime.of(2023, 12, 13, 14, 33, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date0,null));
+                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date0, null));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
     }
 
     @Test
-    void unexpectedEventTestWrongOrder(){
+    void unexpectedEventTestWrongOrder() {
         OffsetDateTime date0 = OffsetDateTime.of(2023, 12, 13, 14, 33, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date2,date1));
+                () -> statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date2, date1));
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
 
     }
+
     @Test
-    void unexpectedEventTestNoDelivery(){
+    void unexpectedEventTestNoDelivery() {
 
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         delivery1.setOrderTime(date1);
         deliveryRepository.save(delivery1);
-        Double d = statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date1,date2);
+        Double d = statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date1, date2);
         assertEquals(0.0, d);
 
     }
+
     @Test
-    void unexpectedEventTestDelivery(){
+    void unexpectedEventTestDelivery() {
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
-        Double d = statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date1,date2);
+        Double d = statisticsService.getUnexpectedEventStatistics(ErrorType.OTHER, date1, date2);
         assertEquals(1.0, d);
 
     }

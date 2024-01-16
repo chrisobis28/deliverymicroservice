@@ -157,29 +157,33 @@ public class StatisticsController implements StatisticsApi {
      * @return the rate of that event
      */
     @Override
-    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader @NotNull String userID,
-                                                                   @RequestParam @NotNull @Valid ErrorType unexpectedEvent,
-                                                                   @RequestParam @DateTimeFormat @Valid OffsetDateTime startTime,
-                                                                   @RequestParam @DateTimeFormat @Valid OffsetDateTime endTime) {
+    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
+                                                                       @NotNull String userID,
+                                                                   @RequestParam
+                                                                       @NotNull @Valid ErrorType unexpectedEvent,
+                                                                   @RequestParam
+                                                                       @DateTimeFormat @Valid OffsetDateTime startTime,
+                                                                   @RequestParam
+                                                                       @DateTimeFormat @Valid OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
-        if( accountType.equals(UsersAuthenticationService.AccountType.ADMIN))
-        {
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
 
-            Double statistics = statisticsService.getUnexpectedEventStatistics(unexpectedEvent,startTime,endTime);
+            Double statistics = statisticsService.getUnexpectedEventStatistics(unexpectedEvent, startTime, endTime);
             return ResponseEntity.status(HttpStatus.OK).body(statistics);
 
         }
-        if(accountType.equals(UsersAuthenticationService.AccountType.INVALID)){
-            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
+        if (accountType.equals(UsersAuthenticationService.AccountType.INVALID)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
         }
-        throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "User doesn't have the necessary role to view this");
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User doesn't have the necessary role to view this");
 
 
     }
 
     /**
-      * Checks if a string is null or empty
+      * Checks if a string is null or empty.
+      *
       * @param str string to check
       * @return boolean value indicating whether string is empty or not
       */

@@ -315,6 +315,6 @@ public class RestaurantController implements RestaurantsApi {
      * @return boolean value indicating whether address is invalid or not
      */
     public boolean isInvalidAddress(List<Double> str) {
-        return str == null || str.size() != 2 ;
+        return str == null || str.size() != 2;
     }
 }

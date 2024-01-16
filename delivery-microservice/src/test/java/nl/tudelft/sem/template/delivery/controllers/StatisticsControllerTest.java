@@ -61,7 +61,7 @@ class StatisticsControllerTest {
     Delivery d4 = new Delivery();
     Delivery d5 = new Delivery();
     Delivery d6 = new Delivery();
-    Error e = new Error();
+    Error error = new Error();
 
 
 
@@ -82,9 +82,9 @@ class StatisticsControllerTest {
         d4.setDeliveryID(orderId4);
         d5.setDeliveryID(orderId5);
         d6.setDeliveryID(orderId6);
-        e.setErrorId(orderId1);
-        e.setType(ErrorType.OTHER);
-        repoe.save(e);
+        error.setErrorId(orderId1);
+        error.setType(ErrorType.OTHER);
+        repoe.save(error);
         usersCommunication = mock(UsersAuthenticationService.class);
         StatisticsService statisticsService = new StatisticsService(repo1);
         sut = new StatisticsController(statisticsService, usersCommunication);
@@ -285,6 +285,7 @@ class StatisticsControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"", exception.getMessage());
     }
+
     @Test
     void statisticsRatingsForUnexpectedEventUnauthorized() {
         userType = UsersAuthenticationService.AccountType.INVALID;
@@ -293,7 +294,7 @@ class StatisticsControllerTest {
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsUnexpectedEventRateGet(userId,event,date1, date2 ));
+                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2));
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
     }
@@ -306,10 +307,11 @@ class StatisticsControllerTest {
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2 ));
+                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2));
 
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
+
     @Test
     void statisticsRatingsForUnexpectedEventNullStartDate() {
         userType = UsersAuthenticationService.AccountType.ADMIN;
@@ -318,7 +320,7 @@ class StatisticsControllerTest {
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsUnexpectedEventRateGet(userId, event,null, date2 ));
+                () -> sut.statisticsUnexpectedEventRateGet(userId, event, null, date2));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
@@ -331,10 +333,11 @@ class StatisticsControllerTest {
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, null ));
+                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, null));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
+
     @Test
     void statisticsRatingsForUnexpectedEventWrongOrderOfDates() {
         userType = UsersAuthenticationService.AccountType.ADMIN;
@@ -343,7 +346,7 @@ class StatisticsControllerTest {
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date2, date1 ));
+                () -> sut.statisticsUnexpectedEventRateGet(userId, event, date2, date1));
 
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
     }
@@ -356,7 +359,7 @@ class StatisticsControllerTest {
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         d1.setOrderTime(date0);
-        d1.setError(e);
+        d1.setError(error);
         repo1.save(d1);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseEntity<Double> r = sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2);
@@ -372,7 +375,7 @@ class StatisticsControllerTest {
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         d1.setOrderTime(date0);
-        d1.setError(e);
+        d1.setError(error);
         repo1.save(d1);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseEntity<Double> r = sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2);
@@ -388,7 +391,7 @@ class StatisticsControllerTest {
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         d1.setOrderTime(date0);
-        d1.setError(e);
+        d1.setError(error);
         repo1.save(d1);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseEntity<Double> r = sut.statisticsUnexpectedEventRateGet(userId, event, date1, date2);
