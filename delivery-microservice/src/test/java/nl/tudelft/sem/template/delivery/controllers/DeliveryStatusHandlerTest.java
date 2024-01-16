@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -99,6 +100,18 @@ public class DeliveryStatusHandlerTest {
                 .extracting("status")
                 .isEqualTo(DeliveryStatus.DELIVERED);
         verify(usersCommunication, times(1)).updateOrderStatus(any(), any());
+    }
+
+    @Test
+    void updateDoesNotSucceedBecauseOtherServerUnavailable() {
+        Delivery delivery = insertExampleDelivery();
+        when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
+        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
+        doThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE)).when(usersCommunication).updateOrderStatus(any(), any());
+        assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
+                .extracting("status")
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+
     }
 
     @Test

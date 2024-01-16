@@ -66,9 +66,9 @@ public class DeliveryStatusHandler {
         if (!StatusValidity.isStatusUpdateLegal(accountType, oldStatus, newStatus)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-
-        deliveryService.updateDeliveryStatus(deliveryId, newStatus);
         usersCommunication.updateOrderStatus(deliveryId, newStatus.toString());
+        deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+
         return ResponseEntity.ok(delivery);
     }
 
