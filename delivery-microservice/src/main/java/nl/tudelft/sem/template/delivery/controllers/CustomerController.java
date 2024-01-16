@@ -1,5 +1,8 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 import nl.tudelft.sem.template.api.CustomersApi;
 import nl.tudelft.sem.template.delivery.services.CustomersService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -9,15 +12,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
 public class CustomerController implements CustomersApi {
 
-    private final CustomersService customersService;
-    private final UsersAuthenticationService usersAuth;
+    private final transient CustomersService customersService;
+    private final transient UsersAuthenticationService usersAuth;
 
+    /**
+     * Constructor.
+     *
+     * @param customersService customer service
+     * @param usersAuth user authentication
+     */
     public CustomerController(CustomersService customersService, UsersAuthenticationService usersAuth) {
         this.customersService = customersService;
         this.usersAuth = usersAuth;
@@ -31,10 +36,10 @@ public class CustomerController implements CustomersApi {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer with specified ID not found");
         }
 
-        List<UUID> deliveryUUIDs = customersService.getDeliveriesForCustomer(customerId)
+        List<UUID> deliveryIds = customersService.getDeliveriesForCustomer(customerId)
                 .stream()
                 .map(Delivery::getDeliveryID)
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(deliveryUUIDs);
+        return ResponseEntity.ok(deliveryIds);
     }
 }

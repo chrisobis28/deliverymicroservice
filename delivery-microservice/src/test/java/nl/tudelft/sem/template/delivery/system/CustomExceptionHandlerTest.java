@@ -29,7 +29,8 @@ public class CustomExceptionHandlerTest {
     private CustomExceptionHandler exceptionHandler;
 
     @Test
-    void when_ResponseStatusException_with_client_side_error_is_thrown_then_ApiError_with_full_message_should_be_returned() throws JsonProcessingException {
+    void whenResponseStatusExceptionWithClientSideErrorIsThrownThenApiErrorWithFullMessageShouldBeReturned()
+            throws JsonProcessingException {
         ResponseEntity<String> response = restTemplate.getForEntity("/test/client-error", String.class);
 
         verify(exceptionHandler).handleResponseStatusException(any(ResponseStatusException.class));
@@ -38,7 +39,8 @@ public class CustomExceptionHandlerTest {
     }
 
     @Test
-    void when_ResponseStatusException_with_server_side_error_is_thrown_then_ApiError_with_no_message_should_be_returned() throws JsonProcessingException {
+    void whenResponseStatusExceptionWithServerSideErrorIsThrownThenApiErrorWithNoMessageShouldBeReturned()
+            throws JsonProcessingException {
         ResponseEntity<String> response = restTemplate.getForEntity("/test/server-error", String.class);
 
         verify(exceptionHandler).handleResponseStatusException(any(ResponseStatusException.class));
@@ -47,7 +49,8 @@ public class CustomExceptionHandlerTest {
     }
 
     @Test
-    void when_application_exception_is_thrown_then_ApiError_with_no_message_and_code_500_should_be_returned() throws JsonProcessingException {
+    void whenApplicationExceptionIsThrownThenApiErrorWithNoMessageAndCode500ShouldBeReturned()
+            throws JsonProcessingException {
         ResponseEntity<String> response = restTemplate.getForEntity("/test/application-error", String.class);
 
         verify(exceptionHandler).handleResponseStatusException(any(RuntimeException.class));

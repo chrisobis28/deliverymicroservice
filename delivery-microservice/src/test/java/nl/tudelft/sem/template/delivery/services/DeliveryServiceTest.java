@@ -3,8 +3,8 @@ package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
-import nl.tudelft.sem.template.model.*;
 import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,10 +19,11 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.OffsetDateTime.now;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceTest {
@@ -39,7 +40,7 @@ class DeliveryServiceTest {
     public DeliveryService deliveryService;
 
     @Test
-    void ReturnsDeliveryStatus() {
+    void returnsDeliveryStatus() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
@@ -50,7 +51,7 @@ class DeliveryServiceTest {
     }
 
     @Test
-    void ThrowsDeliveryNotFoundInvalid() {
+    void throwsDeliveryNotFoundInvalid() {
         UUID invalidDeliveryId = UUID.randomUUID();
         when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
@@ -58,7 +59,7 @@ class DeliveryServiceTest {
     }
 
     @Test
-    void UpdatesStatus() {
+    void updatesStatus() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
@@ -103,8 +104,8 @@ class DeliveryServiceTest {
         when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
         deliveryService.updateEstimatedPrepTime(deliveryId, prepTime);
         verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
-                x.getDeliveryID().equals(deliveryId) &&
-                        x.getEstimatedPrepTime().equals(prepTime)));
+                x.getDeliveryID().equals(deliveryId)
+                        && x.getEstimatedPrepTime().equals(prepTime)));
 
         // Assert that only prep time field changed
         assertEquals(expected, delivery);
@@ -174,7 +175,7 @@ class DeliveryServiceTest {
     public void testComputeEstimatedDeliveryTimeGivenToCourierStatus() {
         UUID deliveryId = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now();
-        OffsetDateTime then = OffsetDateTime.of(2020, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        OffsetDateTime then = OffsetDateTime.of(2020, 12, 13, 14, 0, 0, 0, ZoneOffset.UTC);
         String restaurantID = "vendor@example.org";
         String courierID = "courier@example.org";
         String customerID = "customer@example.org";
@@ -226,7 +227,7 @@ class DeliveryServiceTest {
     public void testComputeEstimatedDeliveryTimeOnTransitStatus() {
         UUID deliveryId = UUID.randomUUID();
         OffsetDateTime now = OffsetDateTime.now();
-        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0, 0, ZoneOffset.UTC);
         String restaurantID = "vendor@example.org";
         String courierID = "courier@example.org";
         String customerID = "customer@example.org";
@@ -279,7 +280,7 @@ class DeliveryServiceTest {
     @Test
     public void testComputeEstimatedDeliveryTimeDeliveredStatus() {
         UUID deliveryId = UUID.randomUUID();
-        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0, 0, ZoneOffset.UTC);
 
         // Create a Delivery object
         Delivery delivery = new Delivery();
@@ -299,7 +300,7 @@ class DeliveryServiceTest {
     @Test
     public void testComputeEstimatedDeliveryTimeRejectedStatus() {
         UUID deliveryId = UUID.randomUUID();
-        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0,0, ZoneOffset.UTC);
+        OffsetDateTime then = OffsetDateTime.of(2023, 12, 13, 14, 0, 0, 0, ZoneOffset.UTC);
 
         // Create a Delivery object
         Delivery delivery = new Delivery();
@@ -379,7 +380,8 @@ class DeliveryServiceTest {
         List<Double> coordB = List.of(3.3, 4.4);
 
         Double expected = 345.82;
-        assertEquals(expected, deliveryService.computeHaversine(coordA.get(0), coordA.get(1), coordB.get(0), coordB.get(1)), 0.01);
+        assertEquals(expected, deliveryService
+                .computeHaversine(coordA.get(0), coordA.get(1), coordB.get(0), coordB.get(1)), 0.01);
     }
 
     @Test
@@ -406,8 +408,8 @@ class DeliveryServiceTest {
         deliveryService.updatePickupTime(deliveryId, pickUpTime);
 
         verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
-            x.getDeliveryID().equals(deliveryId) &&
-                x.getPickupTime().equals(pickUpTime)));
+                x.getDeliveryID().equals(deliveryId)
+                        && x.getPickupTime().equals(pickUpTime)));
 
         assertEquals(expected, delivery);
     }
@@ -425,7 +427,7 @@ class DeliveryServiceTest {
     }
 
     @Test
-    void insertTest(){
+    void insertTest() {
         assertThrows(IllegalArgumentException.class, () -> deliveryService.insert(null));
         assertThrows(IllegalArgumentException.class, () -> deliveryService.insert(new Delivery()));
     }
