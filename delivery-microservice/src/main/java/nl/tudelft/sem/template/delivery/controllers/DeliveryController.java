@@ -2,43 +2,50 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
+import nl.tudelft.sem.template.model.DeliveriesPostRequest;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
-import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.UUID;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+
+
 
 @RestController
 public class DeliveryController implements DeliveriesApi {
 
-    private final DeliveryService deliveryService;
-
-    private final UsersAuthenticationService usersCommunication;
-    private final DeliveryStatusHandler deliveryStatusHandler;
-
-    private final AvailableDeliveryProxy availableDeliveryProxy;
+    private final transient DeliveryService deliveryService;
+    private final transient UsersAuthenticationService usersCommunication;
+    private final transient DeliveryStatusHandler deliveryStatusHandler;
+    private final transient AvailableDeliveryProxy availableDeliveryProxy;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param deliveryService       the delivery service
      * @param usersCommunication    mock for users authorization
      * @param deliveryStatusHandler Handles the status of Delivery entities
      */
-    public DeliveryController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
+    public DeliveryController(DeliveryService deliveryService,
+                              UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
@@ -46,10 +53,11 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Get an error associated with a delivery
+     * Get an error associated with a delivery.
      * (don't check for null error bc error is initialized along with Delivery)
+     *
      * @param deliveryId ID of the Delivery entity (required) id of Delivery entity
-     * @param userId User ID for authorization (required) user ID
+     * @param userId     User ID for authorization (required) user ID
      * @return ResponseEntity containing error (if user is authorized)
      */
     @Override
@@ -72,10 +80,11 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Get the id of the restaurant making the delivery
+     * Get the id of the restaurant making the delivery.
      * - access granted only for vendor of restaurant making delivery, courier making delivery and admin
+     *
      * @param deliveryId ID of the Delivery entity (required) - checking if Delivery entity exists
-     * @param userId User ID for authorization (required) - ID of user making the request
+     * @param userId     User ID for authorization (required) - ID of user making the request
      * @return ResponseEntity containing restaurant id (if user is authorized)
      */
     @Override
@@ -94,65 +103,70 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * The get method for getting the pickup time of a delivery
+     * The get method for getting the pickup time of a delivery.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return pickup time for a delivery
      */
     @Override
-    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId,
+                                                                        @RequestHeader String userId) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
-        {
-            if(!delivery.getCourierID().equals(userId))
+        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
+            if (!delivery.getCourierID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
+            }
             return ResponseEntity.ok().body(delivery.getPickupTime());
         }
-        if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
-        {
-            if(!delivery.getRestaurantID().equals(userId))
+        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
+            if (!delivery.getRestaurantID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
+            }
             return ResponseEntity.ok(delivery.getPickupTime());
         }
-        if(accountType.equals(UsersAuthenticationService.AccountType.CLIENT))
-        {
-            if(!delivery.getCustomerID().equals(userId))
+        if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+            if (!delivery.getCustomerID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Client does not correspond to the order.");
+            }
             return ResponseEntity.ok(delivery.getPickupTime());
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
     }
 
     /**
-     * The put method for updating the pickup time of a delivery
+     * The put method for updating the pickup time of a delivery.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @param pickupTime Update pick up time of delivery (required)
      * @return updated pickup time of delivery
      */
     @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId, @RequestHeader String userId,@RequestBody OffsetDateTime pickupTime) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId,
+                                                                  @RequestHeader String userId,
+                                                                  @RequestBody OffsetDateTime pickupTime) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN) ) {
-            deliveryService.updatePickupTime(deliveryId,pickupTime);
-            return ResponseEntity.ok(delivery);
-        }
-        if(accountType.equals(UsersAuthenticationService.AccountType.COURIER))
-        {
-            if(!delivery.getCourierID().equals(userId))
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
             deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
-        if(accountType.equals(UsersAuthenticationService.AccountType.VENDOR))
-        {
-            if(!delivery.getRestaurantID().equals(userId))
+        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
+            if (!delivery.getCourierID().equals(userId)) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
+            }
+            deliveryService.updatePickupTime(deliveryId, pickupTime);
+            return ResponseEntity.ok(delivery);
+        }
+        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
+            if (!delivery.getRestaurantID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
+            }
             deliveryService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
@@ -160,7 +174,8 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Add Delivery endpoint
+     * Add Delivery endpoint.
+     *
      * @param deliveriesPostRequest Request body for creating a new Delivery entity (optional)
      * @return Delivery entity that was just added to the database
      */
@@ -171,12 +186,11 @@ public class DeliveryController implements DeliveriesApi {
         }
 
         Delivery delivery = new Delivery();
-        String status = deliveriesPostRequest.getStatus().toUpperCase();
+        String status = deliveriesPostRequest.getStatus().toUpperCase(Locale.ROOT);
         String orderId = deliveriesPostRequest.getOrderId();
         String customerId = deliveriesPostRequest.getCustomerId();
         String vendorId = deliveriesPostRequest.getVendorId();
         List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
-        OffsetDateTime now = OffsetDateTime.now();
 
         delivery.setStatus(DeliveryStatus.fromValue(status));
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
@@ -188,14 +202,14 @@ public class DeliveryController implements DeliveriesApi {
         }
 
         Restaurant r;
-        try{
+        try {
             r = deliveryService.getRestaurant(vendorId);
-        }
-        catch(RestaurantService.RestaurantNotFoundException e){
+        } catch (RestaurantService.RestaurantNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VENDOR NOT FOUND.");
         }
 
-        if(deliveryService.computeHaversine(r.getLocation().get(0), r.getLocation().get(1), addr.get(0), addr.get(1)) > r.getDeliveryZone()){
+        if (deliveryService.computeHaversine(r.getLocation().get(0),
+                r.getLocation().get(1), addr.get(0), addr.get(1)) > r.getDeliveryZone()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
         UUID deliveryId = UUID.fromString(orderId);
@@ -204,26 +218,30 @@ public class DeliveryController implements DeliveriesApi {
         delivery.setRestaurantID(vendorId);
         delivery.setDeliveryAddress(addr);
         delivery.setError(null);
-        delivery.setOrderTime(now);
+        delivery.setOrderTime(OffsetDateTime.now());
         delivery = deliveryService.insert(delivery);
         return ResponseEntity.ok(delivery);
     }
 
 
     @Override
-    public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+    public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId,
+                                                                @RequestHeader String userId) {
         return deliveryStatusHandler.getDeliveryStatus(deliveryId, userId);
     }
 
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
         ResponseEntity<Delivery> delivery = deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
-        if (delivery.getBody() != null) availableDeliveryProxy.checkIfAvailable(delivery.getBody());
+        if (delivery.getBody() != null) {
+            availableDeliveryProxy.checkIfAvailable(delivery.getBody());
+        }
         return delivery;
     }
 
     /**
-     * inserts an element into the repo (internal method)
+     * inserts an element into the repo (internal method).
+     *
      * @param delivery delivery being inserted
      * @return the entity
      */
@@ -237,9 +255,10 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Get current location (only customer and admin)
+     * Get current location (only customer and admin).
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return list of doubles showing address (empty for now, will make adapter design pattern)
      */
     @Override
@@ -259,7 +278,8 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Method to check if coordinates are valid
+     * Method to check if coordinates are valid.
+     *
      * @param coords coordinates to check
      * @return boolean value indicating whether coordinates are valid
      */
@@ -268,9 +288,10 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Get customer that ordered the Delivery
+     * Get customer that ordered the Delivery.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return customer id if the user is authorized to see it
      */
     @Override
@@ -290,9 +311,10 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Gets delivery time of Delivery entity
+     * Gets delivery time of Delivery entity.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return gets delivery time (if user is authorized to see it)
      */
     @Override
@@ -313,13 +335,15 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * returns the delivery address
+     * Returns the delivery address.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return delivery address
      */
     @Override
-    public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+    public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId,
+                                                                               @RequestHeader String userId) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
 
@@ -337,14 +361,15 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Returns the pickup location
+     * Returns the pickup location.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
+     * @param userId     User ID for authorization (required)
      * @return the pickup location
      */
     @Override
-    public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        //try {
+    public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId,
+                                                                              @RequestHeader String userId) {
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
 
@@ -360,7 +385,8 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Checks if a string is null or empty
+     * Checks if a string is null or empty.
+     *
      * @param str string to check
      * @return boolean value indicating whether string is empty or not
      */
@@ -369,20 +395,17 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Allows the customer to update a courier's rating
+     * Allows the customer to update a courier's rating.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
-     * @param body Update rating of delivery (required)
+     * @param userId     User ID for authorization (required)
+     * @param body       Update rating of delivery (required)
      * @return Response entity containing the updated Delivery object
      */
     @Override
-    @RequestMapping(
-        method = {RequestMethod.PUT},
-        value = {"/{deliveryId}/rating-courier"},
-        produces = {"application/json"},
-        consumes = {"application/json"}
-    )
-    public ResponseEntity<Delivery> deliveriesDeliveryIdRatingCourierPut(@PathVariable("deliveryId") UUID deliveryId, @RequestHeader @NotNull String userId, @RequestBody @Valid Integer body) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdRatingCourierPut(@PathVariable UUID deliveryId,
+                                                                         @RequestHeader @NotNull String userId,
+                                                                         @RequestBody @Valid Integer body) {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
         } else {
@@ -402,20 +425,16 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     @Override
-    @RequestMapping(
-        method = {RequestMethod.PUT},
-        value = {"/{deliveryId}/rating-restaurant"},
-        produces = {"application/json"},
-        consumes = {"application/json"}
-    )
-    public ResponseEntity<Delivery> deliveriesDeliveryIdRatingRestaurantPut(/*@Parameter(name = "deliveryId",description = "ID of the Delivery entity",required = true,in = ParameterIn.PATH) */@PathVariable("deliveryId") UUID deliveryId, /*@Parameter(name = "userId",description = "User ID for authorization",required = true,in = ParameterIn.HEADER)*/ @RequestHeader @NotNull String userId, /*@Parameter(name = "body",description = "Update rating of restaurant for delivery",required = true) */@RequestBody @Valid Integer body) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdRatingRestaurantPut(@PathVariable UUID deliveryId,
+                                                                            @RequestHeader @NotNull String userId,
+                                                                            @RequestBody @Valid Integer body) {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
         } else {
             Delivery delivery = deliveryService.getDelivery(deliveryId);
             //Call user endpoint that verifies the role of user path:"/account/type"
             UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-            String email = delivery.getCustomerID();//orderMockRepo.getUserEmail(deliveryId);
+            String email = delivery.getCustomerID(); //orderMockRepo.getUserEmail(deliveryId);
             boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
             if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
                 if (type.equals(UsersAuthenticationService.AccountType.INVALID))
@@ -430,11 +449,6 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     @Override
-    @RequestMapping(
-        method = {RequestMethod.GET},
-        value = {"/{deliveryId}/rating-restaurant"},
-        produces = {"application/json"}
-    )
     public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter(name = "deliveryId", description = "ID of the Delivery entity", required = true, in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId", description = "User ID for authorization", required = true, in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
         //Only people that can see rating is the customer who left the rating, the vendor and the admin
         if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
@@ -454,11 +468,6 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     @Override
-    @RequestMapping(
-        method = {RequestMethod.GET},
-        value = {"/{deliveryId}/rating-courier"},
-        produces = {"application/json"}
-    )
     public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter(name = "deliveryId", description = "ID of the Delivery entity", required = true, in = ParameterIn.PATH) @PathVariable("deliveryId") UUID deliveryId, @Parameter(name = "userId", description = "User ID for authorization", required = true, in = ParameterIn.HEADER) @RequestHeader @NotNull String userId) {
         //Only people that can see rating is the customer who left the rating, the courier and the admin
         if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
@@ -478,16 +487,16 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Gets all accepted orders in the system, meaning those that do not yet have a courier assigned
+     * Gets all accepted orders in the system, meaning those that do not yet have a courier assigned.
+     *
      * @param userId ID of the User for authorization (required)
      * @return a List of Delivery Objects
      */
-    @GetMapping("/deliveries/all/accepted")
     @Override
     public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
 
-        return switch(accountType) {
+        return switch (accountType) {
             case ADMIN, COURIER -> ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
             case VENDOR, CLIENT -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
@@ -495,12 +504,12 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Gets the courier ID of an order
+     * Gets the courier ID of an order.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId ID of the User for authorization (required)
+     * @param userId     ID of the User for authorization (required)
      * @return a String with the ID of the courier
      */
-    @GetMapping("/deliveries/{deliveryId}/courier")
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCourierGet(@PathVariable UUID deliveryId,
                                                                  @RequestHeader String userId) {
@@ -521,7 +530,8 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Updates the courier ID of an order
+     * Updates the courier ID of an order.
+     *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     ID of the User for authorization (required)
      * @param courierId  ID of the courier for updating the Delivery (required)
@@ -574,15 +584,17 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Updates the estimated preparation time of an order
+     * Updates the estimated preparation time of an order.
+     *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     User ID for authorization (required)
      * @param body       Update prep time of delivery (required)
      * @return a delivery object with the updates that took place
      */
-    @PutMapping("/deliveries/{deliveryId}/prep")
     @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdPrepPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody Integer body) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdPrepPut(@PathVariable UUID deliveryId,
+                                                                @RequestHeader String userId,
+                                                                @RequestBody Integer body) {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
@@ -606,14 +618,15 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Computes an estimation for when an order will be delivered
+     * Computes an estimation for when an order will be delivered.
      *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     User ID for authorization (required)
      * @return an estimated delivery time
      */
     @Override
-    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
+    public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId,
+                                                                                       @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is null or empty");
         }
@@ -635,14 +648,14 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Return a specific delivery entity
+     * Return a specific delivery entity.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
-     * @return Response Entity containing Delivery
+     * @param userId     User ID for authorization (required)
+     * @return delivery
      */
     @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdGet(@PathVariable UUID deliveryId, @RequestHeader String userId)
-    {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
         }
@@ -665,14 +678,14 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Returns the preparation time for a specific entity
+     * Returns the preparation time for a specific entity.
+     *
      * @param deliveryId ID of the Delivery entity (required)
-     * @param userId User ID for authorization (required)
-     * @return Response Entity containing preparation time
+     * @param userId     User ID for authorization (required)
+     * @return the estimated preparation time
      */
     @Override
-    public ResponseEntity<Integer> deliveriesDeliveryIdPrepGet(@PathVariable UUID deliveryId, @RequestHeader String userId)
-    {
+    public ResponseEntity<Integer> deliveriesDeliveryIdPrepGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
         if (isNullOrEmpty(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
         }
@@ -694,30 +707,37 @@ public class DeliveryController implements DeliveriesApi {
     }
 
     /**
-     * Updates the delivery address of an order
+     * Updates the delivery address of an order.
      *
      * @param deliveryId  ID of the Delivery entity (required)
      * @param userId      ID of the User for authorization (required)
      * @param requestBody new address to be used in the future (required)
      * @return a Delivery Object with the updates that took place
      */
-    @PutMapping("/deliveries/{deliveryId}/delivery-address")
     @Override
-    public ResponseEntity<Delivery> deliveriesDeliveryIdDeliveryAddressPut(@PathVariable UUID deliveryId, @RequestHeader String userId, @RequestBody List<Double> requestBody) {
+    public ResponseEntity<Delivery> deliveriesDeliveryIdDeliveryAddressPut(@PathVariable UUID deliveryId,
+                                                                           @RequestHeader String userId,
+                                                                           @RequestBody List<Double> requestBody) {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (requestBody == null || requestBody.size() != 2)
+        if (requestBody == null || requestBody.size() != 2) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery Address not set correctly.");
+        }
         switch (userType) {
             case CLIENT, ADMIN -> {
-                if (userType.equals(UsersAuthenticationService.AccountType.CLIENT) && !delivery.getCustomerID().equals(userId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Customer does not correspond to the order.");
+                if (userType.equals(UsersAuthenticationService.AccountType.CLIENT)
+                        && !delivery.getCustomerID().equals(userId)) {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Customer does not correspond to the order.");
                 }
                 deliveryService.updateDeliveryAddress(deliveryId, new ArrayList<>(requestBody));
                 return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
             }
-            case COURIER, VENDOR -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customers can update the delivery address.");
-            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+            case COURIER, VENDOR ->
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                            "Only customers can update the delivery address.");
+            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Account could not be verified.");
         }
     }
 

@@ -27,7 +27,7 @@ class DeliveryServiceStatusTest {
     public DeliveryService deliveryDao;
 
     @Test
-    void Returns_delivery_status_when_getDeliveryStatus_called() {
+    void returnsDeliveryStatusWhenGetDeliveryStatusCalled() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);
@@ -38,7 +38,7 @@ class DeliveryServiceStatusTest {
     }
 
     @Test
-    void Throws_deliveryNotFound_when_deliveryId_is_invalid() {
+    void throwsDeliveryNotFoundWhenDeliveryIdIsInvalid() {
         UUID invalidDeliveryId = UUID.randomUUID();
         when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
         assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
@@ -46,7 +46,7 @@ class DeliveryServiceStatusTest {
     }
 
     @Test
-    void Updates_status_when_updateDeliveryStatus_called() {
+    void updatesStatusWhenUpdateDeliveryStatusCalled() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
         delivery.setDeliveryID(deliveryId);

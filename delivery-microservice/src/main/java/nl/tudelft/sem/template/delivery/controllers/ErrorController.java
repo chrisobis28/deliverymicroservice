@@ -1,50 +1,50 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+import java.util.UUID;
 import nl.tudelft.sem.template.api.ErrorsApi;
-//import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
-//import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
-//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.UUID;
 
-@RequestMapping("/errors")
 @RestController
 public class ErrorController implements ErrorsApi {
 
-    private final ErrorService errorService;
-    private final DeliveryService deliveryService;
-    private final UsersAuthenticationService usersCommunication;
+    private final transient ErrorService errorService;
+    private final transient DeliveryService deliveryService;
+    private final transient UsersAuthenticationService usersCommunication;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param errorService       the error service
      * @param deliveryService    the delivery service
      * @param usersCommunication mock for users authorization
      */
-    public ErrorController(ErrorService errorService, DeliveryService deliveryService, UsersAuthenticationService usersCommunication) {
+    public ErrorController(ErrorService errorService, DeliveryService deliveryService,
+                           UsersAuthenticationService usersCommunication) {
         this.errorService = errorService;
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
     }
 
     /**
-     * Gets the error of a given delivery
+     * Gets the error of a given delivery.
      *
      * @param userId     User ID for authorization (required)
      * @param deliveryId ID of the Delivery entity (required)
      * @return the error
      */
-    @GetMapping("/{deliveryId}/")
     @Override
     public ResponseEntity<Error> errorsDeliveryIdGet(@RequestHeader String userId, @PathVariable UUID deliveryId) {
         if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
@@ -78,7 +78,6 @@ public class ErrorController implements ErrorsApi {
      * @param error      Update unexpected event of delivery (required)
      * @return the updated Error
      */
-    @PutMapping("/{deliveryId}/")
     @Override
     public ResponseEntity<Error> errorsDeliveryIdPut(@RequestHeader String userId, @PathVariable UUID deliveryId, @RequestBody Error error) {
         if (isNullOrEmpty(userId)) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
@@ -104,7 +103,7 @@ public class ErrorController implements ErrorsApi {
     }
 
     /**
-     * Checks if a string is null or empty
+     * Checks if a string is null or empty.
      *
      * @param str string to check
      * @return boolean value indicating whether string is empty or not
@@ -114,7 +113,7 @@ public class ErrorController implements ErrorsApi {
     }
 
     /**
-     * inserts an element into the repo
+     * inserts an element into the repo.
      *
      * @param error error being inserted
      * @return empty response entity

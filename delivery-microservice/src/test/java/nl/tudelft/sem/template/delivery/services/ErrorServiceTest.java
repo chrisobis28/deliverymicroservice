@@ -19,7 +19,9 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import javax.transaction.Transactional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -59,6 +61,8 @@ class ErrorServiceTest {
         assertEquals(error, test);
         assertEquals(error, sut.getError(deliveryId));
     }
+
+
 
     @Test
     void updateErrorDelivered() {
@@ -134,4 +138,25 @@ class ErrorServiceTest {
     void insertThrowsIllegalArgument() {
         assertThrows(IllegalArgumentException.class, () -> sut.insert(null));
     }
+
+    @Test
+    void insertErrorNull() {
+        UUID deliveryId = UUID.randomUUID();
+        Error error = new Error();
+        error.setErrorId(deliveryId);
+        error.setReason("Some compelling reason to get no food.");
+        error.setType(ErrorType.OTHER);
+        assertThrows(IllegalArgumentException.class, () -> sut.insert(null));
+    }
+
+    @Test
+    void insertErrorIdNull() {
+        UUID deliveryId = UUID.randomUUID();
+        Error error = new Error();
+        error.setErrorId(null);
+        error.setReason("Some compelling reason to get no food.");
+        error.setType(ErrorType.OTHER);
+        assertThrows(IllegalArgumentException.class, () -> sut.insert(error));
+    }
+
 }

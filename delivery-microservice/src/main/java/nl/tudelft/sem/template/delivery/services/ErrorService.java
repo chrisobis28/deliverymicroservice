@@ -1,5 +1,7 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.util.UUID;
+import javax.transaction.Transactional;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.model.Delivery;
@@ -7,22 +9,19 @@ import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
-import java.util.UUID;
 
 
 @Service
 public class ErrorService {
 
-    private final ErrorRepository errorRepository;
-    private final DeliveryRepository deliveryRepository;
+    private final transient ErrorRepository errorRepository;
+    private final transient DeliveryRepository deliveryRepository;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param errorRepository    the repository storing information about unexpected events
      * @param deliveryRepository the repository storing delivery information
@@ -34,7 +33,7 @@ public class ErrorService {
     }
 
     /**
-     * Gets the error of a given delivery (one to one correspondence)
+     * Gets the error of a given delivery (one to one correspondence).
      *
      * @param deliveryId ID of the given delivery
      * @return the error of the delivery
@@ -45,7 +44,7 @@ public class ErrorService {
     }
 
     /**
-     * Updates the error of a given delivery (one to one correspondence)
+     * Updates the error of a given delivery (one to one correspondence).
      *
      * @param deliveryId ID of the given delivery
      * @param error      updated error item
@@ -70,16 +69,18 @@ public class ErrorService {
      * Exception to be used when an Error entity with a given ID is not found.
      */
     static public class ErrorNotFoundException extends ResponseStatusException {
+        private static final long serialVersionUID = 1L;
+
         public ErrorNotFoundException() {
             super(HttpStatus.NOT_FOUND, "Error with specified id not found");
         }
     }
 
     /**
-     * Persists an entity in the database
-     * Used for testing purposes
+     * Persists an entity in the database.
+     * Used for testing purposes.
      *
-     * @param error Error to add to repository
+     * @param error error to add to repository
      * @return the inserted error
      */
     public Error insert(Error error) {

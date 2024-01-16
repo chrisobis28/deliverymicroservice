@@ -28,6 +28,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @Transactional
@@ -43,9 +44,8 @@ class ErrorControllerTest {
     private RestaurantRepository repo3;
     private ErrorController sut;
     private DeliveryController deliveryController;
-
-    String userId, reason;
-
+    String userId;
+    String reason;
     UsersAuthenticationService.AccountType userType;
     UUID deliveryId;
     Integer value;

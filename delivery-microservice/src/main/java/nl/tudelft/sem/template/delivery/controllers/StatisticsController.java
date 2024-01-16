@@ -1,42 +1,54 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import nl.tudelft.sem.template.api.StatisticsApi;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.ErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import nl.tudelft.sem.template.model.Statistics;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
-import java.util.*;
-import java.time.OffsetDateTime;
 
-@RequestMapping("/statistics")
 @RestController
 public class StatisticsController implements StatisticsApi {
 
-    private final StatisticsService statisticsService;
+    private final transient StatisticsService statisticsService;
 
-    private final UsersAuthenticationService usersCommunication;
+    private final transient UsersAuthenticationService usersCommunication;
 
     /**
-     * Constructor for statistics controller
+     * Constructor for statistics controller.
      *
      * @param statisticsService  the statistics service
      * @param usersCommunication mock for users authorization
      */
     @Autowired
-    public StatisticsController(StatisticsService statisticsService,UsersAuthenticationService usersCommunication) {
+    public StatisticsController(StatisticsService statisticsService, UsersAuthenticationService usersCommunication) {
         this.statisticsService = statisticsService;
         this.usersCommunication = usersCommunication;
     }
 
     /**
-     * inserts an element into the repo (internal method)
+     * inserts an element into the repo (internal method).
+     *
      * @param delivery delivery being inserted
      * @return an empty response entity with a corresponding status code
      */
@@ -50,16 +62,16 @@ public class StatisticsController implements StatisticsApi {
     }
 
     /**
-     * Gets the restaurant rating given to orders
+     * Gets the restaurant rating given to orders.
      *
      * @param userId   used for authorization
      * @param orderIds the orders for which we want to retrieve the ratings
      * @return a list of ratings that has the same size as the orderIds list
-     * if an order doesn't have a rating, we insert null instead
+     *         if an order doesn't have a rating, we insert null instead
      */
-    @GetMapping("/ratings-for-orders")
     @Override
-    public ResponseEntity<Map<String, Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId, @RequestBody List<UUID> orderIds) {
+    public ResponseEntity<Map<String, Integer>> statisticsRatingsForOrdersGet(@RequestHeader String userId,
+                                                                              @RequestBody List<UUID> orderIds) {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         // After second consideration I changed the permission levels of this endpoint,
         // so that everyone can see the ratings for transparency reasons.
@@ -85,7 +97,8 @@ public class StatisticsController implements StatisticsApi {
      * @return list of doubles representing avg deliveries in each hr bracket
      */
     @Override
-    public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId, @Parameter String vendorId) {
+    public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId,
+                                                                       @Parameter String vendorId) {
         if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or restaurant ID is invalid.");
         }
@@ -99,7 +112,7 @@ public class StatisticsController implements StatisticsApi {
             }
             default: throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
-        List<Delivery> deliveries = statisticsService.getOrdersOfAVendor(vendorId);
+        List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>());
         }
@@ -108,16 +121,19 @@ public class StatisticsController implements StatisticsApi {
     }
 
     /**
-     * Returns the statistics for a specific courier
-     * @param userId User ID for authorization (required)
+     * Returns the statistics for a specific courier.
+     *
+     * @param userId    User ID for authorization (required)
      * @param courierId User ID for authorization (optional)
-     * @param startTime  (optional)
-     * @param endTime  (optional)
+     * @param startTime (optional)
+     * @param endTime   (optional)
      * @return the statistics
      */
     @Override
-    public ResponseEntity<Statistics> statisticsCourierOverviewGet(@Parameter String userId, @Parameter String courierId,@Parameter OffsetDateTime startTime, @Parameter OffsetDateTime endTime)
-    {
+    public ResponseEntity<Statistics> statisticsCourierOverviewGet(@Parameter String userId,
+                                                                   @Parameter String courierId,
+                                                                   @Parameter OffsetDateTime startTime,
+                                                                   @Parameter OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         if(!accountType.equals(UsersAuthenticationService.AccountType.INVALID))
@@ -128,13 +144,49 @@ public class StatisticsController implements StatisticsApi {
 
         }
 
-            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
     }
-   /**
-     * Checks if a string is null or empty
-     * @param str string to check
-     * @return boolean value indicating whether string is empty or not
+
+    /**
+     * Statistics for the rate of a certain unexpected event in a time period.
+     *
+     * @param userID User ID for authorization (required)
+     * @param unexpectedEvent Enum type of the unexpected event (required)
+     * @param startTime  (optional)
+     * @param endTime  (optional)
+     * @return the rate of that event
      */
+    //@Override
+    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
+                                                                       @NotNull String userID,
+                                                                   @RequestParam
+                                                                       @NotNull @Valid ErrorType unexpectedEvent,
+                                                                   @RequestParam
+                                                                       @DateTimeFormat @Valid OffsetDateTime startTime,
+                                                                   @RequestParam
+                                                                       @DateTimeFormat @Valid OffsetDateTime endTime) {
+
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
+        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
+
+            Double statistics = statisticsService.getUnexpectedEventStatistics(unexpectedEvent, startTime, endTime);
+            return ResponseEntity.status(HttpStatus.OK).body(statistics);
+
+        }
+        if (accountType.equals(UsersAuthenticationService.AccountType.INVALID)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
+        }
+        throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User doesn't have the necessary role to view this");
+
+
+    }
+
+    /**
+      * Checks if a string is null or empty.
+      *
+      * @param str string to check
+      * @return boolean value indicating whether string is empty or not
+      */
     public boolean isNullOrEmpty(String str) {
         return str == null || str.isEmpty() || str.isBlank();
     }
