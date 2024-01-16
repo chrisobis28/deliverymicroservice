@@ -44,11 +44,13 @@ public class DeliveryController implements DeliveriesApi {
      * @param deliveryStatusHandler Handles the status of Delivery entities
      */
     public DeliveryController(DeliveryService deliveryService,
-                              UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
+                              UsersAuthenticationService usersCommunication,
+                              DeliveryStatusHandler deliveryStatusHandler,
+                              AvailableDeliveryProxyImplementation availableDeliveryProxy) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
-        this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
+        this.availableDeliveryProxy = availableDeliveryProxy;
     }
 
     /**

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import javax.transaction.Transactional;
+
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -62,6 +64,8 @@ class DeliveryControllerTest {
     private RestaurantRepository repo2;
     private RestaurantController restaurantController;
 
+    DeliveryService ds;
+
     String userId;
     UsersAuthenticationService.AccountType userType;
     UUID deliveryId;
@@ -81,8 +85,9 @@ class DeliveryControllerTest {
         delivery.setEstimatedPrepTime(prepTime);
         usersCommunication = mock(UsersAuthenticationService.class);
 
+        ds = new DeliveryService(repo1, new GPS(), repo2);
         restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), usersCommunication);
-        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication, null);
+        sut = new DeliveryController(ds, usersCommunication, null, new AvailableDeliveryProxyImplementation(ds));
     }
 
     @Test
