@@ -1,18 +1,23 @@
 package nl.tudelft.sem.template.delivery.communication;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import lombok.NoArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @Component
 @NoArgsConstructor
 public class UsersCommunication {
+
+    private static final ObjectMapper mapperReceive = new ObjectMapper();
 
     /**
      * Gets the account type of user.
@@ -37,7 +42,9 @@ public class UsersCommunication {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == HttpStatus.OK.value()) {
-                return response.body();
+                JsonNode jsonNode = mapperReceive.readTree(response.body());
+                return jsonNode.get("type").asText();
+
             }
         } catch (Exception e) {
             e.printStackTrace();
