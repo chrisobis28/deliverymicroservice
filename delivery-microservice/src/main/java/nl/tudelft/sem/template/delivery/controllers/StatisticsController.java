@@ -45,7 +45,7 @@ public class StatisticsController implements StatisticsApi {
             statisticsService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
         }
     }
 

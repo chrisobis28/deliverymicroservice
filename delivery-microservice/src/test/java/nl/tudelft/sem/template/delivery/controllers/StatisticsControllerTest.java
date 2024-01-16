@@ -181,7 +181,7 @@ class StatisticsControllerTest {
             .isEqualTo(HttpStatus.BAD_REQUEST);
         assertThatThrownBy(() -> sut.insert(null))
             .message()
-            .isEqualTo("400 BAD_REQUEST \"BAD REQUEST\"");
+            .isEqualTo("400 BAD_REQUEST \"Delivery is invalid.\"");
 
         sut.insert(d2);
         sut.insert(d3);
