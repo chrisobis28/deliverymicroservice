@@ -93,7 +93,7 @@ public class StatisticsControllerTestWithRepo {
     void authorizedEmptyFunctional() {
         String userID = "user@user.com";
         String courierId = "dominos@dominos.com";
-        OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 30));
 
         OffsetDateTime start_interval = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
@@ -124,13 +124,13 @@ public class StatisticsControllerTestWithRepo {
         String courierId = "dominos@dominos.com";
         OffsetDateTime outTime = OffsetDateTime.of(2022, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
 
-        OffsetDateTime start1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 30));
 
-        OffsetDateTime start2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 10));
 
-        OffsetDateTime start3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 40));
 
         OffsetDateTime start_interval = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));

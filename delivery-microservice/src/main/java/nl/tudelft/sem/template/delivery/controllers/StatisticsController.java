@@ -57,7 +57,7 @@ public class StatisticsController implements StatisticsApi {
             statisticsService.insert(delivery);
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
         }
     }
 
@@ -75,10 +75,7 @@ public class StatisticsController implements StatisticsApi {
         UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
         // After second consideration I changed the permission levels of this endpoint,
         // so that everyone can see the ratings for transparency reasons.
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)
-                || userType.equals(UsersAuthenticationService.AccountType.VENDOR)
-                || userType.equals(UsersAuthenticationService.AccountType.COURIER)
-                || userType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
+        if (!userType.equals(UsersAuthenticationService.AccountType.INVALID)) {
             Map<String, Integer> ratings = new HashMap<>();
             for (UUID orderId : orderIds) {
                 ratings.put(orderId.toString(), statisticsService.getOrderRating(orderId));
@@ -103,12 +100,22 @@ public class StatisticsController implements StatisticsApi {
     public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId,
                                                                        @Parameter String vendorId) {
         if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
-            return ResponseEntity.badRequest().build();
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or restaurant ID is invalid.");
         }
         UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-        boolean isVendor = type.equals(UsersAuthenticationService.AccountType.VENDOR) && vendorId.equals(userId);
-        if (!isVendor && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        switch (type) {
+            case ADMIN: break;
+            case COURIER, CLIENT:
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            case VENDOR: {
+                if (vendorId.equals(userId)) {
+                    break;
+                } else {
+                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+                }
+            }
+            default:
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
@@ -134,16 +141,10 @@ public class StatisticsController implements StatisticsApi {
                                                                    @Parameter OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)
-                || accountType.equals(UsersAuthenticationService.AccountType.VENDOR)
-                || accountType.equals(UsersAuthenticationService.AccountType.ADMIN)
-                || accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
-
+        if (!accountType.equals(UsersAuthenticationService.AccountType.INVALID)) {
             Statistics statistics = statisticsService.getCourierStatistics(courierId, startTime, endTime);
-            return ResponseEntity.status(HttpStatus.OK).body(statistics);
-
+            return ResponseEntity.ok(statistics);
         }
-
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
     }
 
@@ -156,7 +157,7 @@ public class StatisticsController implements StatisticsApi {
      * @param endTime  (optional)
      * @return the rate of that event
      */
-    @Override
+    //@Override
     public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
                                                                        @NotNull String userID,
                                                                    @RequestParam
@@ -188,6 +189,6 @@ public class StatisticsController implements StatisticsApi {
       * @return boolean value indicating whether string is empty or not
       */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.equals(" ");
+        return str == null || str.isEmpty() || str.isBlank();
     }
 }

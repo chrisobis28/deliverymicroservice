@@ -55,7 +55,7 @@ public class UsersCommunication {
 
 
     /**
-     * Updates the order status in the Order people's service
+     * Updates the order status in the Order people's service.
      *
      * @param orderId ID of order
      * @param orderStatus status of order
