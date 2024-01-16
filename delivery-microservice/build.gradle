@@ -82,7 +82,7 @@ test {
 	jacoco {
 		enabled = true
 		includes = ['nl.tudelft.sem.template.*']
-		excludes = ['**/api/.*', '**/model/.*']
+		excludes = ['**/api/.*', '**/model/.*', "**/*Mock.*"]
 	}
 }
 
@@ -97,7 +97,7 @@ jacocoTestCoverageVerification {
 			enabled = true
 			element = 'CLASS'
 			includes = ['nl.tudelft.sem.template.*']
-			excludes = ['nl.tudelft.sem.template.api']
+			excludes = ['**/api/.*', '**/model/.*', "**/*Mock.*"]
 
 			limit {
 				counter = 'BRANCH'
@@ -115,7 +115,8 @@ jacocoTestReport {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
 					"**/api/**",
-					"**/model/**"
+					"**/model/**",
+					"**/*Mock.*"
 			])
 		}))
 	}

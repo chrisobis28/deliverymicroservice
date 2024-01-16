@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import java.util.UUID;
 import nl.tudelft.sem.template.delivery.GPS;
+import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -17,11 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -32,12 +35,14 @@ public class DeliveryStatusHandlerTest {
     private DeliveryRepository deliveryRepository;
     @Mock
     private UsersAuthenticationService usersAuthentication;
+    @Mock
+    private UsersCommunication usersCommunication;
     private DeliveryStatusHandler statusHandler;
 
     @BeforeEach
     public void init() {
         DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
-        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication);
+        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication );
     }
 
     private Delivery insertExampleDelivery() {
@@ -94,6 +99,19 @@ public class DeliveryStatusHandlerTest {
                 .get()
                 .extracting("status")
                 .isEqualTo(DeliveryStatus.DELIVERED);
+        verify(usersCommunication, times(1)).updateOrderStatus(any(), any());
+    }
+
+    @Test
+    void updateDoesNotSucceedBecauseOtherServerUnavailable() {
+        Delivery delivery = insertExampleDelivery();
+        when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
+        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
+        doThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE)).when(usersCommunication).updateOrderStatus(any(), any());
+        assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
+                .extracting("status")
+                .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
+
     }
 
     @Test
