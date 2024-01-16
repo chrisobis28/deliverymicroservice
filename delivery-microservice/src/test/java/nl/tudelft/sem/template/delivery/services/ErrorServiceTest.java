@@ -60,6 +60,8 @@ class ErrorServiceTest {
         assertEquals(error, sut.getError(deliveryId));
     }
 
+
+
     @Test
     void updateErrorDelivered() {
         // Set Data
@@ -134,4 +136,27 @@ class ErrorServiceTest {
     void insertThrowsIllegalArgument() {
         assertThrows(IllegalArgumentException.class, () -> sut.insert(null));
     }
+    @Test
+    void insertErrorNull() {
+        UUID deliveryId = UUID.randomUUID();
+        Error error = new Error();
+        error.setErrorId(deliveryId);
+        error.setReason("Some compelling reason to get no food.");
+        error.setType(ErrorType.OTHER);
+        //Error test = sut.insert(error);
+        assertThrows( IllegalArgumentException.class,() -> sut.insert(null));
+        //assertEquals(error, sut.getError(deliveryId));
+    }
+    @Test
+    void insertErrorIdNull() {
+        UUID deliveryId = UUID.randomUUID();
+        Error error = new Error();
+        error.setErrorId(null);
+        error.setReason("Some compelling reason to get no food.");
+        error.setType(ErrorType.OTHER);
+        //Error test = sut.insert(error);
+        assertThrows( IllegalArgumentException.class,() -> sut.insert(error));
+        //assertEquals(error, sut.getError(deliveryId));
+    }
+
 }

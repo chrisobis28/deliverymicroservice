@@ -1586,7 +1586,8 @@ paths:
                   minItems: 2
                   maxItems: 2
                   items:
-                    type: string
+                    type: number
+                    format: double
                   description: Address for the deliver
               required:
                 - orderID
@@ -2134,18 +2135,14 @@ paths:
             type: string
         - name: startTime
           in: query
-          required: true
-          description: Start time with format YYYY-MM-DD HH:mm
           schema:
             type: string
-            example: "2023-11-19 18:20"
+            format: date-time
         - name: endTime
           in: query
-          required: true
-          description: End time with format YYYY-MM-DD HH:mm
           schema:
             type: string
-            example: "2023-11-19 18:20"
+            format: date-time
         - name: unexpectedEvent
           in: query
           required: true

@@ -4,7 +4,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 
-import nl.tudelft.sem.template.delivery.AddressAdapter;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -67,7 +66,7 @@ class DeliveryControllerTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setEstimatedPrepTime(prepTime);
         usersCommunication = mock(UsersAuthenticationService.class);
-        restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), new AddressAdapter(new GPS()), usersCommunication);
+        restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), usersCommunication);
         sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication, null);
     }
 

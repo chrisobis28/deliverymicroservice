@@ -3,14 +3,16 @@ package nl.tudelft.sem.template.delivery.services;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.ErrorType;
 import nl.tudelft.sem.template.model.Statistics;
+import org.springframework.data.jpa.convert.threeten.Jsr310JpaConverters;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
+import java.time.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -144,6 +146,31 @@ public class StatisticsService {
 
         return statistics;
     }
+
+    /**
+     * Calculates the rate of the specific error type in a time frame
+     * @param unexpectedEvent the type of the error
+     * @param startTime the beginning of the period
+     * @param endTime the end of the period
+     * @return the rate
+     */
+    public Double getUnexpectedEventStatistics(ErrorType unexpectedEvent, OffsetDateTime startTime, OffsetDateTime endTime){
+        if(startTime==null || endTime==null){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "One or more fields were null");
+        }
+        if(startTime.isAfter(endTime)){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a correct input");
+        }
+        List<ErrorType> list = deliveryRepository.findAll().stream()
+                .filter(d ->d.getOrderTime().isAfter(startTime) && d.getOrderTime().isBefore(endTime))
+                .map(d -> d.getError().getType()).collect(Collectors.toList());
+        if(list.isEmpty()) return 0.0;
+
+        double count = (double) list.stream().filter(e -> Objects.equals(e,unexpectedEvent)).count();
+        return count/(double) list.size();
+
+    }
+
 
     /**
      * Returns the successful deliveries of a courier

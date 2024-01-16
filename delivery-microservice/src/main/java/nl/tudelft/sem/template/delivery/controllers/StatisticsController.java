@@ -1,18 +1,23 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.StatisticsApi;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.ErrorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import nl.tudelft.sem.template.model.Statistics;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.*;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -131,11 +136,42 @@ public class StatisticsController implements StatisticsApi {
 
             throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
     }
-   /**
-     * Checks if a string is null or empty
-     * @param str string to check
-     * @return boolean value indicating whether string is empty or not
+
+    /**
+     * Statistics for the rate of a certain unexpected event in a time period
+     * @param userID User ID for authorization (required)
+     * @param unexpectedEvent Enum type of the unexpected event (required)
+     * @param startTime  (optional)
+     * @param endTime  (optional)
+     * @return the rate of that event
      */
+    @Override
+    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader @NotNull String userID,
+                                                                   @RequestParam @NotNull @Valid ErrorType unexpectedEvent,
+                                                                   @RequestParam @DateTimeFormat @Valid OffsetDateTime startTime,
+                                                                   @RequestParam @DateTimeFormat @Valid OffsetDateTime endTime) {
+
+        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
+        if( accountType.equals(UsersAuthenticationService.AccountType.ADMIN))
+        {
+
+            Double statistics = statisticsService.getUnexpectedEventStatistics(unexpectedEvent,startTime,endTime);
+            return ResponseEntity.status(HttpStatus.OK).body(statistics);
+
+        }
+        if(accountType.equals(UsersAuthenticationService.AccountType.INVALID)){
+            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User is unauthorized to access this method");
+        }
+        throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "User doesn't have the necessary role to view this");
+
+
+    }
+
+    /**
+      * Checks if a string is null or empty
+      * @param str string to check
+      * @return boolean value indicating whether string is empty or not
+      */
     public boolean isNullOrEmpty(String str) {
         return str == null || str.isEmpty() || str.equals(" ");
     }
