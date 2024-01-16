@@ -1,18 +1,19 @@
 package nl.tudelft.sem.template.delivery.communication;
 
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.UUID;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import java.util.UUID;
+
 import org.springframework.web.server.ResponseStatusException;
 
 @Component
@@ -43,8 +44,8 @@ public class UsersCommunication {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() == HttpStatus.OK.value()) {
-                JsonNode json = mapperReceive.readTree(response.body());
-                return json.get("type").asText();
+                JsonNode jsonNode = mapperReceive.readTree(response.body());
+                return jsonNode.get("type").asText();
             }
         } catch (Exception e) {
             e.printStackTrace();
