@@ -12,6 +12,7 @@ import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.TimeCalculationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
@@ -36,6 +37,8 @@ public class DeliveryController implements DeliveriesApi {
     private final transient DeliveryStatusHandler deliveryStatusHandler;
     private final transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
 
+    private final transient TimeCalculationService timeCalculationService;
+
     /**
      * Constructor.
      *
@@ -44,11 +47,13 @@ public class DeliveryController implements DeliveriesApi {
      * @param deliveryStatusHandler Handles the status of Delivery entities
      */
     public DeliveryController(DeliveryService deliveryService,
-                              UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler) {
+                              UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler,
+                              TimeCalculationService timeCalculationService) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
         this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
+        this.timeCalculationService = timeCalculationService;
     }
 
     /**
@@ -167,21 +172,21 @@ public class DeliveryController implements DeliveriesApi {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            deliveryService.updatePickupTime(deliveryId, pickupTime);
+            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
             if (!delivery.getCourierID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
             }
-            deliveryService.updatePickupTime(deliveryId, pickupTime);
+            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
             if (!delivery.getRestaurantID().equals(userId)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
             }
-            deliveryService.updatePickupTime(deliveryId, pickupTime);
+            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
             return ResponseEntity.ok(delivery);
         }
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
@@ -223,7 +228,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VENDOR NOT FOUND.");
         }
 
-        if (deliveryService.computeHaversine(r.getLocation().get(0),
+        if (timeCalculationService.computeHaversine(r.getLocation().get(0),
                 r.getLocation().get(1), addr.get(0), addr.get(1)) > r.getDeliveryZone()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
@@ -688,14 +693,14 @@ public class DeliveryController implements DeliveriesApi {
 
         switch (userType) {
             case ADMIN -> {
-                deliveryService.updateEstimatedPrepTime(deliveryId, body);
+                timeCalculationService.updateEstimatedPrepTime(deliveryId, body);
                 return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
             }
             case CLIENT, COURIER ->
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             case VENDOR -> {
                 if (check) {
-                    deliveryService.updateEstimatedPrepTime(deliveryId, body);
+                    timeCalculationService.updateEstimatedPrepTime(deliveryId, body);
                     return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -728,7 +733,7 @@ public class DeliveryController implements DeliveriesApi {
         switch (userType) {
             case ADMIN, CLIENT, COURIER, VENDOR -> {
                 if (check) {
-                    OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId);
+                    OffsetDateTime estimate = timeCalculationService.computeEstimatedDeliveryTime(deliveryId);
                     return ResponseEntity.ok(estimate);
                 } else {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN,

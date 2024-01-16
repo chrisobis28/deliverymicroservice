@@ -26,6 +26,7 @@ import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.TimeCalculationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
@@ -82,7 +83,8 @@ class DeliveryControllerTest {
         usersCommunication = mock(UsersAuthenticationService.class);
 
         restaurantController = new RestaurantController(new RestaurantService(repo2, repo1), usersCommunication);
-        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication, null);
+        sut = new DeliveryController(new DeliveryService(repo1, new GPS(), repo2), usersCommunication,
+            null, new TimeCalculationService(repo1, new GPS(), repo2));
     }
 
     @Test
