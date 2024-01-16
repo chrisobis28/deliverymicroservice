@@ -23,7 +23,7 @@ public class UsersCommunication {
     public String getAccountType(String userId) {
 
         // Users belong to port 8081, Orders to 8080, we are at 8082
-        String SERVER = "http://localhost:8081";
+        String SERVER = "http://localhost:8082";
         URI uri = URI.create(SERVER + "/account/type?email=" + userId);
         HttpClient httpClient = HttpClient.newHttpClient();
 

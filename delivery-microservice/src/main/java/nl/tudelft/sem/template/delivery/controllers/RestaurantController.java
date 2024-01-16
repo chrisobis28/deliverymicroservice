@@ -1,12 +1,16 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
+
+import java.util.Objects;
+
+import nl.tudelft.sem.template.api.RestaurantsApi;
+
+
 import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
 
 import java.util.List;
-import java.util.Objects;
 import javax.validation.Valid;
-import nl.tudelft.sem.template.api.RestaurantsApi;
-import nl.tudelft.sem.template.delivery.AddressAdapter;
+
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -21,23 +25,27 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+
+
+//import static org.mockito.Mockito.mock;
+
 @RestController
 public class RestaurantController implements RestaurantsApi {
 
     private final transient RestaurantService restaurantService;
-    private final transient AddressAdapter addressAdapter;
+
     private final transient UsersAuthenticationService usersCommunication;
 
     /**
      * Constructor.
      *
-     * @param restaurantService the restaurant service
+     * @param restaurantService restaurant Service
+     * @param usersCommunication user Communication
      */
     @Autowired
-    public RestaurantController(RestaurantService restaurantService,
-                                AddressAdapter addressAdapter, UsersAuthenticationService usersCommunication) {
+    public RestaurantController(RestaurantService restaurantService, UsersAuthenticationService usersCommunication) {
+
         this.restaurantService = restaurantService;
-        this.addressAdapter = addressAdapter;
         this.usersCommunication = usersCommunication;
     }
 
@@ -85,12 +93,12 @@ public class RestaurantController implements RestaurantsApi {
             return ResponseEntity.badRequest().build();
         }
         String email = restaurantsPostRequest.getRestaurantID();
-        List<String> address = restaurantsPostRequest.getLocation();
+        List<Double> address = restaurantsPostRequest.getLocation();
         if (isNullOrEmpty(email) || isInvalidAddress(address)) {
             return ResponseEntity.badRequest().build();
         }
         Restaurant r = new Restaurant();
-        r.setLocation(addressAdapter.convertStringAddressToDouble(address));
+        r.setLocation(address);
         r.setRestaurantID(email);
         Restaurant restaurant = restaurantService.insert(r);
         return ResponseEntity.ok(restaurant);
@@ -303,10 +311,10 @@ public class RestaurantController implements RestaurantsApi {
     /**
      * Checks if an address is valid.
      *
-     * @param str string to check
+     * @param str address to check
      * @return boolean value indicating whether address is invalid or not
      */
-    public boolean isInvalidAddress(List<String> str) {
-        return str == null || str.size() != 5 || str.contains("") || str.contains(" ");
+    public boolean isInvalidAddress(List<Double> str) {
+        return str == null || str.size() != 2;
     }
 }
