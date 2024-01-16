@@ -239,7 +239,7 @@ class DeliveryServiceTest {
 
         // Define default delivery error
         Error error = new Error();
-        error.setType(ErrorType.DELAYED);
+        error.setType(ErrorType.DELIVERY_DELAYED);
         error.setValue(20);
 
         // Create a Delivery object
