@@ -1,6 +1,13 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.controllers.CustomerController;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.CustomersService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -15,15 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
-
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -51,8 +49,8 @@ public class CustomerControllerTest {
 
     @Test
     void returns_delivery_ids_for_user_id() {
-        List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-        List<Delivery> deliveries = deliveryUUIDs
+        List<UUID> deliveryIds = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
+        List<Delivery> deliveries = deliveryIds
                 .stream()
                 .map(x -> new Delivery().deliveryID(x).customerID("customer@essa.com"))
                 .collect(Collectors.toList());
@@ -60,7 +58,7 @@ public class CustomerControllerTest {
         when(usersAuth.getUserAccountType("customer@essa.com")).thenReturn(AccountType.CLIENT);
 
         assertThat(customerController.customersCustomerIdOrdersGet("customer@essa.com").getBody())
-                .containsExactlyInAnyOrderElementsOf(deliveryUUIDs);
+                .containsExactlyInAnyOrderElementsOf(deliveryIds);
     }
 
     @Test

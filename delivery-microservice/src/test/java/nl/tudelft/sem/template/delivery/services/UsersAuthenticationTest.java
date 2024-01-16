@@ -35,38 +35,38 @@ class UsersAuthenticationTest {
     }
 
     @Test
-    public void Returns_true_when_vendor_is_assigned_to_delivery() {
+    public void returnsTrueWhenVendorIsAssignedToDelivery() {
         when(usersCommunication.getAccountType("vendorId")).thenReturn(AccountType.VENDOR.name());
         assertThat(usersAuthentication.checkUserAccessToDelivery("vendorId", delivery)).isTrue();
     }
 
     @Test
-    public void Returns_true_for_admin_access() {
+    public void returnsTrueForAdminAccess() {
         when(usersCommunication.getAccountType("adminId")).thenReturn(AccountType.ADMIN.name());
         assertThat(usersAuthentication.checkUserAccessToDelivery("adminId", delivery)).isTrue();
     }
 
     @Test
-    public void Returns_false_when_another_client_is_assigned_to_delivery() {
+    public void returnsFalseWhenAnotherClientIsAssignedToDelivery() {
         when(usersCommunication.getAccountType("anotherClientId")).thenReturn(AccountType.CLIENT.name());
         assertThat(usersAuthentication.checkUserAccessToDelivery("anotherClientId", delivery)).isFalse();
     }
 
     @Test
-    public void Returns_false_when_no_courier_is_assigned_to_delivery() {
+    public void returnsFalseWhenNoCourierIsAssignedToDelivery() {
         delivery.setCourierID(null);
         when(usersCommunication.getAccountType("courierId")).thenReturn(AccountType.COURIER.name());
         assertThat(usersAuthentication.checkUserAccessToDelivery("courierId", delivery)).isFalse();
     }
 
     @Test
-    public void Returns_false_when_user_is_not_recognized() {
+    public void returnsFalseWhenUserIsNotRecognized() {
         when(usersCommunication.getAccountType("userId")).thenReturn("Some weird value");
         assertThat(usersAuthentication.checkUserAccessToDelivery("userId", delivery)).isFalse();
     }
 
     @Test
-    public void Returns_false_when_user_is_null() {
+    public void returnsFalseWhenUserIsNull() {
         assertThat(usersAuthentication.checkUserAccessToDelivery(null, delivery)).isFalse();
     }
 
