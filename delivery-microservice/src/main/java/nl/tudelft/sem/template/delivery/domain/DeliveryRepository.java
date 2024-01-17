@@ -28,4 +28,8 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
     @Query("SELECT e FROM Delivery e WHERE :vendorId = e.restaurantID AND e.status = :status")
     List<Delivery> findAllByRestaurantIDAndStatus(String vendorId, @Param("status") DeliveryStatus status);
+
+    @Query("SELECT e FROM Delivery e WHERE e.orderTime < :end AND e.orderTime > :start")
+    List<Delivery> findAllByOrderTime(@Param("start") OffsetDateTime startTime,
+                                      @Param("end") OffsetDateTime endTime);
 }

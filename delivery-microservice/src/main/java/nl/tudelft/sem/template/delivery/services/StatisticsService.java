@@ -97,30 +97,20 @@ public class StatisticsService {
         List<Delivery> courierDeliveries = deliveryRepository.findAllByCourierIDAndStatus(courierId,
             DeliveryStatus.DELIVERED, startTime, endTime);
         Statistics statistics = new Statistics();
-        //Average Rating
         double averageRating = courierDeliveries.stream()
             .mapToInt(Delivery::getRatingCourier).average().orElse(0);
-
-        //DeliveryTimeRatio
         double averageDeliveryTime = courierDeliveries.stream()
                 .mapToDouble(delivery -> delivery.getDeliveredTime().getOffset().getTotalSeconds() / 60.0)
                 .average()
                 .orElse(0.0);
-
-        //SuccessRate
         List<Delivery> filteredRejectedDeliveries = deliveryRepository.findAllByCourierIDAndStatus(courierId,
             DeliveryStatus.REJECTED, startTime, endTime);
-        // Calculate total deliveries
         long totalDeliveries = courierDeliveries.size() + filteredRejectedDeliveries.size();
-
-        // Calculate average success rate
         double averageSuccessRate = totalDeliveries > 0
                 ? (double) courierDeliveries.size() / totalDeliveries : 0.0;
-
         statistics.setAverageRating(averageRating);
         statistics.setSuccessRate(averageSuccessRate);
         statistics.setDeliveryTimeRatio(averageDeliveryTime);
-
         return statistics;
     }
 
@@ -139,9 +129,8 @@ public class StatisticsService {
         if (startTime.isAfter(endTime)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not a correct input");
         }
-        List<ErrorType> list = deliveryRepository.findAll().stream()
-                .filter(d -> d.getOrderTime().isAfter(startTime) && d.getOrderTime().isBefore(endTime))
-                .map(d -> d.getError().getType()).collect(Collectors.toList());
+        List<ErrorType> list = deliveryRepository.findAllByOrderTime(startTime, endTime)
+            .stream().map(d -> d.getError().getType()).collect(Collectors.toList());
         if (list.isEmpty()) {
             return 0.0;
         }
