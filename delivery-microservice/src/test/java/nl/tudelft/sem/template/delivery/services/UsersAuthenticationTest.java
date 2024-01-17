@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Delivery;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,26 +35,38 @@ class UsersAuthenticationTest {
 
     @Test
     public void returnsTrueWhenVendorIsAssignedToDelivery() {
-        when(usersCommunication.getAccountType("vendorId")).thenReturn(AccountType.VENDOR.name().toLowerCase(Locale.ROOT));
+        when(usersCommunication.getAccountType("vendorId")).thenReturn("vendor");
         assertThat(usersAuthentication.checkUserAccessToDelivery("vendorId", delivery)).isTrue();
     }
 
     @Test
+    public void returnsTrueWhenCourierIsAssignedToDelivery() {
+        when(usersCommunication.getAccountType("courierId")).thenReturn("courier");
+        assertThat(usersAuthentication.checkUserAccessToDelivery("courierId", delivery)).isTrue();
+    }
+
+    @Test
+    public void returnsTrueWhenCustomerIsAssignedToDelivery() {
+        when(usersCommunication.getAccountType("customerId")).thenReturn("customer");
+        assertThat(usersAuthentication.checkUserAccessToDelivery("customerId", delivery)).isTrue();
+    }
+
+    @Test
     public void returnsTrueForAdminAccess() {
-        when(usersCommunication.getAccountType("adminId")).thenReturn(AccountType.ADMIN.name().toLowerCase(Locale.ROOT));
+        when(usersCommunication.getAccountType("adminId")).thenReturn("admin");
         assertThat(usersAuthentication.checkUserAccessToDelivery("adminId", delivery)).isTrue();
     }
 
     @Test
     public void returnsFalseWhenAnotherClientIsAssignedToDelivery() {
-        when(usersCommunication.getAccountType("anotherClientId")).thenReturn(AccountType.CLIENT.name());
+        when(usersCommunication.getAccountType("anotherClientId")).thenReturn("client");
         assertThat(usersAuthentication.checkUserAccessToDelivery("anotherClientId", delivery)).isFalse();
     }
 
     @Test
     public void returnsFalseWhenNoCourierIsAssignedToDelivery() {
         delivery.setCourierID(null);
-        when(usersCommunication.getAccountType("courierId")).thenReturn(AccountType.COURIER.name());
+        when(usersCommunication.getAccountType("courierId")).thenReturn("courier");
         assertThat(usersAuthentication.checkUserAccessToDelivery("courierId", delivery)).isFalse();
     }
 
