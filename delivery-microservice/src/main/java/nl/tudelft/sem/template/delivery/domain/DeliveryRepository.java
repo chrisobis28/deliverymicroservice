@@ -19,9 +19,12 @@ public interface DeliveryRepository extends JpaRepository<Delivery, UUID> {
 
     List<Delivery> findAllByCourierID(String courierId);
 
-    @Query("SELECT e FROM Delivery e WHERE :courierId = e.courierID AND e.status = :status AND e.deliveredTime < :end AND e.deliveredTime > :start")
-    List<Delivery> findAllByCourierIDAndStatus(String courierId, @Param("status") DeliveryStatus status,
-                                               @Param("start") OffsetDateTime startTime, @Param("end") OffsetDateTime endTime);
+    @Query("SELECT e FROM Delivery e WHERE :courierId = e.courierID AND "
+        + "e.status = :status AND e.deliveredTime < :end AND e.deliveredTime > :start")
+    List<Delivery> findAllByCourierIDAndStatus(String courierId,
+                                               DeliveryStatus status,
+                                               @Param("start") OffsetDateTime startTime,
+                                               @Param("end") OffsetDateTime endTime);
 
     @Query("SELECT e FROM Delivery e WHERE :vendorId = e.restaurantID AND e.status = :status")
     List<Delivery> findAllByRestaurantIDAndStatus(String vendorId, @Param("status") DeliveryStatus status);
