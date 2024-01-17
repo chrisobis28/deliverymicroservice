@@ -47,15 +47,15 @@ public class UsersAuthenticationService {
     }
 
     /**
-     * The method checks if a user should have permission to update restaurant.
+     * The method checks if a user should have permission to update/view an entity.
      *
      * @param userId        ID of the user
-     * @param restaurantId  Restaurant object we want to check permission for
+     * @param entityId  Restaurant object we want to check permission for
      * @param fieldName     Name of field being updated
      * @return              whether the user has permission to access this restaurant object
      */
-    public Pair<HttpStatus, String> checkUserAccessToRestaurant(String userId, String restaurantId, String fieldName) {
-        if (userId == null || restaurantId == null) {
+    public Pair<HttpStatus, String> checkUserAccessToRestaurant(String userId, String entityId, String fieldName) {
+        if (isNullOrEmpty(userId) || isNullOrEmpty(entityId)) {
             return Pair.of(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid.");
         }
         AccountType accountType = getUserAccountType(userId);
@@ -66,7 +66,7 @@ public class UsersAuthenticationService {
             case CLIENT, COURIER:
                 return courierAndClientRestaurantAccess(fieldName);
             case VENDOR: {
-                if (userId.equals(restaurantId)) {
+                if (userId.equals(entityId)) {
                     return Pair.of(HttpStatus.OK, "OK");
                 } else {
                     return Pair.of(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
@@ -85,7 +85,7 @@ public class UsersAuthenticationService {
      */
     public Pair<HttpStatus, String> courierAndClientRestaurantAccess(String fieldName) {
         switch (fieldName) {
-            case "Couriers": {
+            case "Couriers", "DPH": {
                 return Pair.of(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             }
             case "Delivery Zone": {
@@ -98,6 +98,17 @@ public class UsersAuthenticationService {
             }
             default: return Pair.of(HttpStatus.OK, "OK");
         }
+    }
+
+
+    /**
+     * Checks if a string is null or empty.
+     *
+     * @param str string to check
+     * @return boolean value indicating whether string is empty or not
+     */
+    public boolean isNullOrEmpty(String str) {
+        return str == null || str.isEmpty() || str.isBlank();
     }
 
     public enum AccountType {

@@ -13,6 +13,7 @@ import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.ErrorType;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import nl.tudelft.sem.template.model.Statistics;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -44,21 +45,6 @@ public class StatisticsController implements StatisticsApi {
     public StatisticsController(StatisticsService statisticsService, UsersAuthenticationService usersCommunication) {
         this.statisticsService = statisticsService;
         this.usersCommunication = usersCommunication;
-    }
-
-    /**
-     * inserts an element into the repo (internal method).
-     *
-     * @param delivery delivery being inserted
-     * @return an empty response entity with a corresponding status code
-     */
-    public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
-        try {
-            statisticsService.insert(delivery);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
-        }
     }
 
     /**
@@ -99,23 +85,10 @@ public class StatisticsController implements StatisticsApi {
     @Override
     public ResponseEntity<List<Double>> statisticsDeliveriesPerHourGet(@Parameter String userId,
                                                                        @Parameter String vendorId) {
-        if (isNullOrEmpty(userId) || isNullOrEmpty(vendorId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or restaurant ID is invalid.");
-        }
-        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-        switch (type) {
-            case ADMIN: break;
-            case COURIER, CLIENT:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            case VENDOR: {
-                if (vendorId.equals(userId)) {
-                    break;
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, vendorId,
+            "DPH");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
         if (deliveries == null || deliveries.isEmpty()) {
@@ -179,16 +152,6 @@ public class StatisticsController implements StatisticsApi {
         }
         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User doesn't have the necessary role to view this");
 
-
     }
 
-    /**
-      * Checks if a string is null or empty.
-      *
-      * @param str string to check
-      * @return boolean value indicating whether string is empty or not
-      */
-    public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.isBlank();
-    }
 }
