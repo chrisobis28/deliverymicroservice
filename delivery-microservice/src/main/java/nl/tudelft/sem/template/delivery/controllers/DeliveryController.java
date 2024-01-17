@@ -10,10 +10,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.delivery.services.RestaurantService;
-import nl.tudelft.sem.template.delivery.services.TimeCalculationService;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
+import nl.tudelft.sem.template.delivery.services.*;
 import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -39,6 +36,8 @@ public class DeliveryController implements DeliveriesApi {
 
     private final transient TimeCalculationService timeCalculationService;
 
+    private final transient UpdateService updateService;
+
     /**
      * Constructor.
      *
@@ -48,12 +47,15 @@ public class DeliveryController implements DeliveriesApi {
      */
     public DeliveryController(DeliveryService deliveryService,
                               UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler,
-                              TimeCalculationService timeCalculationService) {
+                              TimeCalculationService timeCalculationService,
+                              AvailableDeliveryProxyImplementation availableDeliveryProxy,
+                              UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.usersCommunication = usersCommunication;
         this.deliveryStatusHandler = deliveryStatusHandler;
-        this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
         this.timeCalculationService = timeCalculationService;
+        this.availableDeliveryProxy = availableDeliveryProxy;
+        this.updateService = updateService;
     }
 
     /**
@@ -469,7 +471,7 @@ public class DeliveryController implements DeliveriesApi {
             if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             } else {
-                deliveryService.updateCourierRating(deliveryId, body);
+                updateService.updateCourierRating(deliveryId, body);
                 delivery = deliveryService.getDelivery(deliveryId);
                 return ResponseEntity.ok(delivery);
             }
@@ -497,7 +499,7 @@ public class DeliveryController implements DeliveriesApi {
                         "User lacks necessary permissions.");
                 }
             } else {
-                deliveryService.updateRestaurantRating(deliveryId, body);
+                updateService.updateRestaurantRating(deliveryId, body);
                 delivery = deliveryService.getDelivery(deliveryId);
                 return ResponseEntity.ok(delivery);
             }
@@ -637,7 +639,7 @@ public class DeliveryController implements DeliveriesApi {
                 "The person you are trying to assign to the order is not a courier.");
         }
         if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            deliveryService.updateDeliveryCourier(deliveryId, courierId);
+            updateService.updateDeliveryCourier(deliveryId, courierId);
             return ResponseEntity.ok(delivery);
         }
         if (delivery.getCourierID() != null) {
@@ -651,7 +653,7 @@ public class DeliveryController implements DeliveriesApi {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
             case COURIER -> {
                 if (userId.equals(courierId)) {
-                    deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                    updateService.updateDeliveryCourier(deliveryId, courierId);
                     availableDeliveryProxy.insertDelivery(delivery);
                     return ResponseEntity.ok(delivery);
                 } else {
@@ -668,7 +670,7 @@ public class DeliveryController implements DeliveriesApi {
                 if (restaurant.getCouriers() == null || !restaurant.getCouriers().contains(courierId)) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
                 }
-                deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                updateService.updateDeliveryCourier(deliveryId, courierId);
                 return ResponseEntity.ok(delivery);
             }
         }
@@ -837,7 +839,7 @@ public class DeliveryController implements DeliveriesApi {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN,
                             "Customer does not correspond to the order.");
                 }
-                deliveryService.updateDeliveryAddress(deliveryId, new ArrayList<>(requestBody));
+                updateService.updateDeliveryAddress(deliveryId, new ArrayList<>(requestBody));
                 return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
             }
             case COURIER, VENDOR ->

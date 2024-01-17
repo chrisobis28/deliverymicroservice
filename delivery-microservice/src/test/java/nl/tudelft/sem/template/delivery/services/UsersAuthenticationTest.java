@@ -10,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,13 +37,13 @@ class UsersAuthenticationTest {
 
     @Test
     public void returnsTrueWhenVendorIsAssignedToDelivery() {
-        when(usersCommunication.getAccountType("vendorId")).thenReturn(AccountType.VENDOR.name());
+        when(usersCommunication.getAccountType("vendorId")).thenReturn(AccountType.VENDOR.name().toLowerCase(Locale.ROOT));
         assertThat(usersAuthentication.checkUserAccessToDelivery("vendorId", delivery)).isTrue();
     }
 
     @Test
     public void returnsTrueForAdminAccess() {
-        when(usersCommunication.getAccountType("adminId")).thenReturn(AccountType.ADMIN.name());
+        when(usersCommunication.getAccountType("adminId")).thenReturn(AccountType.ADMIN.name().toLowerCase(Locale.ROOT));
         assertThat(usersAuthentication.checkUserAccessToDelivery("adminId", delivery)).isTrue();
     }
 

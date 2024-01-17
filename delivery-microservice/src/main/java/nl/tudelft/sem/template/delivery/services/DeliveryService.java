@@ -43,16 +43,16 @@ public class DeliveryService {
         this.restaurantRepository = restaurantRepository;
     }
 
-    /**
-     * Check if restaurant uses own couriers.
-     *
-     * @param delivery delivery being assigned
-     * @return boolean value showing whether restaurant uses own couriers
-     */
-    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
-        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
-        return !(couriers == null || couriers.isEmpty());
-    }
+//    /**
+//     * Check if restaurant uses own couriers.
+//     *
+//     * @param delivery - Delivery being assigned
+//     * @return boolean value showing whether restaurant uses own couriers
+//     */
+//    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
+//        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
+//        return !(couriers == null || couriers.isEmpty());
+//    }
 
     public Delivery getDelivery(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
@@ -76,17 +76,17 @@ public class DeliveryService {
         return delivery.map(Delivery::getStatus).orElseThrow(DeliveryNotFoundException::new);
     }
 
-    /**
-     * Updates the delivery status.
-     *
-     * @param deliveryId a delivery to update the status of
-     * @param deliveryStatus new status
-     */
-    public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
-        delivery.setStatus(deliveryStatus);
-        deliveryRepository.save(delivery);
-    }
+//    /**
+//     * Updates the delivery status.
+//     *
+//     * @param deliveryId a delivery to update the status of
+//     * @param deliveryStatus new status
+//     */
+//    public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
+//        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+//        delivery.setStatus(deliveryStatus);
+//        deliveryRepository.save(delivery);
+//    }
 
     /**
      * Function that returns the address where the food needs to be delivered.
@@ -114,29 +114,29 @@ public class DeliveryService {
     }
 
 
-    /**
-     * Update the rating of a courier.
-     *
-     * @param deliveryId delivery to update
-     * @param rating new rating score
-     */
-    public void updateCourierRating(UUID deliveryId, Integer rating) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
-        delivery.setRatingCourier(rating);
-        deliveryRepository.save(delivery);
-    }
+//    /**
+//     * Update the rating of a courier.
+//     *
+//     * @param deliveryId delivery to update
+//     * @param rating new rating score
+//     */
+//    public void updateCourierRating(UUID deliveryId, Integer rating) {
+//        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+//        delivery.setRatingCourier(rating);
+//        deliveryRepository.save(delivery);
+//    }
 
-    /**
-     * Update the rating of a restaurant.
-     *
-     * @param deliveryId the delivery to be updated
-     * @param rating new rating of restaurant
-     */
-    public void updateRestaurantRating(UUID deliveryId, Integer rating) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
-        delivery.setRatingRestaurant(rating);
-        deliveryRepository.save(delivery);
-    }
+//    /**
+//     * Update the rating of a restaurant.
+//     *
+//     * @param deliveryId the delivery to be updated
+//     * @param rating new rating of restaurant
+//     */
+//    public void updateRestaurantRating(UUID deliveryId, Integer rating) {
+//        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+//        delivery.setRatingRestaurant(rating);
+//        deliveryRepository.save(delivery);
+//    }
 
     /**
      * Exception to be used when a Delivery entity with a given ID is not found.
@@ -177,17 +177,17 @@ public class DeliveryService {
                 .filter(delivery -> delivery.getCourierID() == null).collect(Collectors.toList());
     }
 
-    /**
-     * Given a new courier ID, assign it to a given delivery.
-     *
-     * @param deliveryId ID of a delivery to be updated
-     * @param courierId ID of a courier to be assigned
-     */
-    public void updateDeliveryCourier(UUID deliveryId, String courierId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
-        delivery.setCourierID(courierId);
-        deliveryRepository.save(delivery);
-    }
+//    /**
+//     * Given a new courier ID, assign it to a given delivery.
+//     *
+//     * @param deliveryId ID of a delivery to be updated
+//     * @param courierId ID of a courier to be assigned
+//     */
+//    public void updateDeliveryCourier(UUID deliveryId, String courierId) {
+//        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
+//        delivery.setCourierID(courierId);
+//        deliveryRepository.save(delivery);
+//    }
 
 
 
@@ -202,17 +202,17 @@ public class DeliveryService {
 
     }
 
-    /**
-     * Update the delivery address of an order.
-     *
-     * @param deliveryId ID of delivery to be updated
-     * @param newAddress the new address
-     */
-    public void updateDeliveryAddress(UUID deliveryId, List<Double> newAddress) {
-        Delivery delivery = deliveryRepository.findById(deliveryId)
-                .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
-        delivery.setDeliveryAddress(newAddress);
-        deliveryRepository.save(delivery);
-    }
+//    /**
+//     * Update the delivery address of an order.
+//     *
+//     * @param deliveryId ID of delivery to be updated
+//     * @param newAddress the new address
+//     */
+//    public void updateDeliveryAddress(UUID deliveryId, List<Double> newAddress) {
+//        Delivery delivery = deliveryRepository.findById(deliveryId)
+//                .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+//        delivery.setDeliveryAddress(newAddress);
+//        deliveryRepository.save(delivery);
+//    }
 
 }

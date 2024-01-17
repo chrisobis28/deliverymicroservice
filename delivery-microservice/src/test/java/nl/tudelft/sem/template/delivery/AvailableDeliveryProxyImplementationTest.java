@@ -36,7 +36,7 @@ class AvailableDeliveryProxyImplementationTest {
 
     @BeforeEach
     void setUp() {
-        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, new GPS(), rr));
+        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, new GPS(), rr), rr);
     }
 
     List<Delivery> getMockData() {

@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Delivery;
@@ -23,6 +24,8 @@ public class DeliveryStatusHandler {
     private final transient UsersAuthenticationService usersAuthenticationService;
     private final transient UsersCommunication usersCommunication;
 
+    private final transient UpdateService updateService;
+
     /**
      * Constructor.
      *
@@ -32,10 +35,12 @@ public class DeliveryStatusHandler {
      */
     public DeliveryStatusHandler(DeliveryService deliveryService,
                                  UsersAuthenticationService usersAuthenticationService,
-                                 UsersCommunication usersCommunication) {
+                                 UsersCommunication usersCommunication,
+                                 UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.usersAuthenticationService = usersAuthenticationService;
         this.usersCommunication = usersCommunication;
+        this.updateService = updateService;
     }
 
     /**
@@ -73,7 +78,7 @@ public class DeliveryStatusHandler {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
         usersCommunication.updateOrderStatus(deliveryId, newStatus.toString());
-        deliveryService.updateDeliveryStatus(deliveryId, newStatus);
+        updateService.updateDeliveryStatus(deliveryId, newStatus);
 
         return ResponseEntity.ok(delivery);
     }

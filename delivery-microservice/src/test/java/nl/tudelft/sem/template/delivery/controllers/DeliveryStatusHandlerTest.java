@@ -5,6 +5,7 @@ import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Delivery;
@@ -42,7 +43,8 @@ public class DeliveryStatusHandlerTest {
     @BeforeEach
     public void init() {
         DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
-        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication);
+        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication,
+            new UpdateService(deliveryRepository));
     }
 
     private Delivery insertExampleDelivery() {

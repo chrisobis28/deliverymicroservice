@@ -78,7 +78,7 @@ public class StatisticsControllerTestWithRepo {
         String courierId = "dominos@dominos.com";
         OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
-        when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
+        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
 
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
@@ -93,7 +93,7 @@ public class StatisticsControllerTestWithRepo {
     void authorizedEmptyFunctional() {
         String userID = "user@user.com";
         String courierId = "dominos@dominos.com";
-        OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 30));
 
         OffsetDateTime start_interval = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
@@ -106,7 +106,7 @@ public class StatisticsControllerTestWithRepo {
         testDelivery.setDeliveredTime(end);
         testDelivery.setDeliveryID(UUID.randomUUID());
         repo1.save(testDelivery);
-        when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
+        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
 
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start_interval, end_interval)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -124,13 +124,13 @@ public class StatisticsControllerTestWithRepo {
         String courierId = "dominos@dominos.com";
         OffsetDateTime outTime = OffsetDateTime.of(2022, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
 
-        OffsetDateTime start1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 30));
 
-        OffsetDateTime start2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end2 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 10));
 
-        OffsetDateTime start3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHours(0));
+        //OffsetDateTime start3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end3 = OffsetDateTime.of(2023, 12, 13, 15, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 40));
 
         OffsetDateTime start_interval = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
@@ -165,7 +165,7 @@ public class StatisticsControllerTestWithRepo {
         testDelivery4.setDeliveredTime(outTime);
         testDelivery4.setDeliveryID(UUID.randomUUID());
 
-        when(usersCommunication.getAccountType(userID)).thenReturn("CLIENT");
+        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
         repo1.save(testDelivery4);
 
         repo1.save(testDelivery1);

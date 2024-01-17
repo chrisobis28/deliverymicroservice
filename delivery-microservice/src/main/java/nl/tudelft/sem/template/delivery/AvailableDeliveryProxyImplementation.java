@@ -3,6 +3,8 @@ package nl.tudelft.sem.template.delivery;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.UUID;
+
+import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -16,6 +18,8 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
 
     private final transient DeliveryService deliveryService;
 
+    private final transient RestaurantRepository restaurantRepository;
+
     private transient Queue<UUID> availableDeliveries = new LinkedList<>();
 
     /**
@@ -24,8 +28,9 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
      * @param deliveryService delivery service (for access to the Delivery database)
      */
     @Autowired
-    public AvailableDeliveryProxyImplementation(DeliveryService deliveryService) {
+    public AvailableDeliveryProxyImplementation(DeliveryService deliveryService, RestaurantRepository restaurantRepository) {
         this.deliveryService = deliveryService;
+        this.restaurantRepository = restaurantRepository;
     }
 
     /**
@@ -39,7 +44,8 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
         if (status == null || isNullOrEmpty(d.getRestaurantID()) || !isNullOrEmpty(d.getCourierID())) {
             return false;
         }
-        boolean ownCouriers = deliveryService.restaurantUsesOwnCouriers(d);
+        //boolean ownCouriers = deliveryService.restaurantUsesOwnCouriers(d);
+        boolean ownCouriers = (restaurantRepository.findRestaurantsByCouriersIsNotEmpty()).contains(d.getRestaurantID());
         if (ownCouriers) {
             return false;
         } else {

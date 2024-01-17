@@ -45,15 +45,5 @@ class DeliveryServiceStatusTest {
                 .isThrownBy(() -> deliveryDao.getDeliveryStatus(invalidDeliveryId));
     }
 
-    @Test
-    void updatesStatusWhenUpdateDeliveryStatusCalled() {
-        UUID deliveryId = UUID.randomUUID();
-        Delivery delivery = new Delivery();
-        delivery.setDeliveryID(deliveryId);
 
-        when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
-        deliveryDao.updateDeliveryStatus(deliveryId, DeliveryStatus.DELIVERED);
-        verify(deliveryRepositoryMock, times(1)).save(argThat(x ->
-                x.getDeliveryID().equals(deliveryId) && x.getStatus().equals(DeliveryStatus.DELIVERED)));
-    }
 }
