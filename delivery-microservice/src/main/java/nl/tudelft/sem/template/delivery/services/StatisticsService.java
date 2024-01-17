@@ -110,7 +110,8 @@ public class StatisticsService {
      * @return a statistic object with different stats parameters
      */
     public Statistics getCourierStatistics(String courierId, OffsetDateTime startTime, OffsetDateTime endTime) {
-        List<Delivery> courierDeliveries = getSuccessfulDeliveries(courierId)
+        List<Delivery> courierDeliveries = getSuccessfulDeliveries(courierId);
+        courierDeliveries = courierDeliveries
                 .stream()
                 .filter(delivery -> delivery.getDeliveredTime().isAfter(startTime)
                         && delivery.getDeliveredTime().isBefore(endTime)).collect(Collectors.toList());

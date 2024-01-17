@@ -10,8 +10,10 @@ import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.Acco
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+@RestController
 public class CustomerController implements CustomersApi {
 
     private final transient CustomersService customersService;

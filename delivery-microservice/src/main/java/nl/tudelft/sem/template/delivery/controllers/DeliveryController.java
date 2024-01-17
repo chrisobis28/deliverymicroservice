@@ -205,6 +205,9 @@ public class DeliveryController implements DeliveriesApi {
         List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
 
         delivery.setStatus(DeliveryStatus.fromValue(status));
+        if(delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
+            delivery.setDeliveredTime(OffsetDateTime.now());
+        }
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "BAD REQUEST");
         }
@@ -232,9 +235,13 @@ public class DeliveryController implements DeliveriesApi {
         delivery.setCustomerID(customerId);
         delivery.setRestaurantID(vendorId);
         delivery.setDeliveryAddress(addr);
+        delivery.setCurrentLocation(r.getLocation());
         delivery.setError(none);
         delivery.setOrderTime(OffsetDateTime.now());
         delivery = deliveryService.insert(delivery);
+
+        availableDeliveryProxy.checkIfAvailable(delivery);
+
         return ResponseEntity.ok(delivery);
     }
 

@@ -11,6 +11,7 @@ import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -18,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 
 
 /**
@@ -76,7 +78,11 @@ public class DeliveryService {
         if (delivery == null || delivery.getDeliveryID() == null) {
             throw new IllegalArgumentException();
         }
-        errorRepository.save(delivery.getError());
+        Error error = delivery.getError();
+        if (error != null) {
+            error.setErrorId(delivery.getDeliveryID());
+            errorRepository.save(delivery.getError());
+        }
         return deliveryRepository.save(delivery);
     }
 
@@ -94,6 +100,9 @@ public class DeliveryService {
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
+        if(delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
+            delivery.setDeliveredTime(OffsetDateTime.now());
+        }
         deliveryRepository.save(delivery);
     }
 
@@ -183,7 +192,9 @@ public class DeliveryService {
 
     public List<Delivery> getAcceptedDeliveries() {
         return deliveryRepository.findAll().stream()
-                .filter(delivery -> delivery.getCourierID() == null).collect(Collectors.toList());
+                .filter(delivery -> delivery.getCourierID() == null
+                        && delivery.getStatus().equals(DeliveryStatus.ACCEPTED))
+                .collect(Collectors.toList());
     }
 
     /**

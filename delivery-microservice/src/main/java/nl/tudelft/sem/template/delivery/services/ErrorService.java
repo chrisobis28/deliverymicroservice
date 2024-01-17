@@ -60,6 +60,7 @@ public class ErrorService {
         // We ensure error has the same UUID as the delivery
         error.setErrorId(deliveryId);
         delivery.setError(error);
+        errorRepository.save(error);
         deliveryRepository.save(delivery);
         return delivery.getError();
     }

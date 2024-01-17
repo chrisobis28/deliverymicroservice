@@ -157,14 +157,10 @@ public class StatisticsController implements StatisticsApi {
      * @return the rate of that event
      */
     @Override
-    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
-                                                                       @NotNull String userID,
-                                                                   @RequestParam
-                                                                       @NotNull @Valid ErrorType unexpectedEvent,
-                                                                   @RequestParam
-                                                                       @DateTimeFormat @Valid OffsetDateTime startTime,
-                                                                   @RequestParam
-                                                                       @DateTimeFormat @Valid OffsetDateTime endTime) {
+    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader String userID,
+                                                                   @RequestParam ErrorType unexpectedEvent,
+                                                                   @RequestParam OffsetDateTime startTime,
+                                                                   @RequestParam OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {

@@ -294,7 +294,7 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<String> restaurantsRestaurantIdDelete(@PathVariable("restaurantId") String restaurantId) {
         restaurantService.delete(restaurantId);
-        return ResponseEntity.status(HttpStatus.OK).body("deletion_successful");
+        return ResponseEntity.status(HttpStatus.OK).body("Deletion Successful!");
 
     }
 
