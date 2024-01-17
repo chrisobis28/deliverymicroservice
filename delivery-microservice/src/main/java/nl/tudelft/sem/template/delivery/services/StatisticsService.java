@@ -131,13 +131,7 @@ public class StatisticsService {
         }
         List<ErrorType> list = deliveryRepository.findAllByOrderTime(startTime, endTime)
             .stream().map(d -> d.getError().getType()).collect(Collectors.toList());
-        if (list.isEmpty()) {
-            return 0.0;
-        }
-
         double count = (double) list.stream().filter(e -> Objects.equals(e, unexpectedEvent)).count();
-        return count / (double) list.size();
-
+        return Double.isNaN(count / (double) list.size()) ? 0.0 : count / (double) list.size();
     }
-
 }
