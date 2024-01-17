@@ -453,7 +453,8 @@ class RestaurantControllerTest {
         String msg = "User lacks necessary permissions.";
         sut.restaurantsPost(new RestaurantsPostRequest().restaurantID("bla").location(List.of(0.5, 0.1)));
         //when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any())).thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
+        when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
+            .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         assertThatThrownBy(() -> sut.restaurantsRestaurantIdGet("bla", "duf"))
             .extracting("status")

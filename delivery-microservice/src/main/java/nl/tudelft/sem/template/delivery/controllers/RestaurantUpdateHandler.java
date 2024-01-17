@@ -52,7 +52,7 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
                                                                          @RequestBody List<Double> requestBody) {
         Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Location");
         if (!(result.getLeft()).equals(HttpStatus.OK)) {
-          throw new ResponseStatusException(result.getLeft(), result.getRight());
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         restaurantService.updateLocation(restaurantId, requestBody);
         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
@@ -71,13 +71,14 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
                                                                             @RequestHeader String userId,
                                                                             @RequestBody Double requestBody) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Delivery Zone");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId,
+            "Delivery Zone");
         if (!(result.getLeft()).equals(HttpStatus.OK)) {
-          throw new ResponseStatusException(result.getLeft(), result.getRight());
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         Restaurant r = restaurantService.getRestaurant(restaurantId);
         if (accountType.equals(VENDOR) && r.getCouriers().isEmpty()) {
-          throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
         }
         restaurantService.updateDeliverZone(restaurantId, requestBody);
         return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
@@ -95,9 +96,10 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
     public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut(@PathVariable String restaurantId,
                                                                          @RequestHeader String userId,
                                                                          @RequestBody @Valid List<String> requestBody) {
-        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Couriers");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId,
+            "Couriers");
         if (!(result.getLeft()).equals(HttpStatus.OK)) {
-          throw new ResponseStatusException(result.getLeft(), result.getRight());
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         // check couriers
         if (requestBody != null) {
