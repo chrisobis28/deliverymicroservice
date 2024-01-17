@@ -14,6 +14,7 @@ import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -184,25 +185,16 @@ public class RestaurantController implements RestaurantsApi {
                                                                             @RequestHeader String userId,
                                                                             @RequestBody Double requestBody) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case ADMIN -> {
-                restaurantService.updateDeliverZone(restaurantId, requestBody);
-                return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-            }
-            case VENDOR -> {
-                if (userId.equals(restaurantId) && !restaurantService.getRestaurant(restaurantId).getCouriers().isEmpty()) {
-                    restaurantService.updateDeliverZone(restaurantId, requestBody);
-                    return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-                }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-            case COURIER, CLIENT
-                    -> throw new ResponseStatusException(
-                            HttpStatus.FORBIDDEN,
-                    "Only vendors and admins can change the delivery zone of a restaurant.");
-            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Delivery Zone");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
+        Restaurant r = restaurantService.getRestaurant(restaurantId);
+        if (accountType.equals(VENDOR) && r.getCouriers().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+        }
+        restaurantService.updateDeliverZone(restaurantId, requestBody);
+        return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
     }
 
     /**
@@ -245,27 +237,9 @@ public class RestaurantController implements RestaurantsApi {
     public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut(@PathVariable String restaurantId,
                                                                          @RequestHeader String userId,
                                                                          @RequestBody @Valid List<String> requestBody) {
-        //check user ID
-        if (userId == null || restaurantId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "User ID or Restaurant ID is invalid.");
-        }
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case COURIER, CLIENT:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User lacks necessary permissions.");
-            case  VENDOR: {
-                if (!Objects.equals(userId, restaurantId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                } else {
-                    break;
-                }
-            }
-            case ADMIN : break;
-            default : throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
-
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Couriers");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         // check couriers
         if (requestBody != null) {
@@ -277,12 +251,8 @@ public class RestaurantController implements RestaurantsApi {
                 }
             }
         }
-        try {
-            Restaurant r = restaurantService.setListOfCouriers(restaurantId, requestBody);
-            return ResponseEntity.ok(r);
-        } catch (RestaurantService.RestaurantNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Server error");
-        }
+        Restaurant r = restaurantService.setListOfCouriers(restaurantId, requestBody);
+        return ResponseEntity.ok(r);
     }
 
     /**

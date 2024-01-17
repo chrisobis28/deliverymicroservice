@@ -148,7 +148,6 @@ public class DeliveryService {
      */
     public Restaurant getRestaurant(String restaurantId) {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
-
     }
 
 }
