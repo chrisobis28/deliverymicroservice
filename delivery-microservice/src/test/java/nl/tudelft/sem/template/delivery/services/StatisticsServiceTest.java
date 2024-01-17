@@ -61,7 +61,7 @@ class StatisticsServiceTest {
         delivery.setDeliveryID(deliveryId);
         delivery.setRatingRestaurant(5);
 
-        Delivery test = statisticsService.insert(delivery);
+        Delivery test = deliveryRepository.save(delivery);
         assertEquals(test.getRatingRestaurant(), deliveryRepository.findById(deliveryId).get().getRatingRestaurant());
         assertThat(statisticsService.getOrderRating(deliveryId)).isEqualTo(5);
     }
