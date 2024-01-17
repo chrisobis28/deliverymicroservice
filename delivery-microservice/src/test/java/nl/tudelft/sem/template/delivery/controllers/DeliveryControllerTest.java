@@ -1,11 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -1826,6 +1822,96 @@ class DeliveryControllerTest {
     }
 
     @Test
+    void getDeliveryAuthorized2() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), delivery);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryAuthorized3() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), delivery);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryAuthorized4() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), delivery);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryForbidden1() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID("jbefuef");
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdGet(deliveryId, customerId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void getDeliveryUnForbidden2() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setCourierID("customerId");
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdGet(deliveryId, customerId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    }
+
+
+
+    @Test
     void testDeliveriesDeliveryIdEstimatedDeliveryTimeGet_AdminAccess() {
         // Arrange
         UUID deliveryId = UUID.randomUUID();
@@ -2126,6 +2212,102 @@ class DeliveryControllerTest {
 
         assertEquals(res.getBody(), 30);
         assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryPrepTimeAuthorized1() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), 30);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryPrepTimeAuthorized2() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+
+        ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), 30);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryPrepTimeAuthorized3() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+
+        ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
+
+        assertEquals(res.getBody(), 30);
+        assertEquals(res.getStatusCode(), HttpStatus.OK);
+    }
+
+    @Test
+    void getDeliveryPrepTimeForbidden1() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID("customerId");
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID(customerId);
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void getDeliveryPrepTimeForbidden2() {
+        UUID deliveryId = UUID.randomUUID();
+        String customerId = "test@test.com";
+
+        Delivery delivery = new Delivery();
+        delivery.setDeliveryID(deliveryId);
+        delivery.setRestaurantID(customerId);
+        delivery.setEstimatedPrepTime(30);
+        delivery.setCourierID("customerId");
+        delivery.setCustomerID(customerId);
+        sut.insert(delivery);
+        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -2546,4 +2728,30 @@ class DeliveryControllerTest {
         assertEquals(HttpStatus.OK, res1.getStatusCode());
         assertTrue(Objects.requireNonNull(res1.getBody()).getDeliveryAddress().containsAll(List.of(0.1, 0.3)));
     }
+
+    @Test
+    void deliveryIdGetTest() {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdGet(UUID.randomUUID(),null));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void deliveryPrepareTest() {
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.deliveriesDeliveryIdPrepGet(UUID.randomUUID(),null));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void isLatLongTest() {
+        assertTrue(sut.isInvalidLatLong(null));
+        assertTrue(sut.isInvalidLatLong(List.of(0.0,0.0,0.0)));
+        assertFalse(sut.isInvalidLatLong(List.of(0.0,0.0)));
+
+    }
+
+
+
+
 }

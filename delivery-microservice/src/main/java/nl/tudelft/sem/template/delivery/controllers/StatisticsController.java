@@ -111,7 +111,7 @@ public class StatisticsController implements StatisticsApi {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
-        if (deliveries == null || deliveries.isEmpty()) {
+        if (deliveries.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>());
         }
         List<Double> count = statisticsService.getDeliveriesPerHour(deliveries);
@@ -133,7 +133,13 @@ public class StatisticsController implements StatisticsApi {
                                                                    @Parameter OffsetDateTime startTime,
                                                                    @Parameter OffsetDateTime endTime) {
 
+        if(!usersCommunication.getUserAccountType(courierId)
+                .equals(UsersAuthenticationService.AccountType.COURIER)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such courier");
+
+        }
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+
         if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)
                 || accountType.equals(UsersAuthenticationService.AccountType.VENDOR)
                 || accountType.equals(UsersAuthenticationService.AccountType.ADMIN)
