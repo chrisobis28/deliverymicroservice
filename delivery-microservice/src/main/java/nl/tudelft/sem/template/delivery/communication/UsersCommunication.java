@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.communication;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -12,6 +13,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+
+import java.util.Locale;
 import java.util.UUID;
 
 import org.springframework.web.server.ResponseStatusException;
@@ -30,7 +33,7 @@ public class UsersCommunication {
     public String getAccountType(String userId) {
 
         // Users belong to port 8082, Orders to 8080, we are at 8081
-        String SERVER = "http://localhost:8081";
+        String SERVER = "http://localhost:8082";
         URI uri = URI.create(SERVER + "/account/type?email=" + userId);
         HttpClient httpClient = HttpClient.newHttpClient();
 
@@ -61,6 +64,8 @@ public class UsersCommunication {
      * @param orderStatus status of order
      */
     public void updateOrderStatus(UUID orderId, String orderStatus) {
+
+        orderStatus = orderStatus.toLowerCase(Locale.ROOT);
         // Users belong to port 8082, Orders to 8080, we are at 8081
         String SERVER = "http://localhost:8080";
         URI uri = URI.create(SERVER + "/internal/order/" + orderId + "/status?orderStatus=" + orderStatus);
@@ -76,12 +81,14 @@ public class UsersCommunication {
             HttpResponse<String> response =
                     httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             if (response.statusCode() != HttpStatus.OK.value()) {
+                System.out.println(response.statusCode());
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to update the other service");
 
             }
 
 
         } catch (Exception e) {
+            System.out.println(e);
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Failed to update the other service");
         }
     }
