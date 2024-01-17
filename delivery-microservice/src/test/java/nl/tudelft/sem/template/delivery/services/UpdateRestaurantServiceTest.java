@@ -17,10 +17,12 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @Transactional
 @DataJpaTest
+
 class UpdateRestaurantServiceTest {
 
     @Autowired
@@ -40,8 +42,6 @@ class UpdateRestaurantServiceTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("bla");
         r.setLocation(List.of(11.1, 12.2));
-        List<String> list = new ArrayList<>();
-        list.add("courier1@testmail.com");
         rr.save(r);
 
         assertThrows(RestaurantService.RestaurantNotFoundException.class,

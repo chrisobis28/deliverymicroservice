@@ -43,7 +43,8 @@ public class UpdateRestaurantService {
      * @param requestBody location
      */
     public void updateLocation(String restaurantId, List<Double> requestBody) {
-        Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        Restaurant r = restaurantRepository.findById(restaurantId)
+            .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
         r.location(new ArrayList<>(requestBody));
         restaurantRepository.save(r);
     }
@@ -55,23 +56,24 @@ public class UpdateRestaurantService {
      * @param requestBody delivery zone
      */
     public void updateDeliverZone(String restaurantId, Double requestBody) {
-        Restaurant r = restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        Restaurant r = restaurantRepository.findById(restaurantId)
+            .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
         r.setDeliveryZone(requestBody);
         restaurantRepository.save(r);
     }
 
-  /**
-   * sets the new list of couriers or throws  an exception.
-   *
-   * @param restaurantId the id of the restaurant
-   * @param couriers     the new couriers
-   * @return the changed restaurant entity
-   */
-  public Restaurant setListOfCouriers(String restaurantId, List<String> couriers) {
-    Restaurant r = restaurantRepository.findById(restaurantId)
-        .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
-    r.couriers(couriers);
-    restaurantRepository.save(r);
-    return r;
-  }
+    /**
+     * sets the new list of couriers or throws  an exception.
+     *
+     * @param restaurantId the id of the restaurant
+     * @param couriers     the new couriers
+     * @return the changed restaurant entity
+     */
+    public Restaurant setListOfCouriers(String restaurantId, List<String> couriers) {
+        Restaurant r = restaurantRepository.findById(restaurantId)
+            .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        r.couriers(couriers);
+        restaurantRepository.save(r);
+        return r;
+    }
 }
