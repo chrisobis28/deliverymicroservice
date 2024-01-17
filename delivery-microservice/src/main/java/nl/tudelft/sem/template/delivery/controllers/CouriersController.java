@@ -11,7 +11,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.api.CouriersApi;
-import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -29,7 +29,7 @@ public class CouriersController implements CouriersApi {
     private final transient UsersAuthenticationService usersCommunication;
     private final transient DeliveryService deliveryService;
     private final transient CouriersService couriersService;
-    private final transient AvailableDeliveryProxy availableDeliveryProxy;
+    private final transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
 
     /**
      * Constructor.
@@ -42,7 +42,7 @@ public class CouriersController implements CouriersApi {
         this.deliveryService = deliveryService;
         this.couriersService = couriersService;
         this.usersCommunication = usersCommunication;
-        this.availableDeliveryProxy = new AvailableDeliveryProxy(deliveryService);
+        this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
     }
 
     /**
@@ -70,7 +70,7 @@ public class CouriersController implements CouriersApi {
         return ResponseEntity.ok(list);
     }
 
-    public AvailableDeliveryProxy testMethod() {
+    public AvailableDeliveryProxyImplementation testMethod() {
         return availableDeliveryProxy;
     }
 
@@ -90,14 +90,10 @@ public class CouriersController implements CouriersApi {
         if (couriersService.courierBelongsToRestaurant(courierId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This courier works for a specific restaurant");
         }
-        Queue<UUID> deliveries = availableDeliveryProxy.getQueue();
-        if (deliveries.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "There are no available deliveries at the moment");
-        }
-        UUID id = deliveries.poll();
+        UUID id = availableDeliveryProxy.getAvailableDeliveryId();
         deliveryService.updateDeliveryCourier(id, courierId);
         Delivery delivery = deliveryService.getDelivery(id);
-        availableDeliveryProxy.checkIfAvailable(delivery);
+        availableDeliveryProxy.insertDelivery(delivery);
 
         return ResponseEntity.ok(delivery);
     }

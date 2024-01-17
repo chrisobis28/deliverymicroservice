@@ -1,10 +1,5 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
@@ -20,6 +15,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
+import javax.transaction.Transactional;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 
 /**
@@ -86,11 +87,6 @@ public class DeliveryService {
         return deliveryRepository.save(delivery);
     }
 
-    public DeliveryStatus getDeliveryStatus(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(Delivery::getStatus).orElseThrow(DeliveryNotFoundException::new);
-    }
-
     /**
      * Updates the delivery status.
      *
@@ -104,17 +100,6 @@ public class DeliveryService {
             delivery.setDeliveredTime(OffsetDateTime.now());
         }
         deliveryRepository.save(delivery);
-    }
-
-    /**
-     * Function that returns the address where the food needs to be delivered.
-     *
-     * @param deliveryId the delivery entity
-     * @return the address
-     */
-    public List<Double> getDeliveryAddress(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(Delivery::getDeliveryAddress).orElseThrow(DeliveryNotFoundException::new);
     }
 
     /**
@@ -216,6 +201,7 @@ public class DeliveryService {
      * @param deliveryId ID of delivery to be updated
      * @param prepTime   new value for the update
      */
+    @Transactional
     public void updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setEstimatedPrepTime(prepTime);
@@ -272,7 +258,6 @@ public class DeliveryService {
             }
             case DELIVERED -> throw new OrderAlreadyDeliveredException();
             case REJECTED -> throw new OrderRejectedException();
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown delivery status.");
         }
 
         Integer unexpectedDelay = delivery.getError().getValue();

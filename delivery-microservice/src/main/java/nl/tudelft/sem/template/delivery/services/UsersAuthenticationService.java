@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.model.Delivery;

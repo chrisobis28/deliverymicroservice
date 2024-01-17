@@ -92,7 +92,7 @@ class CouriersControllerTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
-        deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))
@@ -127,7 +127,7 @@ class CouriersControllerTest {
                 .isEqualTo(HttpStatus.NOT_FOUND);
         assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
                 .message()
-                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment\"");
+                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment.\"");
     }
 
     @Test
@@ -144,7 +144,7 @@ class CouriersControllerTest {
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
 
-        deliveries.forEach(x -> sut.testMethod().checkIfAvailable(x));
+        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))
@@ -235,6 +235,7 @@ class CouriersControllerTest {
 
         ResponseEntity<List<Integer>> result = sut.couriersCourierIdRatingsGet(courierId, userId);
         assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertNotNull(result.getBody());
         assertEquals(2, result.getBody().size());
         assertTrue(result.getBody().containsAll(List.of(3, 4)));
     }
@@ -274,6 +275,26 @@ class CouriersControllerTest {
                 () -> sut.couriersCourierIdOrdersGet(vendorId, userId));
         assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
         assertEquals(exception.getReason(), "The id is not recognised as courier.");
+    }
+
+    @Test
+    void couriersCourierIdOrdersGetBadRequest() {
+        String userId = "invalid@testmail.com";
+        String vendorId = "vendor@testmail.com";
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.couriersCourierIdOrdersGet(null, userId));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+    @Test
+    void couriersCourierIdOrdersGetBadRequest2() {
+        String userId = "invalid@testmail.com";
+        String vendorId = "vendor@testmail.com";
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.couriersCourierIdOrdersGet(userId, null));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+
     }
 
     @Test

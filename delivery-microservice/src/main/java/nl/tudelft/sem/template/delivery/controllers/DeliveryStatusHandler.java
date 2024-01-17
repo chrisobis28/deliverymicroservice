@@ -1,9 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -11,9 +7,12 @@ import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.Acco
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 
 @Service
@@ -23,28 +22,19 @@ public class DeliveryStatusHandler {
     private final transient UsersAuthenticationService usersAuthenticationService;
     private final transient UsersCommunication usersCommunication;
 
-
+    /**
+     * Constructor.
+     *
+     * @param deliveryService               the delivery service
+     * @param usersAuthenticationService    mock for users authorization
+     * @param usersCommunication            mock for users communication
+     */
     public DeliveryStatusHandler(DeliveryService deliveryService,
                                  UsersAuthenticationService usersAuthenticationService,
                                  UsersCommunication usersCommunication) {
         this.deliveryService = deliveryService;
         this.usersAuthenticationService = usersAuthenticationService;
         this.usersCommunication = usersCommunication;
-    }
-
-    /**
-     * Endpoint for getting the delivery status.
-     *
-     * @param deliveryId ID of delivery
-     * @param userId     ID of user making the request
-     * @return a string representing the status name
-     */
-    public ResponseEntity<String> getDeliveryStatus(UUID deliveryId, String userId) {
-        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        authorizeUser(userId, accountType, delivery);
-
-        return ResponseEntity.ok(delivery.getStatus().toString());
     }
 
 
@@ -56,10 +46,9 @@ public class DeliveryStatusHandler {
      * @param status     new status to update with
      * @return the updated Delivery object
      */
-    public ResponseEntity<Delivery> updateDeliveryStatus(UUID deliveryId, String userId, String status) {
+    public Delivery updateDeliveryStatus(UUID deliveryId, String userId, String status) {
         AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
-        authorizeUser(userId, accountType, delivery);
 
         DeliveryStatus oldStatus = delivery.getStatus();
         DeliveryStatus newStatus = StatusValidity.validate(status);
@@ -69,16 +58,7 @@ public class DeliveryStatusHandler {
         usersCommunication.updateOrderStatus(deliveryId, newStatus.toString());
         deliveryService.updateDeliveryStatus(deliveryId, newStatus);
 
-        return ResponseEntity.ok(delivery);
-    }
-
-    private void authorizeUser(String userId, AccountType accountType, Delivery delivery) {
-        if (accountType == AccountType.INVALID) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
-        if (!usersAuthenticationService.checkUserAccessToDelivery(userId, delivery)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
+        return delivery;
     }
 
     private static final class StatusValidity {
