@@ -112,7 +112,7 @@ public class RestaurantController implements RestaurantsApi {
     public ResponseEntity<Restaurant> restaurantsRestaurantIdGet(@PathVariable("restaurantId") String restaurantId,
                                                                  @RequestHeader String userId) {
         Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId,
-            "Restaurant ID");
+            "Restaurant");
         if (!(result.getLeft()).equals(HttpStatus.OK)) {
             throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
