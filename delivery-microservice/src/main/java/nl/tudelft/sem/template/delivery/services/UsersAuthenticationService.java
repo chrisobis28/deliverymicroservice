@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.model.Delivery;
@@ -46,11 +45,11 @@ public class UsersAuthenticationService {
     }
 
     public enum AccountType {
-        INVALID("INVALID"),
-        CLIENT("CLIENT"),
-        COURIER("COURIER"),
-        VENDOR("VENDOR"),
-        ADMIN("ADMIN");
+        INVALID("invalid"),
+        CLIENT("customer"),
+        COURIER("courier"),
+        VENDOR("vendor"),
+        ADMIN("admin");
 
         private final String value;
 

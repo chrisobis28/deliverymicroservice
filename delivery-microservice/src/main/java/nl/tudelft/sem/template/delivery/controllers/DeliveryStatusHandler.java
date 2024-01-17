@@ -23,7 +23,13 @@ public class DeliveryStatusHandler {
     private final transient UsersAuthenticationService usersAuthenticationService;
     private final transient UsersCommunication usersCommunication;
 
-
+    /**
+     * Constructor.
+     *
+     * @param deliveryService               the delivery service
+     * @param usersAuthenticationService    mock for users authorization
+     * @param usersCommunication            mock for users communication
+     */
     public DeliveryStatusHandler(DeliveryService deliveryService,
                                  UsersAuthenticationService usersAuthenticationService,
                                  UsersCommunication usersCommunication) {

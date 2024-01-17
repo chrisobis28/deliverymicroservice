@@ -43,7 +43,7 @@ public class DeliveryStatusHandlerTest {
     @BeforeEach
     public void init() {
         DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
-        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication );
+        statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication);
     }
 
     private Delivery insertExampleDelivery() {
@@ -124,7 +124,8 @@ public class DeliveryStatusHandlerTest {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
         when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
-        doThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE)).when(usersCommunication).updateOrderStatus(any(), any());
+        doThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE))
+            .when(usersCommunication).updateOrderStatus(any(), any());
         assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
                 .extracting("status")
                 .isEqualTo(HttpStatus.SERVICE_UNAVAILABLE);
