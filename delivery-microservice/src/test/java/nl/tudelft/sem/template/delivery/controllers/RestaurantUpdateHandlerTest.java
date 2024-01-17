@@ -5,7 +5,6 @@ import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Restaurant;
-import nl.tudelft.sem.template.model.RestaurantsPostRequest;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,7 +70,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, otherRestaurantId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "User lacks necessary permissions.");
     }
@@ -93,7 +92,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "Only vendors and admins can change the delivery zone of a restaurant.");
     }
@@ -114,7 +113,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "Only vendors and admins can change the delivery zone of a restaurant.");
     }
@@ -136,7 +135,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.UNAUTHORIZED, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
         assertEquals(exception.getReason(), "User lacks valid authentication credentials.");
     }
@@ -152,7 +151,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
         assertEquals(exception.getReason(), "Restaurant with specified id not found");
     }
@@ -172,7 +171,7 @@ class RestaurantUpdateHandlerTest {
         when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Delivery Zone"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
-        ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
+        ResponseEntity<Restaurant> res = sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, userId, 20.0);
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertNotNull(res.getBody());
         assertEquals(res.getBody().getDeliveryZone(), 20.0);
@@ -195,7 +194,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0));
+            () -> sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "User lacks necessary permissions.");
     }
@@ -215,7 +214,7 @@ class RestaurantUpdateHandlerTest {
         when(usersCommunication.checkUserAccessToRestaurant(restaurantId, restaurantId, "Delivery Zone"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
-        ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0);
+        ResponseEntity<Restaurant> res = sut.updateRestaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0);
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertNotNull(res.getBody());
         assertEquals(res.getBody().getDeliveryZone(), 20.0);
@@ -239,7 +238,7 @@ class RestaurantUpdateHandlerTest {
         when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Location"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
-        ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, list2);
+        ResponseEntity<Restaurant> res = sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, userId, list2);
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertNotNull(res.getBody());
         assertEquals(res.getBody().getLocation(), List.of(0.1, 0.1));
@@ -262,7 +261,7 @@ class RestaurantUpdateHandlerTest {
         when(usersCommunication.checkUserAccessToRestaurant(restaurantId, restaurantId, "Location"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
-        ResponseEntity<Restaurant> res = sut.restaurantsRestaurantIdLocationPut(restaurantId, restaurantId, list2);
+        ResponseEntity<Restaurant> res = sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, restaurantId, list2);
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertNotNull(res.getBody());
         assertEquals(res.getBody().getLocation(), List.of(0.1, 0.1));
@@ -282,7 +281,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, otherRestaurantId, List.of(0.1, 0.1)));
+            () -> sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, otherRestaurantId, List.of(0.1, 0.1)));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "User lacks necessary permissions.");
     }
@@ -301,7 +300,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+            () -> sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "Only vendors and admins can change the restaurant's address");
     }
@@ -320,7 +319,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+            () -> sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "Only vendors and admins can change the restaurant's address");
     }
@@ -339,7 +338,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.UNAUTHORIZED, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+            () -> sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
         assertEquals(exception.getStatus(), HttpStatus.UNAUTHORIZED);
         assertEquals(exception.getReason(), "User lacks valid authentication credentials.");
     }
@@ -353,7 +352,7 @@ class RestaurantUpdateHandlerTest {
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.restaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
+            () -> sut.updateRestaurantsRestaurantIdLocationPut(restaurantId, userId, List.of(0.1, 0.1)));
         assertEquals(exception.getStatus(), HttpStatus.NOT_FOUND);
         assertEquals(exception.getReason(), "Restaurant with specified id not found");
     }
@@ -363,16 +362,16 @@ class RestaurantUpdateHandlerTest {
         String msg = "User ID or Restaurant ID is invalid.";
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
             .thenReturn(Pair.of(HttpStatus.BAD_REQUEST, msg));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut(null, "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut(null, "bla", null))
             .extracting("status")
             .isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut(null, "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut(null, "bla", null))
             .message()
             .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", null, null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", null, null))
             .extracting("status")
             .isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", null, null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", null, null))
             .message()
             .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
     }
@@ -388,11 +387,11 @@ class RestaurantUpdateHandlerTest {
 
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla",
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla",
             "bla", null))
             .extracting("status")
             .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla",
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla",
             null))
             .message()
             .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
@@ -409,10 +408,10 @@ class RestaurantUpdateHandlerTest {
         String msg = "User lacks necessary permissions.";
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .extracting("status")
             .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .message()
             .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
@@ -427,10 +426,10 @@ class RestaurantUpdateHandlerTest {
         String msg = "User lacks necessary permissions.";
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "duf", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "duf", null))
             .extracting("status")
             .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "duf", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "duf", null))
             .message()
             .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
@@ -440,7 +439,7 @@ class RestaurantUpdateHandlerTest {
         repo2.save(new Restaurant().restaurantID("bla").location(List.of(0.5, 0.1)));
         when(usersCommunication.checkUserAccessToRestaurant("bla", "bla", "Couriers"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
-        ResponseEntity<Restaurant> r2 = sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null);
+        ResponseEntity<Restaurant> r2 = sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null);
         assertThat(r2.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
@@ -455,10 +454,10 @@ class RestaurantUpdateHandlerTest {
         String msg = "User lacks valid authentication credentials.";
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any()))
             .thenReturn(Pair.of(HttpStatus.UNAUTHORIZED, msg));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .extracting("status")
             .isEqualTo(HttpStatus.UNAUTHORIZED);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .message()
             .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
     }
@@ -470,21 +469,21 @@ class RestaurantUpdateHandlerTest {
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any())).thenReturn(Pair.of(HttpStatus.OK, "OK"));
         List<String> list = new ArrayList<>();
         list.add("bl");
-        ResponseEntity<Restaurant> r = sut.restaurantsRestaurantIdCouriersPut("bla", "bla", list);
+        ResponseEntity<Restaurant> r = sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", list);
         assertThat(r.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
 
     @Test
     void restaurantsRestaurantCourierAdminInvalid() {
-        sut.restaurantsPost(new RestaurantsPostRequest().restaurantID("bla").location(List.of(0.5, 0.1)));
+        repo2.save(new Restaurant().restaurantID("bla").location(List.of(0.5, 0.1)));
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any())).thenReturn(Pair.of(HttpStatus.OK, "OK"));
         when(usersCommunication.getUserAccountType("bl")).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         List<String> list = new ArrayList<>();
         list.add("bl");
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", list))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", list))
             .extracting("status")
             .isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", list))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", list))
             .message()
             .isEqualTo("400 BAD_REQUEST \"List contains the id of someone who isn't a courier.\"");
     }
@@ -492,10 +491,10 @@ class RestaurantUpdateHandlerTest {
     @Test
     void restaurantsRestaurantCourierNoRestaurant() {
         when(usersCommunication.checkUserAccessToRestaurant(any(), any(), any())).thenReturn(Pair.of(HttpStatus.OK, "OK"));
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .extracting("status")
             .isEqualTo(HttpStatus.NOT_FOUND);
-        assertThatThrownBy(() -> sut.restaurantsRestaurantIdCouriersPut("bla", "bla", null))
+        assertThatThrownBy(() -> sut.updateRestaurantsRestaurantIdCouriersPut("bla", "bla", null))
             .message()
             .isEqualTo("404 NOT_FOUND \"Restaurant with specified id not found\"");
     }

@@ -1,16 +1,14 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.api.RestaurantsApi;
+import nl.tudelft.sem.template.api.UpdateApi;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.apache.commons.lang3.tuple.Pair;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
@@ -21,7 +19,8 @@ import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationServi
 import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.VENDOR;
 
 @RestController
-public class RestaurantUpdateHandler implements RestaurantsApi {
+@RequestMapping("/update/restaurants")
+public class RestaurantUpdateHandler implements UpdateApi {
     private final transient RestaurantService restaurantService;
 
     private final transient UsersAuthenticationService usersCommunication;
@@ -32,6 +31,7 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
     * @param restaurantService service for restaurants
     * @param usersCommunication service for authenticating users
     */
+    @Autowired
     public RestaurantUpdateHandler(RestaurantService restaurantService,
                                    UsersAuthenticationService usersCommunication) {
         this.restaurantService = restaurantService;
@@ -47,7 +47,7 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
      * @return updated location of a restaurant
      */
     @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdLocationPut(@PathVariable String restaurantId,
+    public ResponseEntity<Restaurant> updateRestaurantsRestaurantIdLocationPut(@PathVariable String restaurantId,
                                                                          @RequestHeader String userId,
                                                                          @RequestBody List<Double> requestBody) {
         Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "Location");
@@ -67,7 +67,7 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
      * @return updated delivery zone of a restaurant
      */
     @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdDeliverZonePut(@PathVariable String restaurantId,
+    public ResponseEntity<Restaurant> updateRestaurantsRestaurantIdDeliverZonePut(@PathVariable String restaurantId,
                                                                             @RequestHeader String userId,
                                                                             @RequestBody Double requestBody) {
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
@@ -93,7 +93,7 @@ public class RestaurantUpdateHandler implements RestaurantsApi {
      * @return the modified restaurant entity
      */
     @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut(@PathVariable String restaurantId,
+    public ResponseEntity<Restaurant> updateRestaurantsRestaurantIdCouriersPut(@PathVariable String restaurantId,
                                                                          @RequestHeader String userId,
                                                                          @RequestBody @Valid List<String> requestBody) {
         Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId,
