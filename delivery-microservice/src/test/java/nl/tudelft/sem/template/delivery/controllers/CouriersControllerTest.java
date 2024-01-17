@@ -56,7 +56,8 @@ class CouriersControllerTest {
     void setUp() {
         ds = new DeliveryService(dr, new GPS(), rr);
         cs = new CouriersService(dr, rr);
-        sut = new CouriersController(ds, usersAuth, cs, new AvailableDeliveryProxyImplementation(ds, rr), new UpdateService(dr));
+        sut = new CouriersController(ds, usersAuth, cs, new AvailableDeliveryProxyImplementation(ds, rr),
+            new UpdateService(dr));
     }
 
     @Test

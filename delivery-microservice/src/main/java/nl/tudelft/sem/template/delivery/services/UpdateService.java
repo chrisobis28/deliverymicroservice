@@ -14,11 +14,11 @@ public class UpdateService {
 
     private final transient DeliveryRepository deliveryRepository;
 
-  /**
-   * Constructor.
-   *
-   * @param deliveryRepository delivery repository
-   */
+    /**
+    * Constructor.
+    *
+    * @param deliveryRepository delivery repository
+    */
     public UpdateService(DeliveryRepository deliveryRepository) {
         this.deliveryRepository = deliveryRepository;
     }
@@ -30,7 +30,8 @@ public class UpdateService {
      * @param courierId ID of a courier to be assigned
      */
     public void updateDeliveryCourier(UUID deliveryId, String courierId) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setCourierID(courierId);
         deliveryRepository.save(delivery);
     }
@@ -42,7 +43,8 @@ public class UpdateService {
      * @param rating new rating of restaurant
      */
     public void updateRestaurantRating(UUID deliveryId, Integer rating) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setRatingRestaurant(rating);
         deliveryRepository.save(delivery);
     }
@@ -54,7 +56,8 @@ public class UpdateService {
      * @param rating new rating score
      */
     public void updateCourierRating(UUID deliveryId, Integer rating) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setRatingCourier(rating);
         deliveryRepository.save(delivery);
     }
@@ -66,7 +69,8 @@ public class UpdateService {
      * @param deliveryStatus new status
      */
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
-        Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+        Delivery delivery = deliveryRepository.findById(deliveryId)
+            .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
         deliveryRepository.save(delivery);
     }

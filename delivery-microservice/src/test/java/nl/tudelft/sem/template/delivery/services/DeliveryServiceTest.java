@@ -80,28 +80,28 @@ class DeliveryServiceTest {
         assertThrows(IllegalArgumentException.class, () -> deliveryService.insert(new Delivery()));
     }
 
-//    @Test
-//    void restaurantUsesOwnCouriersTest() {
-//        Delivery d = new Delivery();
-//        UUID deliveryId = UUID.randomUUID();
-//        d.setDeliveryID(deliveryId);
-//        Restaurant r1 = new Restaurant();
-//        r1.setCouriers(null);
-//        Restaurant r2 = new Restaurant();
-//        r1.setCouriers(List.of());
-//        Restaurant r3 = new Restaurant();
-//        r1.setCouriers(List.of());
-//        r2.setCouriers(null);
-//        r3.setCouriers(List.of("courier1@testmail.com"));
-//        when(restaurantRepositoryMock.findById("restaurant1@testmail.com")).thenReturn(Optional.of(r1));
-//        when(restaurantRepositoryMock.findById("restaurant2@testmail.com")).thenReturn(Optional.of(r2));
-//        when(restaurantRepositoryMock.findById("restaurant3@testmail.com")).thenReturn(Optional.of(r3));
-//
-//        d.setRestaurantID("restaurant1@testmail.com");
-//        Assertions.assertFalse(restaurantRepositoryMock.findRestaurantsByCouriersIsNotEmpty(d));
-//        d.setRestaurantID("restaurant2@testmail.com");
-//        Assertions.assertFalse(deliveryService.restaurantUsesOwnCouriers(d));
-//        d.setRestaurantID("restaurant3@testmail.com");
-//        Assertions.assertTrue(deliveryService.restaurantUsesOwnCouriers(d));
-//    }
+    //    @Test
+    //    void restaurantUsesOwnCouriersTest() {
+    //        Delivery d = new Delivery();
+    //        UUID deliveryId = UUID.randomUUID();
+    //        d.setDeliveryID(deliveryId);
+    //        Restaurant r1 = new Restaurant();
+    //        r1.setCouriers(null);
+    //        Restaurant r2 = new Restaurant();
+    //        r1.setCouriers(List.of());
+    //        Restaurant r3 = new Restaurant();
+    //        r1.setCouriers(List.of());
+    //        r2.setCouriers(null);
+    //        r3.setCouriers(List.of("courier1@testmail.com"));
+    //        when(restaurantRepositoryMock.findById("restaurant1@testmail.com")).thenReturn(Optional.of(r1));
+    //        when(restaurantRepositoryMock.findById("restaurant2@testmail.com")).thenReturn(Optional.of(r2));
+    //        when(restaurantRepositoryMock.findById("restaurant3@testmail.com")).thenReturn(Optional.of(r3));
+    //
+    //        d.setRestaurantID("restaurant1@testmail.com");
+    //        Assertions.assertFalse(restaurantRepositoryMock.findRestaurantsByCouriersIsNotEmpty(d));
+    //        d.setRestaurantID("restaurant2@testmail.com");
+    //        Assertions.assertFalse(deliveryService.restaurantUsesOwnCouriers(d));
+    //        d.setRestaurantID("restaurant3@testmail.com");
+    //        Assertions.assertTrue(deliveryService.restaurantUsesOwnCouriers(d));
+    //    }
 }

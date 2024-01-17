@@ -40,6 +40,9 @@ public class DeliveryStatusHandlerTest {
     private UsersCommunication usersCommunication;
     private DeliveryStatusHandler statusHandler;
 
+    /**
+     * Initialize test elements.
+     */
     @BeforeEach
     public void init() {
         DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
