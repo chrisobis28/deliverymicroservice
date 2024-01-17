@@ -67,6 +67,39 @@ class RestaurantControllerTest {
     }
 
     @Test
+    public void isValidAddressTest() {
+        assertTrue(sut.isInvalidAddress(List.of(0.0,0.0,0.0)));
+    }
+    @Test
+    public void isValidAddressTest1() {
+        assertFalse(sut.isInvalidAddress(List.of(0.0,0.0)));
+    }
+
+    @Test
+    public void isValidAddressTest2() {
+        assertTrue(sut.isInvalidAddress(null));
+    }
+
+    @Test
+    public void isNullOrEmptyTest() {
+        assertTrue(sut.isNullOrEmpty(null));
+    }
+    @Test
+    public void isNullOrEmptyTest1() {
+        assertTrue(sut.isNullOrEmpty(""));
+    }
+
+    @Test
+    public void isNullOrEmptyTest2() {
+        assertTrue(sut.isNullOrEmpty(" "));
+    }
+
+    @Test
+    public void isNullOrEmptyTest3() {
+        assertFalse(sut.isNullOrEmpty("bjefef "));
+    }
+
+    @Test
     void restaurantsInvalidAddr() {
         RestaurantsPostRequest rpr = new RestaurantsPostRequest();
         rpr.setRestaurantID("hi_im_a_vendor@testmail.com");
@@ -335,6 +368,25 @@ class RestaurantControllerTest {
     }
 
     @Test
+    void restaurantsRestaurantIdDeliverZonePutSameVendorNoCouriers() {
+        String restaurantId = "restaurant_sameVendor@testmail.com";
+        Restaurant r = new Restaurant();
+        r.setRestaurantID(restaurantId);
+        r.setLocation(List.of(1.2, 3.4));
+        r.setDeliveryZone(10.0);
+        r.setCouriers(new ArrayList<>());
+        sut.insert(r);
+
+        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
+        when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.restaurantsRestaurantIdDeliverZonePut(restaurantId, restaurantId, 20.0));
+        assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
+        assertEquals(exception.getReason(), "User lacks necessary permissions.");
+    }
+
+    @Test
     void restaurantsRestaurantIdDeliverZonePutDiffVendor() {
         String restaurantId = "restaurant_diffVendor@testmail.com";
         String otherRestaurantId = "other_restaurant_diffVendor@testmail.com";
@@ -352,6 +404,8 @@ class RestaurantControllerTest {
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
         assertEquals(exception.getReason(), "User lacks necessary permissions.");
     }
+
+
 
     @Test
     void restaurantsRestaurantIdDeliverZonePutCourier() {

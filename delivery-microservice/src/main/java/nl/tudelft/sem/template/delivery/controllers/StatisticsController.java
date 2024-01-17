@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.StatisticsApi;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -118,7 +120,7 @@ public class StatisticsController implements StatisticsApi {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
         }
         List<Delivery> deliveries = statisticsService.getOrdersOfVendor(vendorId);
-        if (deliveries == null || deliveries.isEmpty()) {
+        if (deliveries.isEmpty()) {
             return ResponseEntity.ok(new ArrayList<>());
         }
         List<Double> count = statisticsService.getDeliveriesPerHour(deliveries);
@@ -140,7 +142,13 @@ public class StatisticsController implements StatisticsApi {
                                                                    @Parameter OffsetDateTime startTime,
                                                                    @Parameter OffsetDateTime endTime) {
 
+        if(!usersCommunication.getUserAccountType(courierId)
+                .equals(UsersAuthenticationService.AccountType.COURIER)){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such courier");
+
+        }
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+
         if (!accountType.equals(UsersAuthenticationService.AccountType.INVALID)) {
             Statistics statistics = statisticsService.getCourierStatistics(courierId, startTime, endTime);
             return ResponseEntity.ok(statistics);
@@ -157,15 +165,15 @@ public class StatisticsController implements StatisticsApi {
      * @param endTime  (optional)
      * @return the rate of that event
      */
-    //@Override
+    @Override
     public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
-                                                                       @NotNull String userID,
-                                                                   @RequestParam
-                                                                       @NotNull @Valid ErrorType unexpectedEvent,
-                                                                   @RequestParam
-                                                                       @DateTimeFormat @Valid OffsetDateTime startTime,
-                                                                   @RequestParam
-                                                                       @DateTimeFormat @Valid OffsetDateTime endTime) {
+                                                                   @NotNull String userID,
+                                                               @RequestParam
+                                                                   @NotNull @Valid ErrorType unexpectedEvent,
+                                                               @RequestParam
+                                                                   @DateTimeFormat @Valid OffsetDateTime startTime,
+                                                               @RequestParam
+                                                                   @DateTimeFormat @Valid OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {

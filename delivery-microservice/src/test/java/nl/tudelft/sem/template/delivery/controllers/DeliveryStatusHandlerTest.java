@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -103,6 +104,22 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
+    void updateSucceedsWhenAuthenticatedUserMakesALegalUpdateAdmin() {
+        Delivery delivery = insertExampleDelivery();
+        when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.ADMIN);
+        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
+
+        assertThat(statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
+                .extracting("body.status")
+                .isEqualTo(DeliveryStatus.DELIVERED);
+        assertThat(deliveryRepository.findById(delivery.getDeliveryID()))
+                .get()
+                .extracting("status")
+                .isEqualTo(DeliveryStatus.DELIVERED);
+        verify(usersCommunication, times(1)).updateOrderStatus(any(), any());
+    }
+
+    @Test
     void updateDoesNotSucceedBecauseOtherServerUnavailable() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
@@ -147,4 +164,10 @@ public class DeliveryStatusHandlerTest {
                 .extracting("status")
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    void isStatusUpdateLegalTest() {
+
+    }
+
 }
