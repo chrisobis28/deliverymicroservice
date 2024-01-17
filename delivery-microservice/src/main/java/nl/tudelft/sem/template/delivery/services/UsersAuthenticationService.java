@@ -55,7 +55,7 @@ public class UsersAuthenticationService {
      * @return              whether the user has permission to access this restaurant object
      */
     public Pair<HttpStatus, String> checkUserAccessToRestaurant(String userId, String restaurantId, String fieldName) {
-        if (userId == null) {
+        if (userId == null || restaurantId == null) {
             return Pair.of(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid.");
         }
         AccountType accountType = getUserAccountType(userId);
@@ -64,12 +64,7 @@ public class UsersAuthenticationService {
             case ADMIN:
                 return Pair.of(HttpStatus.OK, "OK");
             case CLIENT, COURIER:
-                if (fieldName.equals("Couriers")) {
-                    return Pair.of(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                } else {
-                    return Pair.of(HttpStatus.FORBIDDEN,
-                        "Only vendors and admins can change the delivery zone of a restaurant.");
-                }
+                return courierAndClientRestaurantAccess(fieldName);
             case VENDOR: {
                 if (userId.equals(restaurantId)) {
                     return Pair.of(HttpStatus.OK, "OK");
@@ -79,6 +74,29 @@ public class UsersAuthenticationService {
             }
             default:
                 return Pair.of(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+        }
+    }
+
+    /**
+     * Checks how to respond for couriers and clients depending on the field being accessed.
+     *
+     * @param fieldName the field being accessed
+     * @return whether the user has permission to access this restaurant object
+     */
+    public Pair<HttpStatus, String> courierAndClientRestaurantAccess(String fieldName) {
+        switch (fieldName) {
+            case "Couriers": {
+                return Pair.of(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            }
+            case "Delivery Zone": {
+                return Pair.of(HttpStatus.FORBIDDEN,
+                    "Only vendors and admins can change the delivery zone of a restaurant.");
+            }
+            case "Location": {
+                return Pair.of(HttpStatus.FORBIDDEN,
+                    "Only vendors and admins can change the restaurant's address");
+            }
+            default: return Pair.of(HttpStatus.OK, "OK");
         }
     }
 
