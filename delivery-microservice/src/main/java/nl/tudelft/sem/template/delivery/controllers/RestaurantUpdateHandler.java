@@ -1,7 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.api.UpdateApi;
-import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.UpdateRestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.apache.commons.lang3.tuple.Pair;
@@ -21,7 +21,7 @@ import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationServi
 @RestController
 @RequestMapping("/update/restaurants")
 public class RestaurantUpdateHandler implements UpdateApi {
-    private final transient RestaurantService restaurantService;
+    private final transient UpdateRestaurantService restaurantService;
 
     private final transient UsersAuthenticationService usersCommunication;
 
@@ -32,7 +32,7 @@ public class RestaurantUpdateHandler implements UpdateApi {
     * @param usersCommunication service for authenticating users
     */
     @Autowired
-    public RestaurantUpdateHandler(RestaurantService restaurantService,
+    public RestaurantUpdateHandler(UpdateRestaurantService restaurantService,
                                    UsersAuthenticationService usersCommunication) {
         this.restaurantService = restaurantService;
         this.usersCommunication = usersCommunication;

@@ -1,8 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
-import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.UpdateRestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,11 +34,9 @@ import static org.mockito.Mockito.when;
 class RestaurantUpdateHandlerTest {
 
     @Autowired
-    private DeliveryRepository repo1;
-    @Autowired
     private RestaurantRepository repo2;
     private RestaurantUpdateHandler sut;
-    private RestaurantService rs;
+    private UpdateRestaurantService rs;
     private UsersAuthenticationService usersCommunication;
 
     List<Double> coord;
@@ -47,7 +44,7 @@ class RestaurantUpdateHandlerTest {
     @BeforeEach
     void setUp() {
         coord = List.of(32.6, 50.4);
-        rs = new RestaurantService(repo2, repo1);
+        rs = new UpdateRestaurantService(repo2);
         usersCommunication = mock(UsersAuthenticationService.class);
         sut = new RestaurantUpdateHandler(rs, usersCommunication);
     }
@@ -256,7 +253,7 @@ class RestaurantUpdateHandlerTest {
         list2.add(0.1);
         list2.add(0.1);
         r.setLocation(list);
-        rs.insert(r);
+        repo2.save(r);
 
         when(usersCommunication.checkUserAccessToRestaurant(restaurantId, restaurantId, "Location"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
