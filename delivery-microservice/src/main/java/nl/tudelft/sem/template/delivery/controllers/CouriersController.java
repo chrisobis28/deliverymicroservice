@@ -7,13 +7,13 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.api.CouriersApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.http.HttpStatus;
@@ -31,6 +31,8 @@ public class CouriersController implements CouriersApi {
     private final transient CouriersService couriersService;
     private final transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
 
+    private final transient UpdateService updateService;
+
     /**
      * Constructor.
      *
@@ -38,11 +40,14 @@ public class CouriersController implements CouriersApi {
      * @param usersCommunication mock for users authorization
      */
     public CouriersController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication,
-                              CouriersService couriersService) {
+                              CouriersService couriersService,
+                              AvailableDeliveryProxyImplementation availableDeliveryProxy,
+                              UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.couriersService = couriersService;
         this.usersCommunication = usersCommunication;
-        this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
+        this.availableDeliveryProxy = availableDeliveryProxy;
+        this.updateService = updateService;
     }
 
     /**
@@ -91,7 +96,7 @@ public class CouriersController implements CouriersApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This courier works for a specific restaurant");
         }
         UUID id = availableDeliveryProxy.getAvailableDeliveryId();
-        deliveryService.updateDeliveryCourier(id, courierId);
+        updateService.updateDeliveryCourier(id, courierId);
         Delivery delivery = deliveryService.getDelivery(id);
         availableDeliveryProxy.insertDelivery(delivery);
 

@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
@@ -10,6 +11,10 @@ import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
+import nl.tudelft.sem.template.delivery.services.*;
+import nl.tudelft.sem.template.model.DeliveriesPostRequest;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -48,7 +53,7 @@ class DeliveryControllerTest {
     @Mock
     private DeliveryStatusHandler deliveryStatusHandler;
     @Mock
-    private AvailableDeliveryProxy availableDeliveryProxy;
+    private AvailableDeliveryProxyImplementation availableDeliveryProxy;
     @Autowired
     private DeliveryRepository deliveryRepository;
     @Autowired
@@ -79,8 +84,11 @@ class DeliveryControllerTest {
 
         ds = new DeliveryService(deliveryRepository, new GPS(), restaurantRepository);
         es = new ErrorService(errorRepository, deliveryRepository);
-        restaurantController = new RestaurantController(new RestaurantService(restaurantRepository, deliveryRepository), usersCommunication);
-        sut = new DeliveryController(ds, es, usersCommunication, deliveryStatusHandler, availableDeliveryProxy);
+        restaurantController = new RestaurantController(new RestaurantService(restaurantRepository, deliveryRepository),
+            usersCommunication);
+        sut = new DeliveryController(ds, es, usersCommunication, deliveryStatusHandler,
+            new TimeCalculationService(deliveryRepository, new GPS(), restaurantRepository), availableDeliveryProxy,
+            new UpdateService(deliveryRepository));
     }
 
     @Test
@@ -1742,8 +1750,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getRestaurantID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getRestaurantID()));
 
         ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
 
@@ -1761,8 +1771,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getCourierID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getCourierID()));
 
         ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
 
@@ -1780,8 +1792,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getCustomerID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getCustomerID()));
 
         ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdGet(deliveryId, customerId);
 
@@ -2137,8 +2151,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getCourierID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getCourierID()));
 
         ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
 
@@ -2158,8 +2174,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getRestaurantID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getRestaurantID()));
 
         ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
 
@@ -2179,8 +2197,10 @@ class DeliveryControllerTest {
         delivery.setCourierID(customerId);
         delivery.setCustomerID(customerId);
         deliveryRepository.save(delivery);
-        when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersCommunication.checkUserAccessToDelivery(customerId,delivery)).thenReturn(customerId.equals(delivery.getCustomerID()));
+        when(usersCommunication.getUserAccountType(customerId))
+            .thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.checkUserAccessToDelivery(customerId, delivery))
+            .thenReturn(customerId.equals(delivery.getCustomerID()));
 
         ResponseEntity<Integer> res = sut.deliveriesDeliveryIdPrepGet(deliveryId, customerId);
 

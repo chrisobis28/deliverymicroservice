@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
@@ -28,7 +27,6 @@ import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationServi
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
@@ -95,6 +93,7 @@ public class StatisticsControllerTestWithRepo {
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
                 .getDeliveryTimeRatio()).isEqualTo(0);
     }
+
     @Test
     void authorizedEmptyTestAdmin() {
         String userID = "user@user.com";

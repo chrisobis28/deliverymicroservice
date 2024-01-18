@@ -9,11 +9,14 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -53,7 +56,8 @@ class CouriersControllerTest {
     void setUp() {
         ds = new DeliveryService(dr, new GPS(), rr);
         cs = new CouriersService(dr, rr);
-        sut = new CouriersController(ds, usersAuth, cs);
+        sut = new CouriersController(ds, usersAuth, cs, new AvailableDeliveryProxyImplementation(ds, rr),
+            new UpdateService(dr));
     }
 
     @Test
@@ -281,6 +285,7 @@ class CouriersControllerTest {
                 () -> sut.couriersCourierIdOrdersGet(null, userId));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
     }
+
     @Test
     void couriersCourierIdOrdersGetBadRequest2() {
         String userId = "invalid@testmail.com";

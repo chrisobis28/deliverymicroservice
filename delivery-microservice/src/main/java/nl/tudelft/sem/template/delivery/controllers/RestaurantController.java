@@ -1,8 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 
-import java.util.Objects;
-
 import nl.tudelft.sem.template.api.RestaurantsApi;
 
 
@@ -14,19 +12,17 @@ import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
 import nl.tudelft.sem.template.model.RestaurantsPostRequest;
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.*;
 
 
 @RestController
+@RequestMapping("/restaurants")
 public class RestaurantController implements RestaurantsApi {
 
     private final transient RestaurantService restaurantService;
@@ -113,96 +109,21 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<Restaurant> restaurantsRestaurantIdGet(@PathVariable("restaurantId") String restaurantId,
                                                                  @RequestHeader String userId) {
-        //check user ID
-        if (userId == null || restaurantId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid.");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId, restaurantId,
+            "Restaurant");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
         Restaurant r = restaurantService.getRestaurant(restaurantId);
         switch (accountType) {
-            case COURIER, CLIENT:
+            case CLIENT, COURIER -> {
                 r.setDeliveryZone(null);
                 r.setRestaurantID(null);
-                return ResponseEntity.ok(r);
-            case VENDOR:
-                if (!Objects.equals(userId, restaurantId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                } else {
-                    return ResponseEntity.ok(r);
-                }
-            case ADMIN: return ResponseEntity.ok(r);
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "User lacks valid authentication credentials.");
+            }
+            default -> { }
         }
-    }
-
-    /**
-     * The put method for updating the location of a restaurant.
-     *
-     * @param restaurantId ID of the Restaurant entity (required)
-     * @param userId       User ID for authorization (required)
-     * @param requestBody  Coordinates of the new location of the restaurant
-     * @return updated location of a restaurant
-     */
-    @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdLocationPut(@PathVariable String restaurantId,
-                                                                         @RequestHeader String userId,
-                                                                         @RequestBody List<Double> requestBody) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case ADMIN -> {
-                restaurantService.updateLocation(restaurantId, requestBody);
-                return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-            }
-            case VENDOR -> {
-                if (userId.equals(restaurantId)) {
-                    restaurantService.updateLocation(restaurantId, requestBody);
-                    return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-                }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-            case COURIER, CLIENT
-                    -> throw new ResponseStatusException(
-                            HttpStatus.FORBIDDEN,
-                    "Only vendors and admins can change the restaurant's address");
-            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
-        }
-    }
-
-    /**
-     * The put method for updating the delivery zone of a restaurant.
-     *
-     * @param restaurantId ID of the Restaurant entity (required)
-     * @param userId       User ID for authorization (required)
-     * @param requestBody  Radius of the new delivery zone of the Restaurant
-     * @return updated delivery zone of a restaurant
-     */
-    @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdDeliverZonePut(@PathVariable String restaurantId,
-                                                                            @RequestHeader String userId,
-                                                                            @RequestBody Double requestBody) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case ADMIN -> {
-                restaurantService.updateDeliverZone(restaurantId, requestBody);
-                return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-            }
-            case VENDOR -> {
-                if (userId.equals(restaurantId) && !restaurantService.getRestaurant(restaurantId).getCouriers().isEmpty()) {
-                    restaurantService.updateDeliverZone(restaurantId, requestBody);
-                    return ResponseEntity.ok(restaurantService.getRestaurant(restaurantId));
-                }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-            case COURIER, CLIENT
-                    -> throw new ResponseStatusException(
-                            HttpStatus.FORBIDDEN,
-                    "Only vendors and admins can change the delivery zone of a restaurant.");
-            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
-        }
+        return ResponseEntity.ok(r);
     }
 
     /**
@@ -215,75 +136,14 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<List<Delivery>> restaurantsRestaurantIdNewOrdersGet(@PathVariable String restaurantId,
                                                                               @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case ADMIN -> {
-                return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-            }
-            case VENDOR -> {
-                if (userId.equals(restaurantId)) {
-                    return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-                }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-            case COURIER, CLIENT ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            default ->
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId,
+            restaurantId, "New Order");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
+        return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
     }
 
-    /**
-     * Sets the list of couriers and returns the correct response codes.
-     *
-     * @param restaurantId ID of the Restaurant entity (required)
-     * @param userId       User ID for authorization (required)
-     * @param requestBody  Put a preferred set of couriers for the restaurant (required)
-     * @return the modified restaurant entity
-     */
-    @Override
-    public ResponseEntity<Restaurant> restaurantsRestaurantIdCouriersPut(@PathVariable String restaurantId,
-                                                                         @RequestHeader String userId,
-                                                                         @RequestBody @Valid List<String> requestBody) {
-        //check user ID
-        if (userId == null || restaurantId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "User ID or Restaurant ID is invalid.");
-        }
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case COURIER, CLIENT:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                    "User lacks necessary permissions.");
-            case  VENDOR: {
-                if (!Objects.equals(userId, restaurantId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                } else {
-                    break;
-                }
-            }
-            case ADMIN : break;
-            default : throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
-
-        }
-        // check couriers
-        if (requestBody != null) {
-            for (String id : requestBody) {
-                UsersAuthenticationService.AccountType account = usersCommunication.getUserAccountType(id);
-                if (!Objects.equals(account, COURIER)) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "List contains the id of someone who isn't a courier.");
-                }
-            }
-        }
-        try {
-            Restaurant r = restaurantService.setListOfCouriers(restaurantId, requestBody);
-            return ResponseEntity.ok(r);
-        } catch (RestaurantService.RestaurantNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Server error");
-        }
-    }
 
     /**
      * deletes a restaurant from the system.

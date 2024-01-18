@@ -8,6 +8,11 @@ import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
+import nl.tudelft.sem.template.delivery.services.*;
+import nl.tudelft.sem.template.model.DeliveriesPostRequest;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.*;
 import org.springframework.http.HttpStatus;
@@ -35,6 +40,10 @@ public class DeliveryController implements DeliveriesApi {
     private final transient DeliveryStatusHandler deliveryStatusHandler;
     private final transient AvailableDeliveryProxy availableDeliveryProxy;
 
+    private final transient TimeCalculationService timeCalculationService;
+
+    private final transient UpdateService updateService;
+
     /**
      * Constructor.
      *
@@ -42,16 +51,19 @@ public class DeliveryController implements DeliveriesApi {
      * @param usersAuthenticationService    mock for users authorization
      * @param deliveryStatusHandler Handles the status of Delivery entities
      */
-    public DeliveryController(DeliveryService deliveryService,
-                              ErrorService errorService,
+    public DeliveryController(DeliveryService deliveryService, ErrorService errorService,
                               UsersAuthenticationService usersAuthenticationService,
                               DeliveryStatusHandler deliveryStatusHandler,
-                              AvailableDeliveryProxy availableDeliveryProxy) {
+                              TimeCalculationService timeCalculationService,
+                              AvailableDeliveryProxyImplementation availableDeliveryProxy,
+                              UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.errorService = errorService;
         this.usersAuthenticationService = usersAuthenticationService;
         this.deliveryStatusHandler = deliveryStatusHandler;
+        this.timeCalculationService = timeCalculationService;
         this.availableDeliveryProxy = availableDeliveryProxy;
+        this.updateService = updateService;
     }
 
     /**
@@ -143,7 +155,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Customers cannot update delivery pickup time");
         }
 
-        deliveryService.updatePickupTime(deliveryId, pickupTime);
+        timeCalculationService.updatePickupTime(deliveryId, pickupTime);
         return ResponseEntity.ok(delivery);
     }
 
@@ -182,7 +194,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "VENDOR NOT FOUND.");
         }
 
-        if (deliveryService.computeHaversine(r.getLocation().get(0),
+        if (timeCalculationService.computeHaversine(r.getLocation().get(0),
                 r.getLocation().get(1), address.get(0), address.get(1)) > r.getDeliveryZone()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
@@ -321,7 +333,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customer can give a rating to courier");
         }
 
-        deliveryService.updateCourierRating(deliveryId, rating);
+        updateService.updateCourierRating(deliveryId, rating);
         return ResponseEntity.ok(delivery);
     }
 
@@ -336,7 +348,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customer can give a rating to a restaurant");
         }
 
-        deliveryService.updateRestaurantRating(deliveryId, rating);
+        updateService.updateRestaurantRating(deliveryId, rating);
         return ResponseEntity.ok(delivery);
     }
 
@@ -414,7 +426,7 @@ public class DeliveryController implements DeliveriesApi {
                 "The person you are trying to assign to the order is not a courier.");
         }
         if (userType.equals(AccountType.ADMIN)) {
-            deliveryService.updateDeliveryCourier(deliveryId, courierId);
+            updateService.updateDeliveryCourier(deliveryId, courierId);
             return ResponseEntity.ok(delivery);
         }
         if (delivery.getCourierID() != null) {
@@ -428,7 +440,7 @@ public class DeliveryController implements DeliveriesApi {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
             case COURIER -> {
                 if (userId.equals(courierId)) {
-                    deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                    updateService.updateDeliveryCourier(deliveryId, courierId);
                     availableDeliveryProxy.insertDelivery(delivery);
                     return ResponseEntity.ok(delivery);
                 } else {
@@ -445,7 +457,7 @@ public class DeliveryController implements DeliveriesApi {
                 if (restaurant.getCouriers() == null || !restaurant.getCouriers().contains(courierId)) {
                     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
                 }
-                deliveryService.updateDeliveryCourier(deliveryId, courierId);
+                updateService.updateDeliveryCourier(deliveryId, courierId);
                 return ResponseEntity.ok(delivery);
             }
         }
@@ -471,7 +483,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only restaurant owner can update estimated prep time");
         }
 
-        deliveryService.updateEstimatedPrepTime(deliveryId, prepTime);
+        timeCalculationService.updateEstimatedPrepTime(deliveryId, prepTime);
         return ResponseEntity.ok(delivery);
     }
 
@@ -486,7 +498,7 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId,
                                                                                        @RequestHeader String userId) {
         getDeliveryAndAuthenticateUser(deliveryId, userId);
-        OffsetDateTime estimate = deliveryService.computeEstimatedDeliveryTime(deliveryId);
+        OffsetDateTime estimate = timeCalculationService.computeEstimatedDeliveryTime(deliveryId);
         return ResponseEntity.ok(estimate);
     }
 
@@ -539,7 +551,7 @@ public class DeliveryController implements DeliveriesApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery Address not set correctly");
         }
 
-        deliveryService.updateDeliveryAddress(deliveryId, address);
+        updateService.updateDeliveryAddress(deliveryId, address);
         return ResponseEntity.ok(delivery);
     }
 
