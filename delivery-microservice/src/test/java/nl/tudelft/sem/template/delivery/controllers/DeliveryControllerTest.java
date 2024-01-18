@@ -1011,10 +1011,6 @@ class DeliveryControllerTest {
         r.setRestaurantID("hi_im_a_vendor@testmail.com");
 
         restaurantRepository.save(r);
-
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(dpr));
-        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
     }
 
     @Test

@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import java.util.List;
 import java.util.Objects;
-import java.util.Queue;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.api.CouriersApi;
@@ -38,11 +37,11 @@ public class CouriersController implements CouriersApi {
      * @param usersCommunication mock for users authorization
      */
     public CouriersController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication,
-                              CouriersService couriersService) {
+                              CouriersService couriersService, AvailableDeliveryProxyImplementation availableDeliveryProxy) {
         this.deliveryService = deliveryService;
         this.couriersService = couriersService;
         this.usersCommunication = usersCommunication;
-        this.availableDeliveryProxy = new AvailableDeliveryProxyImplementation(deliveryService);
+        this.availableDeliveryProxy = availableDeliveryProxy;
     }
 
     /**

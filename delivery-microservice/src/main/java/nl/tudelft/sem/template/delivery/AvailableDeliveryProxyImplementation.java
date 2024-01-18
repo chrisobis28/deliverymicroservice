@@ -7,11 +7,13 @@ import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
+@Scope("singleton")
 public class AvailableDeliveryProxyImplementation implements AvailableDeliveryProxy {
 
     private final transient DeliveryService deliveryService;

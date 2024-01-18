@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 import io.swagger.v3.oas.annotations.Parameter;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
@@ -184,10 +185,14 @@ public class DeliveryController implements DeliveriesApi {
 
         if (deliveryService.computeHaversine(r.getLocation().get(0),
                 r.getLocation().get(1), address.get(0), address.get(1)) > r.getDeliveryZone()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
+            status = DeliveryStatus.REJECTED;
         }
 
         UUID deliveryId = UUID.fromString(orderId);
+
+        Error error = new Error()
+                .errorId(deliveryId)
+                .type(ErrorType.NONE);
 
         Delivery delivery = new Delivery()
                 .deliveryID(deliveryId)
@@ -195,7 +200,9 @@ public class DeliveryController implements DeliveriesApi {
                 .restaurantID(vendorId)
                 .deliveryAddress(address)
                 .status(status)
-                .orderTime(OffsetDateTime.now());
+                .orderTime(OffsetDateTime.now())
+                .error(error)
+                .currentLocation(r.getLocation());
 
 
         if(delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
@@ -203,7 +210,6 @@ public class DeliveryController implements DeliveriesApi {
         }
 
         deliveryService.insert(delivery);
-        errorService.updateError(deliveryId, new Error().type(ErrorType.NONE));
 
         availableDeliveryProxy.insertDelivery(delivery);
 
