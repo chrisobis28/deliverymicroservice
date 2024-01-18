@@ -20,9 +20,9 @@ paths:
     post:
       tags:
         - Delivery
-      summary: Add Delivery entity
+      summary: Add Delivery entity.
       requestBody:
-        description: Request body for creating a new Delivery entity
+        description: Request body for creating a new Delivery entity.
         content:
           application/json:
             schema:
@@ -63,26 +63,24 @@ paths:
               schema:
                 $ref: '#/components/schemas/Delivery'
         '400':
-          description: Bad Request. Missing or invalid parameters.
+          description: Bad Request. Missing or invalid parameters or the customer is outside the vendor delivery zone.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Restaurant ID, customer ID or Delivery ID is invalid."
         '404':
-          description: Not Found. The specified order or vendor ID does not exist.
+          description: Not Found. The vendor ID does not correspond to one in the database.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating a not found error
-                example: "NOT_FOUND"
-        '500':
-          description: Server error
+                example: "VENDOR NOT FOUND."
   /deliveries/{deliveryId}:
     get:
-      summary: Retrieve a specific Delivery entity
+      summary: Retrieve a specific Delivery entity.
       description: Returns fields of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -91,7 +89,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -103,34 +101,34 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
+        '403':
+          description: Forbidden access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access
+                example: "User lacks necessary permissions."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/courier:
     get:
-      summary: Retrieve the courier id of a specific Delivery entity
+      summary: Retrieve the courier id of a specific Delivery entity.
       description: Returns the courier id of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -139,72 +137,58 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: email
                 description: The ID of the courier
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "courier@testmail.com"
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins, vendors and couriers are allowed to see the courier id.
+          description: Forbidden. User lacks necessary permissions. Only admins, certain vendors and couriers are allowed to see the courier id.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access due to lack of permissions.
+                example: "User lacks necessary permissions."
         '404':
-          description: Delivery not found
+          description: Delivery not found or there is no courier assigned to it.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with the specified id not found. / No courier assigned to order."
     put:
       tags:
         - Delivery
-      summary: Update courierId for Delivery entity
-      description: Update courierId of Delivery entity visible to your user role. For example, a Vendor can update the assigned Courier.
+      summary: Update courierId for Delivery entity.
+      description: Update courierId of Delivery entity visible to your user role. For example, a Vendor can update the assigned Courier to one of their Deliveries.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        description: Update courier of delivery
+        description: Update courier of delivery.
         required: true
         content:
           application/json:
             schema:
               type: string
               description: The ID of the courier to be updated
+              example: "courier@testmail.com"
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
@@ -216,15 +200,15 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "The person you are trying to assign to the order is not a courier."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
         '403':
           description: Forbidden. User lacks necessary permissions. Only admins, vendors and couriers are allowed to update the assigned courier of an order.
           content:
@@ -232,26 +216,18 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User lacks necessary permissions. / Delivery already has a courier assigned."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with the specified id not found."
   /deliveries/{deliveryId}/restaurant:
     get:
-      summary: Retrieve the restaurant id of a specific Delivery entity
+      summary: Retrieve the restaurant id of a specific Delivery entity.
       description: Returns the restaurant id of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -260,13 +236,14 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: email
                 description: The ID of the restaurant
+                example: "restaurant@testmail.com"
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -274,35 +251,36 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
+
+        '403':
+          description: Forbidden. User lacks permission, only admins, certain couriers, customers and vendors currently assigned to an order can view the restaurant ID.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions.
+                example: "User lacks necessary permissions."
         '404':
-          description: Delivery not found
+          description: Delivery or Restaurant not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with the specified id not found. / Restaurant ID was not found."
 
   /deliveries/{deliveryId}/customer:
     get:
-      summary: Retrieve the customer id of a specific Delivery entity
+      summary: Retrieve the customer id of a specific Delivery entity.
       description: Returns the customer id of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -311,13 +289,14 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: email
                 description: The ID of the customer
+                example: "customer@testmail.com"
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -325,42 +304,36 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
+
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins, vendors and customers are allowed to see the customer id.
+          description: Forbidden. User lacks permission, only admins, certain couriers, customers and vendors currently assigned to an order can view the customer ID.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access due to lack of permissions.
+                example: "User lacks necessary permissions."
         '404':
-          description: Delivery not found
+          description: Delivery or Courier not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with the specified id not found. / Customer ID was not found."
+
   /deliveries/{deliveryId}/prep:
     get:
-      summary: Retrieve the estimated preparation time of a specific Delivery entity
+      summary: Retrieve the estimated preparation time of a specific Delivery entity, in minutes.
       description: Returns the estimated preparation time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -369,54 +342,47 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: integer
                 description: The estimated preparation time
+                example: "15"
         '400':
-          description: Bad Request. Invalid input format or missing parameters.
+          description: Bad Request. Invalid format of input.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials"
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with the specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update estimated preparation time for Delivery entity
-      description: Update preparation time of Delivery entity visible to your user role. For example, a Vendor can set an estimated prep time.
+      summary: Update estimated preparation time for Delivery entity.
+      description: Update preparation time of Delivery entity visible to your User role. For example, a Vendor can set an estimated prep time.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        description: Update prep time of delivery
+        description: Update prep time of delivery.
         required: true
         content:
           application/json:
@@ -425,27 +391,19 @@ paths:
               description: The estimated time to be updated
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Delivery'
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions. Only admins and vendors are allowed to update the estimated preparation time of an order.
           content:
@@ -453,26 +411,18 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "Only restaurant owner can update estimated prep time. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/unexpected-event:
     get:
-      summary: Retrieve the unexpected event of a specific Delivery entity
+      summary: Retrieve the unexpected event of a specific Delivery entity.
       description: Returns the unexpected event of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -486,49 +436,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins, vendors and couriers are allowed to see the courier id.
+          description: Forbidden. User lacks necessary permissions.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/pickup:
     get:
-      summary: Retrieve the pick up time of a specific Delivery entity
+      summary: Retrieve the pick up time of a specific Delivery entity.
       description: Returns the pick up time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -537,110 +471,88 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: date-time
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: 2019-08-31T15:20:30+08:00
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
+        '403':
+          description: Forbidden. User lacks necessary permissions.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update pick up time for Delivery entity
+      summary: Update pick up time for Delivery entity.
       description: Update pick up of Delivery entity visible to your user role. For example, a Courier can update the pick up time.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        description: Update pick up time of delivery
+        description: Update pick up time of delivery.
         required: true
         content:
           application/json:
             schema:
               type: string
               format: date-time
+              example: 2019-08-31T15:20:30+08:00
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Delivery'
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins and couriers are allowed to update the pick up time of an order.
+          description: Forbidden. User lacks necessary permissions.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "Customers cannot update delivery pickup time. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/delivered-time:
     get:
-      summary: Retrieve the delivered time of a specific Delivery entity
+      summary: Retrieve the delivered time of a specific Delivery entity.
       description: Returns the delivered time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -649,47 +561,40 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: date-time
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: 2019-08-31T15:20:30+08:00
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
+        '403':
+          description: Forbidden. User lacks necessary permissions.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/estimated-delivery-time:
     get:
-      summary: Retrieve the estimated delivery time of a specific Delivery entity
+      summary: Retrieve the estimated delivery time of a specific Delivery entity.
       description: Returns the estimated delivery time of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -698,44 +603,37 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 format: date-time
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: 2019-08-31T15:20:30+08:00
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
+        '403':
+          description: Forbidden. User lacks necessary permissions.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/delivery-address:
     get:
       summary: Retrieve the delivery address of a specific Delivery entity
@@ -747,7 +645,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -758,22 +656,15 @@ paths:
                   type: number
                   format: double
                 description: location (delivery address)
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: [32.3021, 45.3232]
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -781,27 +672,19 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update delivery address for Delivery entity
+      summary: Update delivery address for Delivery entity.
       description: Update delivery address of Delivery entity visible to your user role. For example, the customer wants to change the delivery address.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
@@ -819,9 +702,10 @@ paths:
                 type: number
                 format: double
               description: delivery address coordinates
+              example: [56.7890, 32.4519]
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
@@ -833,34 +717,34 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Delivery Address not set correctly."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
+        '403':
+          description: Forbidden access. User lacks necessary permissions to operate.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access
+                example: "Only clients can update delivery address. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/current-location:
     get:
-      summary: Retrieve the current location of a specific Delivery entity
+      summary: Retrieve the current location of a specific Delivery entity.
       description: Returns the current location of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -869,7 +753,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -880,22 +764,15 @@ paths:
                   type: number
                   format: double
                 description: current location (during transit)
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: [31.4589, 98.7023]
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -903,26 +780,18 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/rating-courier:
     get:
-      summary: Retrieve the rating of a specific Delivery entity
+      summary: Retrieve the rating of a specific Delivery entity.
       description: Returns the rating of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -931,28 +800,21 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: integer
                 description: rating of courier
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: 3
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating unauthorized access request
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -960,42 +822,35 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized. / Vendors are not allowed to see couriers rating."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update rating for Delivery entity
-      description: Update rating of Delivery entity visible to your user role. For example, a Customer can give a rating to a delivered order.
+      summary: Update courier's rating for Delivery entity.
+      description: Update rating of Delivery entity visible to your user role. For example, a Customer can give a rating to a delivered order's courier.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
         - $ref: '#/components/parameters/UserId'
       requestBody:
-        description: Update rating of delivery
+        description: Update rating of delivery.
         required: true
         content:
           application/json:
             schema:
               type: integer
               description: The rating of courier for the delivered order
+              example: 5
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
@@ -1007,42 +862,34 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Delivery Address not set correctly."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins and customers are allowed to update the rating of an order.
+          description: Forbidden access. User lacks necessary permissions to operate.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access
+                example: "Only customer can give a rating to a courier. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/rating-restaurant:
     get:
-      summary: Retrieve the rating of restaurant for a specific Delivery entity
+      summary: Retrieve the rating of restaurant for a specific Delivery entity.
       description: Returns the rating of restaurant for Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -1051,28 +898,21 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: integer
                 description: rating of restaurant
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
+                example: 4
+        '401':
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
-        '401':
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -1080,28 +920,20 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "Couriers are not allowed to see restaurant rating. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update rating for Delivery entity
-      description: Update rating of Delivery entity visible to your user role. For example, a Customer can give a rating to a delivered order.
+      summary: Update restaurant's rating for Delivery entity.
+      description: Update rating of Delivery entity visible to your user role. For example, a Customer can give a rating to a delivered order's restaurant.
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
         - $ref: '#/components/parameters/UserId'
@@ -1113,9 +945,10 @@ paths:
             schema:
               type: integer
               description: The rating of restaurant for the delivered order
+              example: 5
       responses:
         '200':
-          description: Update successful
+          description: Update successful.
           content:
             application/json:
               schema:
@@ -1127,7 +960,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Delivery Address not set correctly."
         '401':
           description: Unauthorized access
           content:
@@ -1135,34 +968,26 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins and customers are allowed to update the rating of an order.
+          description: Forbidden access. User lacks necessary permissions to operate.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access
+                example: "Only customer can give a rating to a restaurant. / User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
   /deliveries/{deliveryId}/status:
     get:
-      summary: Retrieve the status of a specific Delivery entity
+      summary: Retrieve the status of a specific Delivery entity.
       description: Returns the status of Delivery entity visible to your User role. You must specify the Delivery id and your User id.
       tags:
         - Delivery
@@ -1171,29 +996,21 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
                 type: string
                 description: status
                 example: "DELIVERED"
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                description: Code indicating an unauthorized access
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -1201,27 +1018,19 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found."
     put:
       tags:
         - Delivery
-      summary: Update status of Delivery entity
+      summary: Update status of Delivery entity.
       description: Update status of Delivery entity visible to your user role
       parameters:
         - $ref: '#/components/parameters/DeliveryId'
@@ -1234,7 +1043,7 @@ paths:
               $ref: '#/components/schemas/DeliveryStatus'
       responses:
         '200':
-          description: Status update successful
+          description: Status update successful.
           content:
             application/json:
               schema:
@@ -1246,43 +1055,43 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Delivery Address not set correctly."
         '401':
-          description: Unauthorized access.
+          description: Unauthorized access
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins, vendors and couriers are allowed to update the status of an order.
+          description: Forbidden access. User lacks necessary permissions to operate or the status that they want to update is not a successor of the entity's previous.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access
+                example: "User could not be authorized. / Status update illegal."
         '404':
-          description: Delivery not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
+                example: "Delivery with specified id not found."
+        '503':
+          description: Could not update the other micro-service (orders).
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating delivery not found
+                example: "Failed to update the other service."
   /deliveries/{deliveryId}/pickup-location:
     get:
-      summary: Given an order tells the courier where to pick it up from
-      description: Given an order tells the courier where to pick it up from
+      summary: Retrieve the pick-up/restaurant's location of a Delivery.
+      description: Give the courier an indication of where to pick-up the order.
       tags:
         - Delivery
       parameters:
@@ -1301,22 +1110,15 @@ paths:
                   type: number
                   format: double
                 description: restaurant coordinates
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
+                example: [54.6789, 60.8721]
+        '401':
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
-        '401':
-          description: Unauthorized access
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is not known to the system."
         '403':
           description: Forbidden. User lacks necessary permissions.
           content:
@@ -1324,27 +1126,19 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User could not be authorized."
         '404':
-          description: Order not found
+          description: Delivery not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery with specified id not found. / Restaurant with specified id not found."
   /customers/{customerId}/orders:
     get:
-      summary: Get a list of orders of a customer
-      description: Returns a list of order ids given a customer id
+      summary: Get a list of orders of a customer.
+      description: Returns a list of order ids given a customer id.
       tags:
         - Delivery
       parameters:
@@ -1366,33 +1160,18 @@ paths:
                   format: uuid
                   description: order id
                 description: list of order ids
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: [550e8400-e29b-41d4-a716-446655440000, 551e8400-e29b-41d4-a716-446655440000]
         '404':
-          description: Customer Not Found
+          description: Customer not found.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating customer not found
+                example: "Customer with specified ID not found."
   /deliveries/all/accepted:
     get:
-      summary: Get a list of orders that have been accepted
+      summary: Get a list of orders that have been accepted.
       description: Returns a list of orders that have been accepted.
       tags:
         - Delivery
@@ -1400,7 +1179,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -1408,6 +1187,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/Delivery'
                 description: list of orders that are available to the courier within a range of 5km. We will internally filter out orders from restaurants that use their own couriers and orders that have a status other than PENDING.
+                example: [550e8400-e29b-41d4-a716-446655440000, 551e8400-e29b-41d4-a716-446655440000]
         '401':
           description: Unauthorized access.
           content:
@@ -1415,19 +1195,19 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
-        '500':
-          description: Server error
+                example: "User lacks valid authentication credentials."
+        '403':
+          description: Forbidden. User lacks permission.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "User lacks necessary permissions."
   /couriers/{courierId}/ratings:
     get:
-      summary: Get the ratings of a courier
-      description: Returns a list of ratings by given courier id
+      summary: Get the ratings of a courier.
+      description: Returns a list of ratings by given courier id.
       tags:
         - Delivery
       parameters:
@@ -1440,7 +1220,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -1449,6 +1229,7 @@ paths:
                   type: integer
                   description: rating
                 description: list of ratings
+                example: [3, 4, 2, 5, 3, 5]
         '400':
           description: Bad Request. Invalid input format or missing parameters.
           content:
@@ -1456,26 +1237,26 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Courier ID cannot be NULL."
+        '401':
+          description: Account lacks credentials for verification.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating account can't be allowed access.
+                example: "Account could not be verified."
         '404':
           description: Courier Not Found
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating courier not found
+                example: "The id is not recognised as courier."
   /couriers/{courierId}/orders:
     get:
-      summary: Retrieve a list of delivery Ids for a specific courier Id
+      summary: Retrieve a list of delivery ids for a specific courier id.
       description: Returns a list of delivery Ids for a specific courier Id. You must specify the courier id.
       tags:
         - Delivery
@@ -1489,7 +1270,7 @@ paths:
         - $ref: '#/components/parameters/UserId'
       responses:
         '200':
-          description: Successful response
+          description: Successful response.
           content:
             application/json:
               schema:
@@ -1505,26 +1286,26 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Courier ID cannot be NULL."
+        '401':
+          description: Account lacks credentials for verification.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating account can't be allowed access.
+                example: "Account could not be verified."
         '404':
-          description: Delivery not found
+          description: Courier Not Found
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating courier not found
+                example: "The id is not recognised as courier."
   /couriers/{courierId}/next-order:
     put:
-      summary: Assigns the next available order to a courier
+      summary: Assigns the next available order to a courier.
       description: Returns the delivery assigned to a specific courier Id. You must specify the courier id.
       tags:
         - Delivery
@@ -1549,7 +1330,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "There is no such courier. / This courier works for a specific restaurant."
         '404':
           description: Delivery not found
           content:
@@ -1557,20 +1338,12 @@ paths:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Delivery not found."
   /restaurants:
     post:
       tags:
         - Restaurant
-      summary: Add Restaurant entity
+      summary: Add Restaurant entity.
       requestBody:
         description: Request body for creating a new Restaurant entity. This is an internal endpoint that ensures consistency among microservices. Should be called by others when creating a restaurant.
         content:
@@ -1608,13 +1381,11 @@ paths:
             application/json:
               schema:
                 type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
-        '500':
-          description: Server error
+                description: Code indicating a bad request. Invalid parameters.
+                example: "Restaurant could not be created. / Restaurant ID or location is invalid."
   /restaurants/{restaurantId}:
     get:
-      summary: Retrieve a specific Restaurant entity
+      summary: Retrieve a specific Restaurant entity.
       tags:
         - Restaurant
       parameters:
@@ -1635,33 +1406,33 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID or Restaurant ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
+        '403':
+          description: Forbidden access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access
+                example: "User lacks necessary permissions."
         '404':
-          description: Restaurant not found
+          description: Restaurant not found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Restaurant with specified id not found."
     delete:
-      summary: Delete a specific Restaurant entity
+      summary: Delete a specific Restaurant entity.
       tags:
         - Restaurant
       description: Deletes a restaurant by ID. This is an internal endpoint that ensures consistency among microservices. Should be called by others when deleting a restaurant.
@@ -1675,15 +1446,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating whether deletion was successful
-                example: "DELETION_SUCCESSFUL"
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Deletion Successful!"
         '404':
           description: Restaurant not found
           content:
@@ -1691,20 +1454,12 @@ paths:
               schema:
                 type: string
                 description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Restaurant with specified id not found."
   /restaurants/{restaurantId}/location:
     put:
       tags:
         - Restaurant
-      summary: Update the location of Restaurant entity
+      summary: Update the location of Restaurant entity.
       description: Admin and vendor can update the location of a given restaurant. This is an internal endpoint that ensures consistency. Should be called by other microservices when updating the location of a restaurant.
       parameters:
         - $ref: '#/components/parameters/RestaurantId'
@@ -1721,10 +1476,11 @@ paths:
                 type: number
                 format: double
               description: delivery address coordinates
+              example: [98.0323, 67.1234]
         required: true
       responses:
         '200':
-          description: Location update successful
+          description: Location update successful.
           content:
             application/json:
               schema:
@@ -1736,7 +1492,23 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID or Restaurant ID is invalid."
+        '401':
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "User lacks valid authentication credentials."
+        '403':
+          description: Forbidden access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access
+                example: "User lacks necessary permissions. / Only vendors and admins can change the restaurant's address."
         '404':
           description: Restaurant not found
           content:
@@ -1744,20 +1516,12 @@ paths:
               schema:
                 type: string
                 description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Restaurant with specified id not found"
   /restaurants/{restaurantId}/deliver-zone:
     put:
       tags:
         - Restaurant
-      summary: Update the delivery zone of Restaurant entity
+      summary: Update the delivery zone of Restaurant entity.
       description: Vendor can update the deliver zone of a given restaurant.
       parameters:
         - $ref: '#/components/parameters/RestaurantId'
@@ -1770,10 +1534,11 @@ paths:
               type: number
               format: double
               description: Delivery zone
+              example: 30
         required: true
       responses:
         '200':
-          description: Delivery zone update successful
+          description: Delivery zone update successful.
           content:
             application/json:
               schema:
@@ -1785,23 +1550,23 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "User ID or Restaurant ID is invalid."
         '401':
-          description: Unauthorized access
+          description: Unauthorized access.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins and vendors can set delivery zone.
+          description: Forbidden access.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                description: Code indicating forbidden access
+                example: "User lacks necessary permissions. / Only vendors and admins can change the delivery zone of a restaurant."
         '404':
           description: Restaurant not found
           content:
@@ -1809,20 +1574,12 @@ paths:
               schema:
                 type: string
                 description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Restaurant with specified id not found"
   /restaurants/{restaurantId}/couriers:
     put:
       tags:
         - Restaurant
-      summary: Set preferred set of couriers of Restaurant entity
+      summary: Set preferred set of couriers of Restaurant entity.
       description: If a restaurant wants to use only a specific subset of couriers, they might be set by the admin or the vendor
       parameters:
         - $ref: "#/components/parameters/RestaurantId"
@@ -1838,6 +1595,7 @@ paths:
               items:
                 type: string
                 description: List of IDs of couriers
+              example: [courier1@testmail.com, courier2@testmail.com]
       responses:
         '200':
           description: Courier update successful
@@ -1852,7 +1610,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "List contains the id of someone who isn't a courier. / User ID or Restaurant ID is invalid."
         '401':
           description: Unauthorized access.
           content:
@@ -1860,7 +1618,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
         '403':
           description: Forbidden. User lacks necessary permissions. Only admins and vendors can set preferred couriers.
           content:
@@ -1868,7 +1626,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User lacks necessary permissions."
         '404':
           description: Restaurant not found
           content:
@@ -1876,15 +1634,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating restaurant not found
-                example: "RESTAURANT_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "Restaurant with specified id not found."
   /restaurants/{restaurantId}/new-orders:
     get:
       tags:
@@ -1903,14 +1653,42 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Delivery'
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "User ID or Restaurant ID is invalid."
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating unauthorized access
+                example: "User lacks valid authentication credentials."
         '403':
-          $ref: '#/components/responses/Forbidden'
+          description: Forbidden. User lacks necessary permissions. Only admins and vendors can set preferred couriers.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating forbidden access due to lack of permissions
+                example: "User lacks necessary permissions."
+        '404':
+          description: Restaurant not found
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating restaurant not found
+                example: "Restaurant with specified id not found."
 
   /errors/{deliveryId}:
     get:
-      summary: Retrieve unexpected event for a specific Delivery entity
+      summary: Retrieve unexpected event for a specific Delivery entity.
       tags:
         - Error
       description: Returns an unexpected event associated with a Delivery by ID
@@ -1919,7 +1697,7 @@ paths:
         - $ref: '#/components/parameters/DeliveryId'
       responses:
         '200':
-          description: Successfully returned unexpected event
+          description: Successfully returned unexpected event.
           content:
             application/json:
               schema:
@@ -1931,33 +1709,25 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User not authenticated to view error for this delivery."
         '404':
-          description: Delivery not found. There doesn't exist an Error with the given ID.
+          description: Delivery or Error not found.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating delivery or error not found
+                example: "Delivery with specified id not found. / Error with specified id not found."
     put:
       tags:
         - Error
-      summary: Update unexpected event of Delivery entity
+      summary: Update unexpected event of Delivery entity.
       description: Update unexpected event of Delivery by ID
       parameters:
         - $ref: '#/components/parameters/UserId'
         - $ref: '#/components/parameters/DeliveryId'
       requestBody:
-        description: Update unexpected event of delivery
+        description: Update unexpected event of delivery.
         content:
           application/json:
             schema:
@@ -1965,19 +1735,11 @@ paths:
         required: true
       responses:
         '200':
-          description: Delivery error updated successfully
+          description: Delivery error updated successfully.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '400':
-          description: Bad Request. Invalid or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
           description: Unauthorized access. The provided user is not authorized for this operation.
           content:
@@ -1985,34 +1747,26 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
-        '403':
-          description: Forbidden. User lacks necessary permissions. Only admins have access to analytics.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
+                example: "User not authenticated to update error for this delivery"
         '404':
-          description: Error not found. There doesn't exist an Error with the given ID.
+          description: Delivery could not be found.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating delivery not found
-                example: "DELIVERY_NOT_FOUND"
-        '500':
-          description: Server error
+                example: "Delivery with specified id not found."
+        '409':
+          description: Conflict.
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating a conflict.
+                example: "Delivery with specified id has already been delivered."
   /statistics/courier-overview:
     get:
-      summary: Shows a number of statistics for a courier in a selected time frame
+      summary: Shows a number of statistics for a courier in a selected time frame.
       tags:
         - Analytics
       description: For the specified period get the driver efficiency in terms of delay, success rate and average rating. Those 3 statistics are expressed as a Statistics object.
@@ -2040,14 +1794,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Statistics'
-        '400':
-          description: Bad Request. Invalid input format or missing parameters.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating a bad request
-                example: "BAD_REQUEST"
         '401':
           description: Unauthorized access.
           content:
@@ -2055,7 +1801,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is unauthorized to access this method."
         '404':
           description: Courier Not Found. The specified courierID does not exist.
           content:
@@ -2063,15 +1809,13 @@ paths:
               schema:
                 type: string
                 description: Code indicating courier not found
-                example: "COURIER_NOT_FOUND"
-        '500':
-          $ref: '#/components/responses/ServerError'
+                example: "No such courier."
   /statistics/deliveries-per-hour:
     get:
-      summary: Shows the number of deliveries per hour
+      summary: Shows the number of deliveries per hour.
       tags:
         - Analytics
-      description: Gets all deliveries and counts them depending on the hour of delivery, then returns an array of size 24 containing the corresponding count of deliveries
+      description: Gets all deliveries and counts them depending on the hour of delivery, then returns an array of size 24 containing the corresponding count of deliveries.
       parameters:
         - name: userId
           in: header
@@ -2085,7 +1829,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Successfully computed statistic
+          description: Successfully computed statistic.
           content:
             application/json:
               schema:
@@ -2095,6 +1839,14 @@ paths:
                   format: double
                 example: [ 1.5, 2.25, 3.0, 4.0, 5.0, 6.1, 7.0, 8.3, 9.0, 10.75, 11.0, 12.0, 13.0, 14.0, 15.0, 16.5, 17.6, 18.8, 19.0, 20.3, 21.1, 22.4, 23.5, 24.45 ]
                 description: An array representing the count of deliveries for each hour (0-23).
+        '400':
+          description: Bad Request. Invalid input format or missing parameters.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Code indicating a bad request
+                example: "User ID or Restaurant ID is invalid."
         '401':
           description: Unauthorized access.
           content:
@@ -2102,27 +1854,27 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User lacks valid authentication credentials."
         '403':
-          description: Forbidden. User lacks necessary permissions. Only admins have access to analytics.
+          description: Forbidden. User lacks necessary permissions. Only admins and vendors can set preferred couriers.
           content:
             application/json:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
-        '500':
-          description: Server error
+                example: "User lacks necessary permissions."
+        '404':
+          description: Restaurant not found
           content:
             application/json:
               schema:
                 type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                description: Code indicating restaurant not found
+                example: "Restaurant with specified id not found."
 
   /statistics/unexpected-event-rate:
     get:
-      summary: Shows what is the rate of a given unexpected event occurring for a particular time period
+      summary: Shows what is the rate of a given unexpected event occurring for a particular time period.
       tags:
         - Analytics
       description: For the specified period, gets the deliveries having a specified unexpected event enum type and finds their ratio with all deliveries.
@@ -2151,7 +1903,7 @@ paths:
             $ref: '#/components/schemas/ErrorType'
       responses:
         '200':
-          description: Successfully computed statistic
+          description: Successfully computed statistic.
           content:
             application/json:
               schema:
@@ -2166,7 +1918,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating a bad request
-                example: "BAD_REQUEST"
+                example: "Not a correct input. / One or more fields were null."
         '401':
           description: Unauthorized access.
           content:
@@ -2174,7 +1926,7 @@ paths:
               schema:
                 type: string
                 description: Code indicating unauthorized access
-                example: "UNAUTHORIZED"
+                example: "User is unauthorized to access this method."
         '403':
           description: Forbidden. User lacks necessary permissions. Only admins have access to analytics.
           content:
@@ -2182,26 +1934,10 @@ paths:
               schema:
                 type: string
                 description: Code indicating forbidden access due to lack of permissions
-                example: "FORBIDDEN"
-        '404':
-          description: Type Not Found. The specified unexpected event type does not exist.
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating unexpected event type not found
-                example: "TYPE_NOT_FOUND"
-        '500':
-          description: Server error
-          content:
-            application/json:
-              schema:
-                type: string
-                description: Code indicating server error
-                example: "SERVER_ERROR"
+                example: "User doesn't have the necessary role to view this."
   /statistics/ratings-for-orders:
     get:
-      summary: Returns a list of ratings for a list of order ids
+      summary: Returns a list of ratings for a list of order ids.
       tags:
         - Analytics
       parameters:
@@ -2223,22 +1959,29 @@ paths:
         required: true
       responses:
         '200':
-          description: Successfully returned ratings
+          description: Successfully returned ratings.
           content:
             application/json:
               schema:
                 type: object
                 additionalProperties:
                   type: integer
+        '403':
+          description: Unauthorized access.
+          content:
+            application/json:
+              schema:
+                type: string
+                description: Unauthorized access request. Account could not be classified.
+                example: "User lacks valid authentication credentials."
         '404':
           description: Requested Order ID not found.
           content:
             application/json:
               schema:
                 type: string
-                description: Error message
-        '500':
-          $ref: '#/components/responses/ServerError'
+                description: Delivery could not be found.
+                example: "Delivery with specified id not found."
 components:
   parameters:
     DeliveryId:
