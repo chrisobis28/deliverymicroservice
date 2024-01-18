@@ -277,6 +277,27 @@ class CouriersControllerTest {
     }
 
     @Test
+    void couriersCourierIdOrdersGetBadRequest() {
+        String userId = "invalid@testmail.com";
+        String vendorId = "vendor@testmail.com";
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.couriersCourierIdOrdersGet(null, userId));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void couriersCourierIdOrdersGetBadRequest2() {
+        String userId = "invalid@testmail.com";
+        String vendorId = "vendor@testmail.com";
+
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.couriersCourierIdOrdersGet(userId, null));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+
+    }
+
+    @Test
     void couriersCourierIdOrdersGetOK() {
         String userId = "invalid@testmail.com";
         String courierId = "courier@testmail.com";

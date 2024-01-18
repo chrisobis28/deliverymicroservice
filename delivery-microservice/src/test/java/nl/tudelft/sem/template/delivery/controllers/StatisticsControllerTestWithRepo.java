@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
@@ -24,10 +23,10 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 import java.util.UUID;
 
+import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.CLIENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
@@ -36,8 +35,8 @@ import static org.mockito.Mockito.when;
 @DataJpaTest
 public class StatisticsControllerTestWithRepo {
     private StatisticsService statisticsService;
+
     @Mock
-    private UsersCommunication usersCommunication;
     private UsersAuthenticationService usersAuthenticationService;
     @Autowired
     private DeliveryRepository repo1;
@@ -48,9 +47,9 @@ public class StatisticsControllerTestWithRepo {
     @BeforeEach
     void setUp() {
 
-        usersCommunication = mock(UsersCommunication.class);
+        //usersCommunication = mock(UsersCommunication.class);
         statisticsService = new StatisticsService(repo1);
-        usersAuthenticationService = new UsersAuthenticationService(usersCommunication);
+        //usersAuthenticationService = new UsersAuthenticationService(usersCommunication);
         sut = new StatisticsController(statisticsService, usersAuthenticationService);
     }
 
@@ -60,7 +59,10 @@ public class StatisticsControllerTestWithRepo {
         String courierId = "dominos@dominos.com";
         OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
-        when(usersCommunication.getAccountType(userID)).thenReturn("none");
+        when(usersAuthenticationService.getUserAccountType(userID))
+                .thenReturn(UsersAuthenticationService.AccountType.INVALID);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
             sut.statisticsCourierOverviewGet(userID, courierId, start, end).getStatusCode();
@@ -78,7 +80,50 @@ public class StatisticsControllerTestWithRepo {
         String courierId = "dominos@dominos.com";
         OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
-        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
+        when(usersAuthenticationService.getUserAccountType(userID))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getAverageRating()).isEqualTo(0);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getSuccessRate()).isEqualTo(0);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getDeliveryTimeRatio()).isEqualTo(0);
+    }
+
+    @Test
+    void authorizedEmptyTestAdmin() {
+        String userID = "user@user.com";
+        String courierId = "dominos@dominos.com";
+        OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        when(usersAuthenticationService.getUserAccountType(userID))
+                .thenReturn(UsersAuthenticationService.AccountType.ADMIN);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getAverageRating()).isEqualTo(0);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getSuccessRate()).isEqualTo(0);
+        assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
+                .getDeliveryTimeRatio()).isEqualTo(0);
+    }
+
+    @Test
+    void authorizedEmptyTestVendor() {
+        String userID = "user@user.com";
+        String courierId = "dominos@dominos.com";
+        OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        when(usersAuthenticationService.getUserAccountType(userID))
+                .thenReturn(UsersAuthenticationService.AccountType.VENDOR);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
@@ -106,7 +151,11 @@ public class StatisticsControllerTestWithRepo {
         testDelivery.setDeliveredTime(end);
         testDelivery.setDeliveryID(UUID.randomUUID());
         repo1.save(testDelivery);
-        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
+        when(usersAuthenticationService.getUserAccountType(userID))
+                .thenReturn(CLIENT);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
 
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start_interval, end_interval)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -165,7 +214,11 @@ public class StatisticsControllerTestWithRepo {
         testDelivery4.setDeliveredTime(outTime);
         testDelivery4.setDeliveryID(UUID.randomUUID());
 
-        when(usersCommunication.getAccountType(userID)).thenReturn("customer");
+
+        when(usersAuthenticationService.getUserAccountType(userID)).thenReturn(CLIENT);
+        when(usersAuthenticationService.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
         repo1.save(testDelivery4);
 
         repo1.save(testDelivery1);

@@ -21,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,6 +79,41 @@ class RestaurantControllerTest {
         assertThatThrownBy(() -> sut.restaurantsPost(null))
             .message()
             .isEqualTo("400 BAD_REQUEST \"Restaurant could not be created.\"");
+    }
+
+    @Test
+    public void isValidAddressTest() {
+        assertTrue(sut.isInvalidAddress(List.of(0.0, 0.0, 0.0)));
+    }
+
+    @Test
+    public void isValidAddressTest1() {
+        assertFalse(sut.isInvalidAddress(List.of(0.0, 0.0)));
+    }
+
+    @Test
+    public void isValidAddressTest2() {
+        assertTrue(sut.isInvalidAddress(null));
+    }
+
+    @Test
+    public void isNullOrEmptyTest() {
+        assertTrue(sut.isNullOrEmpty(null));
+    }
+
+    @Test
+    public void isNullOrEmptyTest1() {
+        assertTrue(sut.isNullOrEmpty(""));
+    }
+
+    @Test
+    public void isNullOrEmptyTest2() {
+        assertTrue(sut.isNullOrEmpty(" "));
+    }
+
+    @Test
+    public void isNullOrEmptyTest3() {
+        assertFalse(sut.isNullOrEmpty("bjefef "));
     }
 
     @Test

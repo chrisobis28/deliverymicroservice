@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import java.util.UUID;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -61,44 +61,27 @@ public class DeliveryStatusHandlerTest {
     }
 
     @Test
-    void returnsDeliveryIdWhenUserAuthenticated() {
-        Delivery delivery = insertExampleDelivery();
-        when(usersAuthentication.getUserAccountType("customer")).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
-        when(usersAuthentication.checkUserAccessToDelivery("customer", delivery)).thenReturn(true);
-
-        assertThat(statusHandler.getDeliveryStatus(delivery.getDeliveryID(), "customer"))
-                .extracting("status", "body")
-                .containsExactly(HttpStatus.OK, DeliveryStatus.ON_TRANSIT.name());
-    }
-
-    @Test
-    void throwsUnauthorizedWhenUserIsNotKnown() {
-        Delivery delivery = insertExampleDelivery();
-        when(usersAuthentication.getUserAccountType("unknown")).thenReturn(AccountType.INVALID);
-
-        assertThatThrownBy(() -> statusHandler.getDeliveryStatus(delivery.getDeliveryID(), "unknown"))
-                .extracting("status")
-                .isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    void throwsForbiddenWhenUserDoesNotHaveAccessToDelivery() {
-        Delivery delivery = insertExampleDelivery();
-        when(usersAuthentication.getUserAccountType("other customer")).thenReturn(AccountType.CLIENT);
-
-        assertThatThrownBy(() -> statusHandler.getDeliveryStatus(delivery.getDeliveryID(), "other customer"))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-    }
-
-    @Test
     void updateSucceedsWhenAuthenticatedUserMakesALegalUpdate() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
-        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
 
         assertThat(statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
-                .extracting("body.status")
+                .extracting("status")
+                .isEqualTo(DeliveryStatus.DELIVERED);
+        assertThat(deliveryRepository.findById(delivery.getDeliveryID()))
+                .get()
+                .extracting("status")
+                .isEqualTo(DeliveryStatus.DELIVERED);
+        verify(usersCommunication, times(1)).updateOrderStatus(any(), any());
+    }
+
+    @Test
+    void updateSucceedsWhenAuthenticatedUserMakesALegalUpdateAdmin() {
+        Delivery delivery = insertExampleDelivery();
+        when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.ADMIN);
+
+        assertThat(statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
+                .extracting("status")
                 .isEqualTo(DeliveryStatus.DELIVERED);
         assertThat(deliveryRepository.findById(delivery.getDeliveryID()))
                 .get()
@@ -111,7 +94,6 @@ public class DeliveryStatusHandlerTest {
     void updateDoesNotSucceedBecauseOtherServerUnavailable() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
-        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
         doThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE))
             .when(usersCommunication).updateOrderStatus(any(), any());
         assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "DELIVERED"))
@@ -124,7 +106,6 @@ public class DeliveryStatusHandlerTest {
     void throwsForbiddenWhenAuthenticatedUserMakesNotChronologicalUpdate() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("restaurant")).thenReturn(AccountType.VENDOR);
-        when(usersAuthentication.checkUserAccessToDelivery("restaurant", delivery)).thenReturn(true);
 
         assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "restaurant", "ACCEPTED"))
                 .extracting("status")
@@ -135,7 +116,6 @@ public class DeliveryStatusHandlerTest {
     void throwsForbiddenWhenAuthenticatedUserMakesUpdateNotBelongingToThem() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("client")).thenReturn(AccountType.CLIENT);
-        when(usersAuthentication.checkUserAccessToDelivery("client", delivery)).thenReturn(true);
 
         assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "client", "DELIVERED"))
                 .extracting("status")
@@ -146,10 +126,15 @@ public class DeliveryStatusHandlerTest {
     void throwsBadRequestWhenAuthenticatedUserMakesUpdateWithInvalidDeliveryStatus() {
         Delivery delivery = insertExampleDelivery();
         when(usersAuthentication.getUserAccountType("courier")).thenReturn(AccountType.COURIER);
-        when(usersAuthentication.checkUserAccessToDelivery("courier", delivery)).thenReturn(true);
 
         assertThatThrownBy(() -> statusHandler.updateDeliveryStatus(delivery.getDeliveryID(), "courier", "SOMETHING WEIRD"))
                 .extracting("status")
                 .isEqualTo(HttpStatus.BAD_REQUEST);
     }
+
+    @Test
+    void isStatusUpdateLegalTest() {
+
+    }
+
 }

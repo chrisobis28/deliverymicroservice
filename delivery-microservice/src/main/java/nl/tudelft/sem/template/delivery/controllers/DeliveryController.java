@@ -1,21 +1,20 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import nl.tudelft.sem.template.api.DeliveriesApi;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
+import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.ErrorService;
+import nl.tudelft.sem.template.delivery.services.RestaurantService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.*;
 import nl.tudelft.sem.template.model.DeliveriesPostRequest;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
-import nl.tudelft.sem.template.model.Restaurant;
+import nl.tudelft.sem.template.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,15 +23,22 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
 
 
 @RestController
 public class DeliveryController implements DeliveriesApi {
 
     private final transient DeliveryService deliveryService;
-    private final transient UsersAuthenticationService usersCommunication;
+    private final transient ErrorService errorService;
+    private final transient UsersAuthenticationService usersAuthenticationService;
     private final transient DeliveryStatusHandler deliveryStatusHandler;
-    private final transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
+    private final transient AvailableDeliveryProxy availableDeliveryProxy;
 
     private final transient TimeCalculationService timeCalculationService;
 
@@ -42,20 +48,48 @@ public class DeliveryController implements DeliveriesApi {
      * Constructor.
      *
      * @param deliveryService       the delivery service
-     * @param usersCommunication    mock for users authorization
+     * @param usersAuthenticationService    mock for users authorization
      * @param deliveryStatusHandler Handles the status of Delivery entities
      */
-    public DeliveryController(DeliveryService deliveryService,
-                              UsersAuthenticationService usersCommunication, DeliveryStatusHandler deliveryStatusHandler,
+    public DeliveryController(DeliveryService deliveryService, ErrorService errorService,
+                              UsersAuthenticationService usersAuthenticationService,
+                              DeliveryStatusHandler deliveryStatusHandler,
                               TimeCalculationService timeCalculationService,
                               AvailableDeliveryProxyImplementation availableDeliveryProxy,
                               UpdateService updateService) {
         this.deliveryService = deliveryService;
-        this.usersCommunication = usersCommunication;
+        this.errorService = errorService;
+        this.usersAuthenticationService = usersAuthenticationService;
         this.deliveryStatusHandler = deliveryStatusHandler;
         this.timeCalculationService = timeCalculationService;
         this.availableDeliveryProxy = availableDeliveryProxy;
         this.updateService = updateService;
+    }
+
+    /**
+     * Authenticates user for a delivery associated with the given deliveryId.
+     * If user with the given userId doesn't exist UNAUTHORIZED is thrown.
+     * If the user lacks necessary permissions FORBIDDEN is thrown.
+     * Otherwise, the delivery is returned.
+     *
+     * @return Delivery object that given user is authenticated for
+     * @throws InvalidUserException      if user with the given userId doesn't exist
+     * @throws NotAuthenticatedException if the user lacks necessary permissions
+     */
+    public Delivery getDeliveryAndAuthenticateUser(UUID deliveryId, String userId) {
+
+        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (AccountType.INVALID.equals(accountType)) {
+            throw new InvalidUserException();
+        }
+
+        Delivery delivery = deliveryService.getDelivery(deliveryId);
+        boolean userIsAuthenticated = usersAuthenticationService.checkUserAccessToDelivery(userId, delivery);
+        if (!userIsAuthenticated) {
+            throw new NotAuthenticatedException();
+        }
+
+        return delivery;
     }
 
     /**
@@ -67,29 +101,10 @@ public class DeliveryController implements DeliveriesApi {
      * @return ResponseEntity containing error (if user is authorized)
      */
     @Override
-    public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable("deliveryId") UUID deliveryId,
+    public ResponseEntity<Error> deliveriesDeliveryIdUnexpectedEventGet(@PathVariable UUID deliveryId,
                                                                         @RequestHeader String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-        String customer_id = delivery.getCustomerID();
-        String c_id = delivery.getCourierID();
-        String r_id = delivery.getRestaurantID();
-        if (isNullOrEmpty(c_id) || isNullOrEmpty(customer_id) || isNullOrEmpty(r_id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unexpected event could not be found.");
-        }
-        if (!check) {
-            if (user.equals(UsersAuthenticationService.AccountType.INVALID)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-            } else {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-        } else {
-            return ResponseEntity.ok(delivery.getError());
-        }
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getError());
     }
 
     /**
@@ -102,25 +117,9 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdRestaurantGet(UUID deliveryId, String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        String r_id = delivery.getRestaurantID();
-        String c_id = delivery.getCourierID();
-        if (isNullOrEmpty(r_id) || isNullOrEmpty(c_id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant ID was not found");
-        }
-        if (!check && userType.equals(UsersAuthenticationService.AccountType.INVALID)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
-        if (!check) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-        } else {
-            return ResponseEntity.ok(r_id);
-        }
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getRestaurantID());
     }
 
     /**
@@ -133,30 +132,8 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdPickupGet(@PathVariable UUID deliveryId,
                                                                         @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            return ResponseEntity.ok(delivery.getPickupTime());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
-            if (!delivery.getCourierID().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
-            }
-            return ResponseEntity.ok().body(delivery.getPickupTime());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
-            if (!delivery.getRestaurantID().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
-            }
-            return ResponseEntity.ok(delivery.getPickupTime());
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.CLIENT)) {
-            if (!delivery.getCustomerID().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Client does not correspond to the order.");
-            }
-            return ResponseEntity.ok(delivery.getPickupTime());
-        }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getPickupTime());
     }
 
     /**
@@ -171,27 +148,15 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdPickupPut(@PathVariable UUID deliveryId,
                                                                   @RequestHeader String userId,
                                                                   @RequestBody OffsetDateTime pickupTime) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
-            return ResponseEntity.ok(delivery);
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        UsersAuthenticationService.AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (AccountType.CLIENT.equals(accountType)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Customers cannot update delivery pickup time");
         }
-        if (accountType.equals(UsersAuthenticationService.AccountType.COURIER)) {
-            if (!delivery.getCourierID().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Courier does not correspond to the order.");
-            }
-            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
-            return ResponseEntity.ok(delivery);
-        }
-        if (accountType.equals(UsersAuthenticationService.AccountType.VENDOR)) {
-            if (!delivery.getRestaurantID().equals(userId)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendor does not correspond to the order.");
-            }
-            timeCalculationService.updatePickupTime(deliveryId, pickupTime);
-            return ResponseEntity.ok(delivery);
-        }
-        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Account could not be verified.");
+
+        timeCalculationService.updatePickupTime(deliveryId, pickupTime);
+        return ResponseEntity.ok(delivery);
     }
 
     /**
@@ -203,23 +168,22 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<Delivery> deliveriesPost(@Valid DeliveriesPostRequest deliveriesPostRequest) {
         if (deliveriesPostRequest == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Request body cannot be null");
         }
 
-        Delivery delivery = new Delivery();
-        String status = deliveriesPostRequest.getStatus().toUpperCase(Locale.ROOT);
+        String statusString = deliveriesPostRequest.getStatus().toUpperCase(Locale.ROOT);
+        DeliveryStatus status = DeliveryStatus.fromValue(statusString);
         String orderId = deliveriesPostRequest.getOrderId();
         String customerId = deliveriesPostRequest.getCustomerId();
         String vendorId = deliveriesPostRequest.getVendorId();
-        List<Double> addr = deliveriesPostRequest.getDeliveryAddress();
+        List<Double> address = deliveriesPostRequest.getDeliveryAddress();
 
-        delivery.setStatus(DeliveryStatus.fromValue(status));
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "Restaurant ID, customer ID or Delivery ID is invalid.");
         }
 
-        if (addr == null || addr.size() != 2) {
+        if (address == null || address.size() != 2) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Address is invalid.");
         }
 
@@ -231,17 +195,23 @@ public class DeliveryController implements DeliveriesApi {
         }
 
         if (timeCalculationService.computeHaversine(r.getLocation().get(0),
-                r.getLocation().get(1), addr.get(0), addr.get(1)) > r.getDeliveryZone()) {
+                r.getLocation().get(1), address.get(0), address.get(1)) > r.getDeliveryZone()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
         }
+
         UUID deliveryId = UUID.fromString(orderId);
-        delivery.deliveryID(deliveryId);
-        delivery.setCustomerID(customerId);
-        delivery.setRestaurantID(vendorId);
-        delivery.setDeliveryAddress(addr);
-        delivery.setError(null);
-        delivery.setOrderTime(OffsetDateTime.now());
-        delivery = deliveryService.insert(delivery);
+
+        Delivery delivery = new Delivery()
+                .deliveryID(deliveryId)
+                .customerID(customerId)
+                .restaurantID(vendorId)
+                .deliveryAddress(address)
+                .status(status)
+                .orderTime(OffsetDateTime.now());
+
+        deliveryService.insert(delivery);
+        errorService.updateError(deliveryId, new Error().type(ErrorType.NONE));
+
         return ResponseEntity.ok(delivery);
     }
 
@@ -249,31 +219,17 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdStatusGet(@PathVariable UUID deliveryId,
                                                                 @RequestHeader String userId) {
-        return deliveryStatusHandler.getDeliveryStatus(deliveryId, userId);
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getStatus().getValue());
     }
 
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdStatusPut(UUID deliveryId, String userId, String status) {
-        ResponseEntity<Delivery> delivery = deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
-        if (delivery.getBody() != null) {
-            availableDeliveryProxy.insertDelivery(delivery.getBody());
-        }
-        return delivery;
-    }
 
-    /**
-     * inserts an element into the repo (internal method).
-     *
-     * @param delivery delivery being inserted
-     * @return the entity
-     */
-    public ResponseEntity<Void> insert(@RequestBody Delivery delivery) {
-        try {
-            deliveryService.insert(delivery);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery is invalid.");
-        }
+        getDeliveryAndAuthenticateUser(deliveryId, userId);
+        Delivery delivery = deliveryStatusHandler.updateDeliveryStatus(deliveryId, userId, status);
+        availableDeliveryProxy.insertDelivery(delivery);
+        return ResponseEntity.ok(delivery);
     }
 
     /**
@@ -285,38 +241,11 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdCurrentLocationGet(UUID deliveryId, String userId) {
-        if (isNullOrEmpty(userId) || deliveryId == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID or Delivery ID is invalid.");
-        }
-        Delivery d = deliveryService.getDelivery(deliveryId);
-        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        if (isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getCustomerID())
-            || isInvalidLatLong(d.getCurrentLocation())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Current location could not be found.");
-        }
-        switch (user) {
-            case ADMIN: return ResponseEntity.ok(d.getCurrentLocation());
-            case CLIENT, COURIER, VENDOR: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, d)) {
-                    return ResponseEntity.ok(d.getCurrentLocation());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getCurrentLocation());
     }
 
-    /**
-     * Method to check if coordinates are valid.
-     *
-     * @param coords coordinates to check
-     * @return boolean value indicating whether coordinates are valid
-     */
-    public boolean isInvalidLatLong(List<Double> coords) {
-        return coords == null || coords.size() != 2;
-    }
 
     /**
      * Get customer that ordered the Delivery.
@@ -327,26 +256,9 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCustomerGet(UUID deliveryId, String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        Delivery d = deliveryService.getDelivery(deliveryId);
-        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        if (isNullOrEmpty(d.getCustomerID()) || isNullOrEmpty(d.getCourierID()) || isNullOrEmpty(d.getRestaurantID())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Customer ID could not be found");
-        }
-        switch (user) {
-            case ADMIN: return ResponseEntity.ok(d.getCustomerID());
-            case CLIENT, COURIER, VENDOR: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, d)) {
-                    return ResponseEntity.ok(d.getCustomerID());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getCustomerID());
     }
 
     /**
@@ -358,27 +270,9 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdDeliveredTimeGet(UUID deliveryId, String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        Delivery d = deliveryService.getDelivery(deliveryId);
-        UsersAuthenticationService.AccountType user = usersCommunication.getUserAccountType(userId);
-        if (isNullOrEmpty(d.getRestaurantID()) || isNullOrEmpty(d.getCustomerID())
-            || isNullOrEmpty(d.getCourierID()) || d.getDeliveredTime() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Delivered time could not be found.");
-        }
-        switch (user) {
-            case ADMIN: return ResponseEntity.ok(d.getDeliveredTime());
-            case CLIENT, COURIER, VENDOR: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, d)) {
-                    return ResponseEntity.ok(d.getDeliveredTime());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getDeliveredTime());
     }
 
     /**
@@ -391,25 +285,8 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdDeliveryAddressGet(@PathVariable UUID deliveryId,
                                                                                @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-
-        if (delivery == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Delivery was not found");
-        }
-
-        switch (accountType) {
-            case ADMIN: return ResponseEntity.ok(deliveryService.getDeliveryAddress(deliveryId));
-            case VENDOR, CLIENT, COURIER: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, delivery)) {
-                    return ResponseEntity.ok(deliveryService.getDeliveryAddress(deliveryId));
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getDeliveryAddress());
     }
 
     /**
@@ -422,20 +299,9 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<List<Double>> deliveriesDeliveryIdPickupLocationGet(@PathVariable UUID deliveryId,
                                                                               @RequestHeader String userId) {
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-
-        // Check user access based on account type and association with the delivery
-        if (usersCommunication.checkUserAccessToDelivery(userId, delivery)) {
-            List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
-            return ResponseEntity.ok(pickupAddress);
-        } else {
-            if (type.equals(UsersAuthenticationService.AccountType.INVALID)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-            } else {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-        }
+        getDeliveryAndAuthenticateUser(deliveryId, userId);
+        List<Double> pickupAddress = deliveryService.getPickupLocation(deliveryId);
+        return ResponseEntity.ok(pickupAddress);
     }
 
     /**
@@ -445,7 +311,7 @@ public class DeliveryController implements DeliveriesApi {
      * @return boolean value indicating whether string is empty or not
      */
     public boolean isNullOrEmpty(String str) {
-        return str == null || str.isEmpty() || str.isBlank();
+        return str == null || str.isBlank();
     }
 
     /**
@@ -453,116 +319,57 @@ public class DeliveryController implements DeliveriesApi {
      *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     User ID for authorization (required)
-     * @param body       Update rating of delivery (required)
+     * @param rating       Update rating of delivery (required)
      * @return Response entity containing the updated Delivery object
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdRatingCourierPut(@PathVariable UUID deliveryId,
                                                                          @RequestHeader @NotNull String userId,
-                                                                         @RequestBody @Valid Integer body) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        } else {
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
-            //Call user endpoint that verifies the role of user path:"/account/type"
-            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-            String email = delivery.getCustomerID();
-            boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
-            if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            } else {
-                updateService.updateCourierRating(deliveryId, body);
-                delivery = deliveryService.getDelivery(deliveryId);
-                return ResponseEntity.ok(delivery);
-            }
+                                                                         @RequestBody @Valid Integer rating) {
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (!List.of(AccountType.ADMIN, AccountType.CLIENT).contains(accountType)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customer can give a rating to courier");
         }
+
+        updateService.updateCourierRating(deliveryId, rating);
+        return ResponseEntity.ok(delivery);
     }
 
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdRatingRestaurantPut(@PathVariable UUID deliveryId,
                                                                             @RequestHeader @NotNull String userId,
-                                                                            @RequestBody @Valid Integer body) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        } else {
-            Delivery delivery = deliveryService.getDelivery(deliveryId);
-            //Call user endpoint that verifies the role of user path:"/account/type"
-            UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-            String email = delivery.getCustomerID(); //orderMockRepo.getUserEmail(deliveryId);
-            boolean isCustomer = userId.equals(email) && type.equals(UsersAuthenticationService.AccountType.CLIENT);
-            if (!isCustomer && !type.equals(UsersAuthenticationService.AccountType.ADMIN)) {
-                if (type.equals(UsersAuthenticationService.AccountType.INVALID)) {
-                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                        "User lacks valid authentication credentials.");
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User lacks necessary permissions.");
-                }
-            } else {
-                updateService.updateRestaurantRating(deliveryId, body);
-                delivery = deliveryService.getDelivery(deliveryId);
-                return ResponseEntity.ok(delivery);
-            }
+                                                                            @RequestBody @Valid Integer rating) {
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (!List.of(AccountType.ADMIN, AccountType.CLIENT).contains(accountType)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only customer can give a rating to a restaurant");
         }
+
+        updateService.updateRestaurantRating(deliveryId, rating);
+        return ResponseEntity.ok(delivery);
     }
 
     @Override
-    public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@Parameter @PathVariable UUID deliveryId,
-                                                                           @Parameter @RequestHeader
-                                                                           @NotNull String userId) {
-        //Only people that can see rating is the customer who left the rating, the vendor and the admin
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
+    public ResponseEntity<Integer> deliveriesDeliveryIdRatingRestaurantGet(@PathVariable UUID deliveryId,
+                                                                           @RequestHeader @NotNull String userId) {
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        if (usersAuthenticationService.getUserAccountType(userId).equals(AccountType.COURIER)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Couriers are not allowed to see restaurant rating");
         }
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (isNullOrEmpty(delivery.getRestaurantID()) || isNullOrEmpty(delivery.getCustomerID())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Restaurant rating could not be found.");
-        }
-        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-
-        switch (type) {
-            case COURIER:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            case CLIENT, VENDOR: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, delivery)) {
-                    return ResponseEntity.ok(delivery.getRatingRestaurant());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            case ADMIN: return ResponseEntity.ok(delivery.getRatingRestaurant());
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+        return ResponseEntity.ok(delivery.getRatingRestaurant());
     }
 
     @Override
     public ResponseEntity<Integer> deliveriesDeliveryIdRatingCourierGet(@Parameter @PathVariable UUID deliveryId,
                                                                         @Parameter @RequestHeader @NotNull String userId) {
-        //Only people that can see rating is the customer who left the rating, the courier and the admin
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        if (usersAuthenticationService.getUserAccountType(userId).equals(AccountType.VENDOR)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Vendors are not allowed to see couriers rating");
         }
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (isNullOrEmpty(delivery.getCourierID()) || isNullOrEmpty(delivery.getCustomerID())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Courier rating could not be found");
-        }
-        UsersAuthenticationService.AccountType type = usersCommunication.getUserAccountType(userId);
-
-        switch (type) {
-            case VENDOR:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            case CLIENT, COURIER: {
-                if (usersCommunication.checkUserAccessToDelivery(userId, delivery)) {
-                    return ResponseEntity.ok(delivery.getRatingCourier());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            case ADMIN: return ResponseEntity.ok(delivery.getRatingCourier());
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User could not be authorized.");
-        }
+        return ResponseEntity.ok(delivery.getRatingRestaurant());
     }
 
     /**
@@ -573,7 +380,7 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<List<Delivery>> deliveriesAllAcceptedGet(@RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
+        UsersAuthenticationService.AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
 
         return switch (accountType) {
             case ADMIN, COURIER -> ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
@@ -594,28 +401,8 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<String> deliveriesDeliveryIdCourierGet(@PathVariable UUID deliveryId,
                                                                  @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (isNullOrEmpty(delivery.getCourierID())) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No courier assigned to order");
-        }
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-
-        switch (userType) {
-            case CLIENT:
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            case ADMIN: return ResponseEntity.ok(delivery.getCourierID());
-            case VENDOR, COURIER: {
-                if (check) {
-                    return ResponseEntity.ok(delivery.getCourierID());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "User lacks valid authentication credentials.");
-        }
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getCourierID());
     }
 
     /**
@@ -630,15 +417,15 @@ public class DeliveryController implements DeliveriesApi {
     public ResponseEntity<Delivery> deliveriesDeliveryIdCourierPut(@PathVariable UUID deliveryId,
                                                                    @RequestHeader String userId,
                                                                    @RequestBody String courierId) {
-        UsersAuthenticationService.AccountType courier = usersCommunication.getUserAccountType(courierId);
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
+        AccountType courier = usersAuthenticationService.getUserAccountType(courierId);
+        AccountType userType = usersAuthenticationService.getUserAccountType(userId);
         Delivery delivery = deliveryService.getDelivery(deliveryId);
 
-        if (!courier.equals(UsersAuthenticationService.AccountType.COURIER)) {
+        if (!courier.equals(AccountType.COURIER)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
                 "The person you are trying to assign to the order is not a courier.");
         }
-        if (userType.equals(UsersAuthenticationService.AccountType.ADMIN)) {
+        if (userType.equals(AccountType.ADMIN)) {
             updateService.updateDeliveryCourier(deliveryId, courierId);
             return ResponseEntity.ok(delivery);
         }
@@ -682,37 +469,22 @@ public class DeliveryController implements DeliveriesApi {
      *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     User ID for authorization (required)
-     * @param body       Update prep time of delivery (required)
+     * @param prepTime   Update prep time of delivery (required)
      * @return a delivery object with the updates that took place
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdPrepPut(@PathVariable UUID deliveryId,
                                                                 @RequestHeader String userId,
-                                                                @RequestBody Integer body) {
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
+                                                                @RequestBody Integer prepTime) {
 
-        switch (userType) {
-            case ADMIN -> {
-                timeCalculationService.updateEstimatedPrepTime(deliveryId, body);
-                return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
-            }
-            case CLIENT, COURIER ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            case VENDOR -> {
-                if (check) {
-                    timeCalculationService.updateEstimatedPrepTime(deliveryId, body);
-                    return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User lacks necessary permissions.");
-                }
-            }
-            default ->
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "User lacks valid authentication credentials.");
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (!List.of(AccountType.ADMIN, AccountType.VENDOR).contains(accountType)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only restaurant owner can update estimated prep time");
         }
+
+        timeCalculationService.updateEstimatedPrepTime(deliveryId, prepTime);
+        return ResponseEntity.ok(delivery);
     }
 
     /**
@@ -725,27 +497,9 @@ public class DeliveryController implements DeliveriesApi {
     @Override
     public ResponseEntity<OffsetDateTime> deliveriesDeliveryIdEstimatedDeliveryTimeGet(@PathVariable UUID deliveryId,
                                                                                        @RequestHeader String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is null or empty");
-        }
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-
-        switch (userType) {
-            case ADMIN, CLIENT, COURIER, VENDOR -> {
-                if (check) {
-                    OffsetDateTime estimate = timeCalculationService.computeEstimatedDeliveryTime(deliveryId);
-                    return ResponseEntity.ok(estimate);
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                        "User lacks necessary permission levels.");
-                }
-            }
-            default ->
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Unauthorized access. User cannot be authorized.");
-        }
+        getDeliveryAndAuthenticateUser(deliveryId, userId);
+        OffsetDateTime estimate = timeCalculationService.computeEstimatedDeliveryTime(deliveryId);
+        return ResponseEntity.ok(estimate);
     }
 
     /**
@@ -757,29 +511,8 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        System.out.println(userId);
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-
-        // Vendors can see estimations for their orders only
-        // Couriers can see estimations for their deliveries only
-        // Customers can see estimations for their orders only
-        switch (userType) {
-            case ADMIN: return ResponseEntity.ok(delivery);
-            case CLIENT, COURIER, VENDOR: {
-                if (check) {
-                    return ResponseEntity.ok(delivery);
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery);
     }
 
     /**
@@ -791,28 +524,8 @@ public class DeliveryController implements DeliveriesApi {
      */
     @Override
     public ResponseEntity<Integer> deliveriesDeliveryIdPrepGet(@PathVariable UUID deliveryId, @RequestHeader String userId) {
-        if (isNullOrEmpty(userId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User ID is invalid.");
-        }
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        boolean check = usersCommunication.checkUserAccessToDelivery(userId, delivery);
-
-        // Vendors can see estimations for their orders only
-        // Couriers can see estimations for their deliveries only
-        // Customers can see estimations for their orders only
-        switch (userType) {
-            case ADMIN: return ResponseEntity.ok(delivery.getEstimatedPrepTime());
-            case CLIENT, COURIER, VENDOR: {
-                if (check) {
-                    return ResponseEntity.ok(delivery.getEstimatedPrepTime());
-                } else {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-                }
-            }
-            default:
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
-        }
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        return ResponseEntity.ok(delivery.getEstimatedPrepTime());
     }
 
     /**
@@ -820,35 +533,38 @@ public class DeliveryController implements DeliveriesApi {
      *
      * @param deliveryId  ID of the Delivery entity (required)
      * @param userId      ID of the User for authorization (required)
-     * @param requestBody new address to be used in the future (required)
+     * @param address new address to be used in the future (required)
      * @return a Delivery Object with the updates that took place
      */
     @Override
     public ResponseEntity<Delivery> deliveriesDeliveryIdDeliveryAddressPut(@PathVariable UUID deliveryId,
                                                                            @RequestHeader String userId,
-                                                                           @RequestBody List<Double> requestBody) {
-        UsersAuthenticationService.AccountType userType = usersCommunication.getUserAccountType(userId);
-        Delivery delivery = deliveryService.getDelivery(deliveryId);
-        if (requestBody == null || requestBody.size() != 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery Address not set correctly.");
+                                                                           @RequestBody List<Double> address) {
+
+        Delivery delivery = getDeliveryAndAuthenticateUser(deliveryId, userId);
+        AccountType accountType = usersAuthenticationService.getUserAccountType(userId);
+        if (!List.of(AccountType.ADMIN, AccountType.CLIENT).contains(accountType)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Only restaurant owner can update estimated preparation time");
         }
-        switch (userType) {
-            case CLIENT, ADMIN -> {
-                if (userType.equals(UsersAuthenticationService.AccountType.CLIENT)
-                        && !delivery.getCustomerID().equals(userId)) {
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                            "Customer does not correspond to the order.");
-                }
-                updateService.updateDeliveryAddress(deliveryId, new ArrayList<>(requestBody));
-                return ResponseEntity.ok(deliveryService.getDelivery(deliveryId));
-            }
-            case COURIER, VENDOR ->
-                    throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                            "Only customers can update the delivery address.");
-            default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                    "Account could not be verified.");
+        if (address.size() != 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Delivery Address not set correctly");
+        }
+
+        updateService.updateDeliveryAddress(deliveryId, address);
+        return ResponseEntity.ok(delivery);
+    }
+
+
+    static public class InvalidUserException extends ResponseStatusException {
+        public InvalidUserException() {
+            super(HttpStatus.UNAUTHORIZED, "User is not known to the system");
         }
     }
 
+    static public class NotAuthenticatedException extends ResponseStatusException {
+        public NotAuthenticatedException() {
+            super(HttpStatus.FORBIDDEN, "User could not be authorized");
+        }
+    }
 }
-

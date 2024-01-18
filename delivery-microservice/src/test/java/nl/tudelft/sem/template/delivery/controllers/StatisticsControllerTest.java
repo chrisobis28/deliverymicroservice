@@ -5,8 +5,7 @@ import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.*;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.ErrorType;
 import org.apache.commons.lang3.tuple.Pair;
@@ -26,9 +25,9 @@ import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
-
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +43,7 @@ class StatisticsControllerTest {
 
 
     String userId;
+    String courierId;
     UsersAuthenticationService.AccountType userType;
     UUID orderId1;
     UUID orderId2;
@@ -71,6 +71,7 @@ class StatisticsControllerTest {
     void setUp() {
         // Mock data
         userId = "user@example.org";
+        courierId = "k";
         orderId1 = UUID.randomUUID();
         orderId2 = UUID.randomUUID();
         orderId3 = UUID.randomUUID();
@@ -104,6 +105,7 @@ class StatisticsControllerTest {
             .message()
             .isEqualTo("400 BAD_REQUEST \"User ID or Restaurant ID is invalid.\"");
     }
+
 
     @Test
     void testForDeliveriesPerHrUnauthorized() {
@@ -145,6 +147,35 @@ class StatisticsControllerTest {
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
             .message()
             .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
+    }
+
+    @Test
+    void testForDeliveriesPerHrBadRequestNull() {
+        when(usersCommunication.checkUserAccessToRestaurant(null, userId, "DPH"))
+            .thenReturn(Pair.of(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid."));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsDeliveriesPerHourGet(null, userId));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void testForDeliveriesPerHrBadRequestEmpty1() {
+        when(usersCommunication.checkUserAccessToRestaurant(" ", userId, "DPH"))
+            .thenReturn(Pair.of(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid."));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsDeliveriesPerHourGet(" ", userId));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+
+    }
+
+    @Test
+    void testForDeliveriesPerHrBadRequestNull2() {
+        when(usersCommunication.checkUserAccessToRestaurant(userId, null, "DPH"))
+            .thenReturn(Pair.of(HttpStatus.BAD_REQUEST, "User ID or Restaurant ID is invalid."));
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsDeliveriesPerHourGet(userId, null));
+        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
+
     }
 
     @Test
@@ -207,6 +238,7 @@ class StatisticsControllerTest {
         assertEquals(HttpStatus.OK, actual.getStatusCode());
         assertEquals(6.0, Objects.requireNonNull(actual.getBody()).get(14));
     }
+
 
     @Test
     void testForDeliveriesPerHrNoDeliveredDeliveries() {
@@ -284,6 +316,78 @@ class StatisticsControllerTest {
     @Test
     void statisticsRatingsForOrdersGet() {
         userType = UsersAuthenticationService.AccountType.ADMIN;
+        d1.setRatingRestaurant(4);
+        d2.setStatus(DeliveryStatus.ACCEPTED);
+        // Mock ratings and user type
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
+        repo1.save(d1);
+        repo1.save(d2);
+
+        // Call the method
+        ResponseEntity<Map<String, Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
+
+        // Verify the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        // Verify the returned ratings
+        Map<String, Integer> ratings = responseEntity.getBody();
+        assert ratings != null;
+        assertEquals(2, ratings.size());
+        assertEquals(4, ratings.get(orderId1.toString())); // Rating for orderId1
+        assertNull(ratings.get(orderId2.toString())); // Rating for orderId2
+    }
+
+    @Test
+    void statisticsRatingsForOrdersGetClient() {
+        userType = UsersAuthenticationService.AccountType.CLIENT;
+        d1.setRatingRestaurant(4);
+        d2.setStatus(DeliveryStatus.ACCEPTED);
+        // Mock ratings and user type
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
+        repo1.save(d1);
+        repo1.save(d2);
+
+        // Call the method
+        ResponseEntity<Map<String, Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
+
+        // Verify the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        // Verify the returned ratings
+        Map<String, Integer> ratings = responseEntity.getBody();
+        assert ratings != null;
+        assertEquals(2, ratings.size());
+        assertEquals(4, ratings.get(orderId1.toString())); // Rating for orderId1
+        assertNull(ratings.get(orderId2.toString())); // Rating for orderId2
+    }
+
+    @Test
+    void statisticsRatingsForOrdersGetCourier() {
+        userType = UsersAuthenticationService.AccountType.COURIER;
+        d1.setRatingRestaurant(4);
+        d2.setStatus(DeliveryStatus.ACCEPTED);
+        // Mock ratings and user type
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
+        repo1.save(d1);
+        repo1.save(d2);
+
+        // Call the method
+        ResponseEntity<Map<String, Integer>> responseEntity = sut.statisticsRatingsForOrdersGet(userId, orderIds);
+
+        // Verify the response
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+        // Verify the returned ratings
+        Map<String, Integer> ratings = responseEntity.getBody();
+        assert ratings != null;
+        assertEquals(2, ratings.size());
+        assertEquals(4, ratings.get(orderId1.toString())); // Rating for orderId1
+        assertNull(ratings.get(orderId2.toString())); // Rating for orderId2
+    }
+
+    @Test
+    void statisticsRatingsForOrdersGetVendor() {
+        userType = UsersAuthenticationService.AccountType.VENDOR;
         d1.setRatingRestaurant(4);
         d2.setStatus(DeliveryStatus.ACCEPTED);
         // Mock ratings and user type
@@ -434,4 +538,44 @@ class StatisticsControllerTest {
         assertEquals(0.0, r.getBody());
         assertEquals(HttpStatus.OK, r.getStatusCode());
     }
+
+    @Test
+    void noSuchCourier() {
+        userType = UsersAuthenticationService.AccountType.ADMIN;
+        ErrorType event = ErrorType.NONE;
+        OffsetDateTime date0 = OffsetDateTime.of(2023, 12, 13, 14, 33, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
+        d1.setOrderTime(date0);
+        d1.setError(error);
+        repo1.save(d1);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsCourierOverviewGet(userId, userId, date1, date2));
+
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
+    }
+
+    @Test
+    void unauthorize() {
+        userType = UsersAuthenticationService.AccountType.INVALID;
+        ErrorType event = ErrorType.NONE;
+        OffsetDateTime date0 = OffsetDateTime.of(2023, 12, 13, 14, 33, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
+        OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
+        d1.setOrderTime(date0);
+        d1.setError(error);
+        repo1.save(d1);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
+        when(usersCommunication.getUserAccountType(courierId))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> sut.statisticsCourierOverviewGet(userId, courierId, date1, date2));
+
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+
+    }
+
+
+
 }

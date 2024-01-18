@@ -17,6 +17,4 @@ public abstract class ErrorHandlingAbstractAction implements DeliveryErrorAction
             nextHandler.handle(delivery);
         }
     }
-
-    ;
 }

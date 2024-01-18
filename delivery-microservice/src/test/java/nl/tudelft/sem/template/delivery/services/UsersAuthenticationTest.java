@@ -1,7 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Delivery;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import java.util.Locale;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -41,13 +39,25 @@ class UsersAuthenticationTest {
 
     @Test
     public void returnsTrueWhenVendorIsAssignedToDelivery() {
-        when(usersCommunication.getAccountType("vendorId")).thenReturn(AccountType.VENDOR.name().toLowerCase(Locale.ROOT));
+        when(usersCommunication.getAccountType("vendorId")).thenReturn("vendor");
         assertThat(usersAuthentication.checkUserAccessToDelivery("vendorId", delivery)).isTrue();
     }
 
     @Test
+    public void returnsTrueWhenCourierIsAssignedToDelivery() {
+        when(usersCommunication.getAccountType("courierId")).thenReturn("courier");
+        assertThat(usersAuthentication.checkUserAccessToDelivery("courierId", delivery)).isTrue();
+    }
+
+    @Test
+    public void returnsTrueWhenCustomerIsAssignedToDelivery() {
+        when(usersCommunication.getAccountType("customerId")).thenReturn("customer");
+        assertThat(usersAuthentication.checkUserAccessToDelivery("customerId", delivery)).isTrue();
+    }
+
+    @Test
     public void returnsTrueForAdminAccess() {
-        when(usersCommunication.getAccountType("adminId")).thenReturn(AccountType.ADMIN.name().toLowerCase(Locale.ROOT));
+        when(usersCommunication.getAccountType("adminId")).thenReturn("admin");
         assertThat(usersAuthentication.checkUserAccessToDelivery("adminId", delivery)).isTrue();
     }
 

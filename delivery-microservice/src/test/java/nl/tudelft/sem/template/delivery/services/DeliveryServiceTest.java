@@ -34,25 +34,6 @@ class DeliveryServiceTest {
     public DeliveryService deliveryService;
 
     @Test
-    void returnsDeliveryStatus() {
-        UUID deliveryId = UUID.randomUUID();
-        Delivery delivery = new Delivery();
-        delivery.setDeliveryID(deliveryId);
-        delivery.setStatus(DeliveryStatus.ACCEPTED);
-
-        when(deliveryRepositoryMock.findById(deliveryId)).thenReturn(Optional.of(delivery));
-        assertThat(deliveryService.getDeliveryStatus(deliveryId)).isEqualTo(DeliveryStatus.ACCEPTED);
-    }
-
-    @Test
-    void throwsDeliveryNotFoundInvalid() {
-        UUID invalidDeliveryId = UUID.randomUUID();
-        when(deliveryRepositoryMock.findById(any(UUID.class))).thenReturn(Optional.empty());
-        assertThatExceptionOfType(DeliveryService.DeliveryNotFoundException.class)
-                .isThrownBy(() -> deliveryService.getDeliveryStatus(invalidDeliveryId));
-    }
-
-    @Test
     void getDelivery() {
         UUID deliveryId = UUID.randomUUID();
         Delivery delivery = new Delivery();
