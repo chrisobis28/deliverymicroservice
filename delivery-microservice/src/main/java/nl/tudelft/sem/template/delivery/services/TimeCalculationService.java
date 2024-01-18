@@ -44,11 +44,11 @@ public class TimeCalculationService {
      * @param deliveryId ID of delivery to be updated
      * @param prepTime   new value for the update
      */
-    public void updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
+    public Delivery updateEstimatedPrepTime(UUID deliveryId, Integer prepTime) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setEstimatedPrepTime(prepTime);
-        deliveryRepository.save(delivery);
+        return deliveryRepository.save(delivery);
     }
 
     /**
@@ -57,11 +57,11 @@ public class TimeCalculationService {
      * @param deliveryId the delivery id
      * @param pickupTime the new pickup time
      */
-    public void updatePickupTime(UUID deliveryId, OffsetDateTime pickupTime) {
+    public Delivery updatePickupTime(UUID deliveryId, OffsetDateTime pickupTime) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
             .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setPickupTime(pickupTime);
-        deliveryRepository.save(delivery);
+        return deliveryRepository.save(delivery);
     }
 
     /**

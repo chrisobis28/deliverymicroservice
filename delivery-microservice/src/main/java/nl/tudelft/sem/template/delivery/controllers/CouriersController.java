@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.CouriersApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
-import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UpdateService;
@@ -43,9 +42,10 @@ public class CouriersController implements CouriersApi {
      * @param availableDeliveryProxy the proxy that creates a cache for deliveries without courier
      * @param updateService          service of all updates
      */
-    public CouriersController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication,
+    public CouriersController(DeliveryService deliveryService,
+                              UsersAuthenticationService usersCommunication,
                               CouriersService couriersService,
-                              AvailableDeliveryProxyImplementation availableDeliveryProxy,
+                              AvailableDeliveryProxy availableDeliveryProxy,
                               UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.couriersService = couriersService;
@@ -79,10 +79,6 @@ public class CouriersController implements CouriersApi {
         return ResponseEntity.ok(list);
     }
 
-    public AvailableDeliveryProxyImplementation testMethod() {
-        return (AvailableDeliveryProxyImplementation) availableDeliveryProxy;
-    }
-
     /**
      * Assign the order next in the queue to the courier.
      *
@@ -102,7 +98,6 @@ public class CouriersController implements CouriersApi {
         UUID id = availableDeliveryProxy.getAvailableDeliveryId();
         updateService.updateDeliveryCourier(id, courierId);
         Delivery delivery = deliveryService.getDelivery(id);
-        availableDeliveryProxy.insertDelivery(delivery);
 
         return ResponseEntity.ok(delivery);
     }

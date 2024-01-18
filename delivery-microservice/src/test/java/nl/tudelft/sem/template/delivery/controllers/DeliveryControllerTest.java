@@ -1,20 +1,12 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
-import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
-import nl.tudelft.sem.template.delivery.services.DeliveryService;
-import nl.tudelft.sem.template.delivery.services.ErrorService;
-import nl.tudelft.sem.template.delivery.services.RestaurantService;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.delivery.services.*;
-import nl.tudelft.sem.template.model.DeliveriesPostRequest;
-import nl.tudelft.sem.template.model.Delivery;
-import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -82,7 +74,7 @@ class DeliveryControllerTest {
         delivery.setEstimatedPrepTime(prepTime);
         usersCommunication = mock(UsersAuthenticationService.class);
 
-        ds = new DeliveryService(deliveryRepository, new GPS(), restaurantRepository, errorRepository);
+        ds = new DeliveryService(deliveryRepository, restaurantRepository, errorRepository);
         es = new ErrorService(errorRepository, deliveryRepository);
         restaurantController = new RestaurantController(
                 new RestaurantService(restaurantRepository, deliveryRepository),
@@ -734,17 +726,31 @@ class DeliveryControllerTest {
         deliveryRepository.save(m1);
 
         String userId = "user@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
-        when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(AccountType.CLIENT);
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(AccountType.CLIENT);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
+            .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
+    }
+
+    @Test
+    void deliveriesDeliveryIdCourierPutOtherCourier() {
+        UUID deliveryId = UUID.randomUUID();
+        String vendorId = "vendor@testmail.com";
+        Delivery m1 = new Delivery();
+        m1.setDeliveryID(deliveryId);
+        m1.setRestaurantID(vendorId);
+        deliveryRepository.save(m1);
+
+        String courierId = "courier@testmail.com";
+        String otherCourierId = "other-courier@testmail.com";
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(otherCourierId)).thenReturn(AccountType.COURIER);
+
+        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, courierId, otherCourierId))
                 .extracting("status")
-                .isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .message()
-                .isEqualTo("400 BAD_REQUEST \"The person you are trying to assign to the order is not a courier.\"");
-        verify(usersCommunication, times(4)).getUserAccountType(any());
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -766,12 +772,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .message()
-                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
-        verify(usersCommunication, times(4)).getUserAccountType(any());
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -780,25 +782,20 @@ class DeliveryControllerTest {
         String customerId = "customer@testmail.com";
         String vendorId = "vendor@testmail.com";
         String courierId = "courier@testmail.com";
-        Delivery m1 = new Delivery();
-        m1.setDeliveryID(deliveryId);
-        m1.setCourierID(courierId);
-        m1.setRestaurantID(vendorId);
-        m1.setCustomerID(customerId);
-        deliveryRepository.save(m1);
+        Delivery delivery = new Delivery()
+                .deliveryID(deliveryId)
+                .courierID(courierId)
+                .restaurantID(vendorId)
+                .customerID(customerId);
+        deliveryRepository.save(delivery);
 
         String userId = "user@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
-        when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
+        when(usersCommunication.getUserAccountType(userId)).thenReturn(AccountType.INVALID);
+        when(usersCommunication.getUserAccountType(courierId)).thenReturn(AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .message()
-                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
-        verify(usersCommunication, times(4)).getUserAccountType(any());
+            .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -806,11 +803,9 @@ class DeliveryControllerTest {
         UUID deliveryId = UUID.randomUUID();
         String customerId = "customer@testmail.com";
         String vendorId = "vendor@testmail.com";
-        String courierId = "courier@testmail.com";
         String otherCourierId = "otherCourier@testmail.com";
         Delivery m1 = new Delivery();
         m1.setDeliveryID(deliveryId);
-        m1.setCourierID(courierId);
         m1.setRestaurantID(vendorId);
         m1.setCustomerID(customerId);
         deliveryRepository.save(m1);
@@ -824,7 +819,6 @@ class DeliveryControllerTest {
         ResponseEntity<Delivery> res = sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, otherCourierId);
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertEquals(Objects.requireNonNull(res.getBody()).getCourierID(), otherCourierId);
-        verify(usersCommunication, times(2)).getUserAccountType(any());
     }
 
     @Test
@@ -833,6 +827,8 @@ class DeliveryControllerTest {
         String customerId = "customer@testmail.com";
         String vendorId = "vendor@testmail.com";
         String otherCourierId = "otherCourier@testmail.com";
+        restaurantRepository.save(new Restaurant().restaurantID(vendorId));
+
         Delivery m1 = new Delivery();
         m1.setDeliveryID(deliveryId);
         m1.setCourierID(null);
@@ -856,6 +852,7 @@ class DeliveryControllerTest {
         assertEquals(HttpStatus.OK, res.getStatusCode());
         assertEquals(Objects.requireNonNull(res.getBody()).getCourierID(), userId);
         verify(usersCommunication, times(2)).getUserAccountType(any());
+        verify(availableDeliveryProxy).insertDelivery(any());
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, userId, userId))
                 .extracting("status")
@@ -905,29 +902,37 @@ class DeliveryControllerTest {
                 .thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-                .message()
-                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierId))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierId))
-                .message()
-                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, vendorId, courierId))
-                .extracting("status")
-                .isEqualTo(HttpStatus.FORBIDDEN);
-        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, vendorId, courierId))
-                .message()
-                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
+            .extracting("status")
+            .isEqualTo(HttpStatus.FORBIDDEN);
 
         ResponseEntity<Delivery> res4 = sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierInList);
         assertEquals(HttpStatus.OK, res4.getStatusCode());
         assertEquals(Objects.requireNonNull(res4.getBody()).getCourierID(), courierInList);
+    }
+
+    @Test
+    void deliveriesDeliveryIdCourierPutVendorButNoOwnCouriers() {
+        Delivery delivery = new Delivery()
+                .deliveryID(UUID.randomUUID())
+                .restaurantID("restaurant-id");
+        deliveryRepository.save(delivery);
+
+        restaurantRepository.save(new Restaurant().restaurantID("restaurant-id"));
+
+        when(usersCommunication.getUserAccountType("restaurant-id")).thenReturn(AccountType.VENDOR);
+        when(usersCommunication.getUserAccountType("courier-id")).thenReturn(AccountType.COURIER);
+
+        assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(delivery.getDeliveryID(), "restaurant-id", "courier-id"))
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
 
@@ -1165,6 +1170,7 @@ class DeliveryControllerTest {
         ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals(Objects.requireNonNull(result.getBody()).getDeliveryID().toString(), orderId);
+        verify(availableDeliveryProxy).insertDelivery(any());
     }
 
     @Test

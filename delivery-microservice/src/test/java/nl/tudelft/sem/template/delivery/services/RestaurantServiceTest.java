@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -42,7 +41,7 @@ public class RestaurantServiceTest {
     @BeforeEach
     public void setup() {
         rs = new RestaurantService(rr, dr);
-        ds = new DeliveryService(dr, new GPS(), rr, er);
+        ds = new DeliveryService(dr, rr, er);
     }
 
     @Test
