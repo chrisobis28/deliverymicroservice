@@ -192,6 +192,10 @@ public class DeliveryController implements DeliveriesApi {
 
         UUID deliveryId = UUID.fromString(orderId);
 
+        Error error = new Error()
+                .errorId(deliveryId)
+                .type(ErrorType.NONE);
+
         Delivery delivery = new Delivery()
                 .deliveryID(deliveryId)
                 .customerID(customerId)
@@ -199,6 +203,7 @@ public class DeliveryController implements DeliveriesApi {
                 .deliveryAddress(address)
                 .status(status)
                 .orderTime(OffsetDateTime.now())
+                .error(error)
                 .currentLocation(r.getLocation());
 
 
@@ -206,8 +211,8 @@ public class DeliveryController implements DeliveriesApi {
             delivery.setDeliveredTime(OffsetDateTime.now());
         }
 
-        delivery = deliveryService.insert(delivery);
-        errorService.updateError(deliveryId, new Error().type(ErrorType.NONE));
+        deliveryService.insert(delivery);
+
         availableDeliveryProxy.insertDelivery(delivery);
 
         return ResponseEntity.ok(delivery);
