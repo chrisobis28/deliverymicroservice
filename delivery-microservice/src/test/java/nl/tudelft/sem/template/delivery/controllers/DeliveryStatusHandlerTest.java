@@ -3,6 +3,7 @@ package nl.tudelft.sem.template.delivery.controllers;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
@@ -33,19 +34,22 @@ import static org.mockito.Mockito.*;
 public class DeliveryStatusHandlerTest {
 
     @Autowired
-    private DeliveryRepository deliveryRepository;
+    private transient DeliveryRepository deliveryRepository;
+
+    @Autowired
+    private transient ErrorRepository errorRepository;
     @Mock
-    private UsersAuthenticationService usersAuthentication;
+    private transient UsersAuthenticationService usersAuthentication;
     @Mock
-    private UsersCommunication usersCommunication;
-    private DeliveryStatusHandler statusHandler;
+    private transient UsersCommunication usersCommunication;
+    private transient DeliveryStatusHandler statusHandler;
 
     /**
      * Initialize test elements.
      */
     @BeforeEach
     public void init() {
-        DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null);
+        DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null, errorRepository);
         statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication,
             new UpdateService(deliveryRepository));
     }

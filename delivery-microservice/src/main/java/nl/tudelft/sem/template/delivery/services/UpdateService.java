@@ -5,6 +5,7 @@ import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -62,18 +63,23 @@ public class UpdateService {
         deliveryRepository.save(delivery);
     }
 
+
     /**
      * Updates the delivery status.
      *
-     * @param deliveryId a delivery to update the status of
+     * @param deliveryId     a delivery to update the status of
      * @param deliveryStatus new status
      */
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
         Delivery delivery = deliveryRepository.findById(deliveryId)
-            .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
+                .orElseThrow(DeliveryService.DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
+        if (delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
+            delivery.setDeliveredTime(OffsetDateTime.now());
+        }
         deliveryRepository.save(delivery);
     }
+
 
     /**
      * Update the delivery address of an order.

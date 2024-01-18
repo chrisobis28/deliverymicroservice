@@ -1,0 +1,1054 @@
+{
+	"info": {
+		"_postman_id": "0198b524-2bf3-44e4-b8d0-f95f2cfd896e",
+		"name": "Location Server",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26251552",
+		"_collection_link": "https://gold-spaceship-488725.postman.co/workspace/Functionality-Tests.-Delivery-M~6fc3a5a9-28eb-4bf5-9e6d-18abdbcaf4b8/collection/26243586-0198b524-2bf3-44e4-b8d0-f95f2cfd896e?action=share&source=collection_link&creator=26251552"
+	},
+	"item": [
+		{
+			"name": "coordinates",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{url}}/coordinates",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"coordinates"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Default",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/coordinates",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"coordinates"
+							]
+						}
+					},
+					"code": 200,
+					"_postman_previewlanguage": "text",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json",
+							"name": "Content-Type",
+							"description": "",
+							"type": "text"
+						}
+					],
+					"cookie": [],
+					"body": "51.99851 4.371485"
+				}
+			]
+		},
+		{
+			"name": "Customer  - Team C",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"customer3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"homeAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"deliveryAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/customer/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"customer",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Customer  - Team C",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"customer3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"homeAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"deliveryAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/customer/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"customer",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:25:39 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Courier - Team C",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"courier3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/courier/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"courier",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier - Team C",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"courier3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/courier/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"courier",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:25:50 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Vendor - Team C",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"vendor3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Doe's Diner\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/vendor/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"vendor",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Vendor - Team C",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"vendor3@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Doe's Diner\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/vendor/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"vendor",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:25:58 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Admin - Team C",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"admin1@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/admin/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"admin",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Admin - Team C",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin1@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/admin/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"admin",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:26:05 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Get Restaurant - Team B",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "vendor3@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor3@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor3@example.com"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Restaurant - Team B",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "vendor3@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor3@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor3@example.com"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Disposition",
+							"value": "inline;filename=f.txt"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:26:16 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor3@example.com\",\n    \"couriers\": [],\n    \"location\": [\n        51.99851,\n        4.371485\n    ],\n    \"deliveryZone\": 30\n}"
+				}
+			]
+		},
+		{
+			"name": "Post Order - Team A",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "customer3@example.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "any",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": " {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/order/create/vendor3@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"order",
+						"create",
+						"vendor3@example.com"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Post Order - Team A",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": " {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/create/vendor3@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"create",
+								"vendor3@example.com"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Disposition",
+							"value": "inline;filename=f.txt"
+						},
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "Expires",
+							"value": "0"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "36"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 11:16:07 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "7a555843-1d0a-46ec-88bd-230a8a22b764"
+				}
+			]
+		},
+		{
+			"name": "Paid order - Team A",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "customer3@example.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "any",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"paymentDetails\": {\r\n    \"cardHolder\": \"J. Johnson\",\r\n    \"cardNr\": 5412541254125412,\r\n    \"CVVCode\": 433,\r\n    \"expDate\": {\r\n      \"expMonth\": 3,\r\n      \"expYear\": 2025\r\n    }\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/order/7a555843-1d0a-46ec-88bd-230a8a22b764/pay",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"order",
+						"7a555843-1d0a-46ec-88bd-230a8a22b764",
+						"pay"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Paid order - Team A",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"paymentDetails\": {\r\n    \"cardHolder\": \"J. Johnson\",\r\n    \"cardNr\": 5412541254125412,\r\n    \"CVVCode\": 433,\r\n    \"expDate\": {\r\n      \"expMonth\": 3,\r\n      \"expYear\": 2025\r\n    }\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/order/7a555843-1d0a-46ec-88bd-230a8a22b764/pay",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"7a555843-1d0a-46ec-88bd-230a8a22b764",
+								"pay"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "Expires",
+							"value": "0"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "7"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 11:16:24 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "pending"
+				}
+			]
+		},
+		{
+			"name": "Get Delivery - Team B",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Delivery - Team B",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin1@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/7a555843-1d0a-46ec-88bd-230a8a22b764",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"7a555843-1d0a-46ec-88bd-230a8a22b764"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 11:16:35 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"7a555843-1d0a-46ec-88bd-230a8a22b764\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor3@example.com\",\n    \"customerID\": \"customer3@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"7a555843-1d0a-46ec-88bd-230a8a22b764\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T12:16:24.383417+01:00\",\n    \"deliveryAddress\": [\n        51.99851,\n        4.371485\n    ],\n    \"currentLocation\": [\n        51.99851,\n        4.371485\n    ],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Update Delivery Status - Team B",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "customer3@example.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "any",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin1@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "ACCEPTED",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/61d2e590-854c-4f95-8c2c-bc5c6fecd6b2/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"61d2e590-854c-4f95-8c2c-bc5c6fecd6b2",
+						"status"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update Delivery Status - Team B",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin1@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "ACCEPTED",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/7a555843-1d0a-46ec-88bd-230a8a22b764/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"7a555843-1d0a-46ec-88bd-230a8a22b764",
+								"status"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 11:19:12 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"7a555843-1d0a-46ec-88bd-230a8a22b764\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor3@example.com\",\n    \"customerID\": \"customer3@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"7a555843-1d0a-46ec-88bd-230a8a22b764\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T12:16:24.383417+01:00\",\n    \"deliveryAddress\": [\n        51.99851,\n        4.371485\n    ],\n    \"currentLocation\": [\n        51.99851,\n        4.371485\n    ],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Updated Status - Team A",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "customer3@example.com",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "any",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/order/7a555843-1d0a-46ec-88bd-230a8a22b764",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"order",
+						"7a555843-1d0a-46ec-88bd-230a8a22b764"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Updated Status - Team A",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/order/7a555843-1d0a-46ec-88bd-230a8a22b764",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"order",
+								"7a555843-1d0a-46ec-88bd-230a8a22b764"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Content-Type-Options",
+							"value": "nosniff"
+						},
+						{
+							"key": "X-XSS-Protection",
+							"value": "1; mode=block"
+						},
+						{
+							"key": "Cache-Control",
+							"value": "no-cache, no-store, max-age=0, must-revalidate"
+						},
+						{
+							"key": "Pragma",
+							"value": "no-cache"
+						},
+						{
+							"key": "Expires",
+							"value": "0"
+						},
+						{
+							"key": "X-Frame-Options",
+							"value": "SAMEORIGIN"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 11:19:43 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"gpsCoordinates\": {\n        \"latitude\": 51.99851,\n        \"longitude\": 4.371485\n    },\n    \"ordertime\": \"2024-01-18T12:16:18.418696\",\n    \"id\": \"7a555843-1d0a-46ec-88bd-230a8a22b764\",\n    \"restaurantId\": \"vendor3@example.com\",\n    \"dishes\": [],\n    \"specialRequirements\": \"\",\n    \"status\": \"accepted\",\n    \"userID\": \"customer3@example.com\",\n    \"deliveryLocation\": {\n        \"countryCode\": \"NL\",\n        \"zipcode\": \"4321BA\",\n        \"city\": \"Delft\",\n        \"streetName\": \"Oude Delft\",\n        \"houseNumber\": \"123\"\n    },\n    \"deliveryFee\": 2,\n    \"totalPrice\": 2,\n    \"timestamp\": \"2024-01-18 12:16\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "https://90c19403-054f-456b-bdf9-b02c61ccd7eb.mock.pstmn.io"
+		}
+	]
+}

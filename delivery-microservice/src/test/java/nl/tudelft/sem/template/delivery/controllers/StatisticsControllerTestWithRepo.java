@@ -34,15 +34,15 @@ import static org.mockito.Mockito.when;
 @Transactional
 @DataJpaTest
 public class StatisticsControllerTestWithRepo {
-    private StatisticsService statisticsService;
+    private transient StatisticsService statisticsService;
 
     @Mock
-    private UsersAuthenticationService usersAuthenticationService;
+    private transient UsersAuthenticationService usersAuthenticationService;
     @Autowired
-    private DeliveryRepository repo1;
+    private transient DeliveryRepository repo1;
     @Autowired
-    private RestaurantRepository repo2;
-    private StatisticsController sut;
+    private transient RestaurantRepository repo2;
+    private transient StatisticsController sut;
 
     @BeforeEach
     void setUp() {
@@ -138,7 +138,6 @@ public class StatisticsControllerTestWithRepo {
     void authorizedEmptyFunctional() {
         String userID = "user@user.com";
         String courierId = "dominos@dominos.com";
-        //OffsetDateTime start = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime end = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHoursMinutes(0, 30));
 
         OffsetDateTime start_interval = OffsetDateTime.of(2023, 12, 12, 15, 32, 23, 0, ZoneOffset.ofHours(0));
@@ -255,13 +254,13 @@ public class StatisticsControllerTestWithRepo {
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start_interval, second_end_interval)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getAverageRating()).isEqualTo(4.5);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getSuccessRate()).isEqualTo(1);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getDeliveryTimeRatio()).isEqualTo(20);
 
     }

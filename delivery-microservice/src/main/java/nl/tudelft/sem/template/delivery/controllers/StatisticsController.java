@@ -1,24 +1,14 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
 import io.swagger.v3.oas.annotations.Parameter;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import nl.tudelft.sem.template.api.StatisticsApi;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.ErrorType;
+import nl.tudelft.sem.template.model.Statistics;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import nl.tudelft.sem.template.model.Statistics;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,8 +16,9 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
+
+import java.time.OffsetDateTime;
+import java.util.*;
 
 
 @RestController
@@ -116,7 +107,9 @@ public class StatisticsController implements StatisticsApi {
                                                                    @Parameter OffsetDateTime endTime) {
         if (!usersCommunication.getUserAccountType(courierId)
                 .equals(UsersAuthenticationService.AccountType.COURIER)) {
+
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No such courier");
+
         }
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
 
@@ -130,21 +123,17 @@ public class StatisticsController implements StatisticsApi {
     /**
      * Statistics for the rate of a certain unexpected event in a time period.
      *
-     * @param userID User ID for authorization (required)
+     * @param userID          User ID for authorization (required)
      * @param unexpectedEvent Enum type of the unexpected event (required)
-     * @param startTime  (optional)
-     * @param endTime  (optional)
+     * @param startTime       (optional)
+     * @param endTime         (optional)
      * @return the rate of that event
      */
     @Override
-    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader
-                                                                   @NotNull String userID,
-                                                               @RequestParam
-                                                                   @NotNull @Valid ErrorType unexpectedEvent,
-                                                               @RequestParam
-                                                                   @DateTimeFormat @Valid OffsetDateTime startTime,
-                                                               @RequestParam
-                                                                   @DateTimeFormat @Valid OffsetDateTime endTime) {
+    public ResponseEntity<Double> statisticsUnexpectedEventRateGet(@RequestHeader String userID,
+                                                                   @RequestParam ErrorType unexpectedEvent,
+                                                                   @RequestParam OffsetDateTime startTime,
+                                                                   @RequestParam OffsetDateTime endTime) {
 
         UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userID);
         if (accountType.equals(UsersAuthenticationService.AccountType.ADMIN)) {

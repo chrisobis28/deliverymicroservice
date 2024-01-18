@@ -1,6 +1,7 @@
 package nl.tudelft.sem.template.delivery;
 
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
@@ -26,17 +27,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AvailableDeliveryProxyImplementationTest {
 
-    private AvailableDeliveryProxyImplementation sut;
+    private transient AvailableDeliveryProxyImplementation sut;
 
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
 
     @Autowired
-    private RestaurantRepository rr;
+    private transient ErrorRepository er;
+
+    @Autowired
+    private transient RestaurantRepository rr;
 
     @BeforeEach
     void setUp() {
-        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, new GPS(), rr), rr);
+
+        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, new GPS(), rr, er), rr);
     }
 
     List<Delivery> getMockData() {

@@ -1700,7 +1700,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /update/restaurants/{restaurantId}/location:
+  /restaurants/{restaurantId}/location:
     put:
       tags:
         - Restaurant
@@ -1753,7 +1753,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /update/restaurants/{restaurantId}/deliver-zone:
+  /restaurants/{restaurantId}/deliver-zone:
     put:
       tags:
         - Restaurant
@@ -1818,7 +1818,7 @@ paths:
                 type: string
                 description: Code indicating server error
                 example: "SERVER_ERROR"
-  /update/restaurants/{restaurantId}/couriers:
+  /restaurants/{restaurantId}/couriers:
     put:
       tags:
         - Restaurant

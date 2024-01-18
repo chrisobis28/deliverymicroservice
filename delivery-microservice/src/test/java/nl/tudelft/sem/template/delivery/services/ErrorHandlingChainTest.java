@@ -24,16 +24,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class ErrorHandlingChainTest {
 
-    private final ErrorHandlingChainDefinition factory = new ErrorHandlingChainDefinition();
+    private final transient ErrorHandlingChainDefinition factory = new ErrorHandlingChainDefinition();
     @Mock
-    private NotificationService notificationService;
+    private transient NotificationService notificationService;
     @Mock
-    private CustomerHelplineService helplineService;
+    private transient CustomerHelplineService helplineService;
     @InjectMocks
-    private SendNotificationAction sendNotificationAction;
+    private transient SendNotificationAction sendNotificationAction;
     @InjectMocks
-    private ContactHelplineAction contactHelplineAction;
-    private DeliveryErrorAction errorHandlingChain;
+    private transient ContactHelplineAction contactHelplineAction;
+    private transient DeliveryErrorAction errorHandlingChain;
 
     @BeforeEach
     void setUp() {

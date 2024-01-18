@@ -23,15 +23,15 @@ import static org.mockito.Mockito.*;
 class DeliveryServiceTest {
 
     @Mock
-    public DeliveryRepository deliveryRepositoryMock;
+    public transient DeliveryRepository deliveryRepositoryMock;
     @Mock
-    public RestaurantRepository restaurantRepositoryMock;
+    public transient RestaurantRepository restaurantRepositoryMock;
 
     @Mock
-    public GPS gpsMock;
+    public transient GPS gpsMock;
 
     @InjectMocks
-    public DeliveryService deliveryService;
+    public transient DeliveryService deliveryService;
 
     @Test
     void getDelivery() {
@@ -47,9 +47,11 @@ class DeliveryServiceTest {
     void getAcceptedDeliveriesCases() {
         Delivery d1 = new Delivery();
         d1.setDeliveryID(UUID.randomUUID());
+        d1.setStatus(DeliveryStatus.ACCEPTED);
         d1.setCourierID(null);
         Delivery d2 = new Delivery();
         d2.setDeliveryID(UUID.randomUUID());
+        d2.setStatus(DeliveryStatus.DELIVERED);
         d2.setCourierID("courier@testmail.com");
         when(deliveryRepositoryMock.findAll()).thenReturn(List.of(d1, d2));
         assertThat(deliveryService.getAcceptedDeliveries()).containsExactly(d1);

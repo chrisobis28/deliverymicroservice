@@ -1,0 +1,5174 @@
+{
+	"info": {
+		"_postman_id": "1a306f43-b5d9-4a84-ab92-75c8a42e2f1f",
+		"name": "Functionality Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26251552",
+		"_collection_link": "https://gold-spaceship-488725.postman.co/workspace/Functionality-Tests.-Delivery-M~6fc3a5a9-28eb-4bf5-9e6d-18abdbcaf4b8/collection/26243586-1a306f43-b5d9-4a84-ab92-75c8a42e2f1f?action=share&source=collection_link&creator=26251552"
+	},
+	"item": [
+		{
+			"name": "Customer - USERS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"customer@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"homeAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"deliveryAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/customer/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"customer",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Customer - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"customer@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"homeAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"deliveryAddress\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"4321BA\",\r\n    \"city\": \"Delft\",\r\n    \"streetName\": \"Oude Delft\",\r\n    \"houseNumber\": \"123\"\r\n  }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/customer/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"customer",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:02:48 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Courier - USERS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"courier@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/courier/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"courier",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"courier@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/courier/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"courier",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:02:57 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Vendor - USERS",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"vendor@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Doe's Diner\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/vendor/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"vendor",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Vendor - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"vendor@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Doe's Diner\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"36B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/vendor/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"vendor",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:13 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Admin - USERS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"admin@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/admin/create",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"admin",
+						"create"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Admin - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"admin@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/admin/create",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"admin",
+								"create"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:28 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Create Restaurant Internal - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"restaurantID\": \"vendor-internal@example.com\",\r\n    \"location\": [\r\n        52,\r\n        4.4\r\n    ]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/restaurants",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Restaurant Internal - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"restaurantID\": \"vendor-internal@example.com\",\r\n    \"location\": [\r\n        52,\r\n        4.4\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/restaurants",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:36 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor-internal@example.com\",\n    \"couriers\": null,\n    \"location\": [\n        52,\n        4.4\n    ],\n    \"deliveryZone\": 30\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"status\": \"pending\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.3\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"status\": \"pending\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.3\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:42 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.7928854+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Account Type - USERS",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8082/account/type?email=admin@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"type"
+					],
+					"query": [
+						{
+							"key": "email",
+							"value": "admin@example.com"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Account Type - USERS",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8082/account/type?email=admin@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"type"
+							],
+							"query": [
+								{
+									"key": "email",
+									"value": "admin@example.com"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:49 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"type\": \"admin\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Get Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:03:58 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "courier@example.com",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "courier@example.com",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:04:34 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "19"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:04:59 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "courier@example.com"
+				}
+			]
+		},
+		{
+			"name": "Vendor of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/restaurant",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"restaurant"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Vendor of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/restaurant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"restaurant"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "18"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:06 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "vendor@example.com"
+				}
+			]
+		},
+		{
+			"name": "Customer of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/customer",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"customer"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Customer of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/customer",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"customer"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "20"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:12 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "customer@example.com"
+				}
+			]
+		},
+		{
+			"name": "Estimated Preparation Time of Delivery - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "20",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/prep",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"prep"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Estimated Preparation Time of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "20",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/prep",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"prep"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:17 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": 20,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Estimated Preparation Time of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/prep",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"prep"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Estimated Preparation Time of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/prep",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"prep"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:23 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "20"
+				}
+			]
+		},
+		{
+			"name": "Unexpected Event of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/unexpected-event",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"unexpected-event"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Unexpected Event of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/unexpected-event",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"unexpected-event"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:29 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"reason\": null,\n    \"value\": null,\n    \"type\": \"NONE\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Report Unexpected Event - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I don't want pizza anymore. Sorry.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/errors/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"errors",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Report Unexpected Event - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I don't want pizza anymore. Sorry.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/errors/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"errors",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:35 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"reason\": \"I don't want pizza anymore. Sorry.\",\n    \"value\": 0,\n    \"type\": \"CANCELLED_BY_CLIENT\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Unexpected Event of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/errors/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"errors",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Unexpected Event of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/errors/fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"errors",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:05:43 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"reason\": \"I don't want pizza anymore. Sorry.\",\n    \"value\": 0,\n    \"type\": \"CANCELLED_BY_CLIENT\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Estimate Delivery Time of Order - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/estimated-delivery-time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"estimated-delivery-time"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Estimate Delivery Time of Order - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/estimated-delivery-time",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"estimated-delivery-time"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:06:04 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "\"2024-01-18T11:33:42.792885+01:00\""
+				}
+			]
+		},
+		{
+			"name": "Pick-up Time of Delivery - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\"2024-01-17T14:10:17.109Z\"",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"pickup"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Pick-up Time of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\"2024-01-17T14:10:17.109Z\"",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"pickup"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:06:24 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": 20,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": \"I don't want pizza anymore. Sorry.\",\n        \"value\": 0,\n        \"type\": \"CANCELLED_BY_CLIENT\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": \"2024-01-17T14:10:17.109Z\",\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Pick-up Time of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"pickup"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Pick-up Time of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"pickup"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:07:05 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "\"2024-01-17T15:10:17.109+01:00\""
+				}
+			]
+		},
+		{
+			"name": "Delivered Time of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/delivered-time",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"delivered-time"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Delivered Time of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/delivered-time",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"delivered-time"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:07:17 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Location  to Deliver - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/delivery-address",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"delivery-address"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Location  to Deliver - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/delivery-address",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"delivery-address"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:07:41 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    52,\n    4.3\n]"
+				}
+			]
+		},
+		{
+			"name": "Find Current Location of Order - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/current-location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"current-location"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Find Current Location of Order - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/current-location",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"current-location"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:23:21 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    51.99851,\n    4.371485\n]"
+				}
+			]
+		},
+		{
+			"name": "Rate Courier of Delivery - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "4",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"rating-courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Rate Courier of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "4",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"rating-courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:12 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": 20,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": \"I don't want pizza anymore. Sorry.\",\n        \"value\": 0,\n        \"type\": \"CANCELLED_BY_CLIENT\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": \"2024-01-17T15:10:17.109+01:00\",\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 4,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "See Rating of Courier of Delivery - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"rating-courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "See Rating of Courier of Delivery - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"rating-courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:21 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Rate Restaurant of Order - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "5",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-restaurant",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"rating-restaurant"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Rate Restaurant of Order - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "5",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-restaurant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"rating-restaurant"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:30 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": 20,\n    \"error\": {\n        \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n        \"reason\": \"I don't want pizza anymore. Sorry.\",\n        \"value\": 0,\n        \"type\": \"CANCELLED_BY_CLIENT\"\n    },\n    \"status\": \"PENDING\",\n    \"pickup_time\": \"2024-01-17T15:10:17.109+01:00\",\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:03:42.792885+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.3\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 4,\n    \"ratingRestaurant\": 5\n}"
+				}
+			]
+		},
+		{
+			"name": "See Rating of Restaurant of Order - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-restaurant",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"rating-restaurant"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "See Rating of Restaurant of Order - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/rating-restaurant",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"rating-restaurant"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:37 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "5"
+				}
+			]
+		},
+		{
+			"name": "Current Delivery Status - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"status"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Current Delivery Status - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/status",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"status"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "7"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:47 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "PENDING"
+				}
+			]
+		},
+		{
+			"name": "Courier Sees Pick-up Location - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup-location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+						"pickup-location"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier Sees Pick-up Location - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/fedfd66d-7f98-41ed-8942-2d46b63e7b40/pickup-location",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"fedfd66d-7f98-41ed-8942-2d46b63e7b40",
+								"pickup-location"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:10:57 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    51.99851,\n    4.371485\n]"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery 2 - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    52.1,\r\n    4.39\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery 2 - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    52.1,\r\n    4.39\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:11:11 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:11.4386981+01:00\",\n    \"deliveryAddress\": [\n        52.1,\n        4.39\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery 3 - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    51.9,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery 3 - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    51.9,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:11:48 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:48.0854755+01:00\",\n    \"deliveryAddress\": [\n        51.9,\n        4.4\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "See All Orders of Customer - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/customers/customer@example.com/orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"customers",
+						"customer@example.com",
+						"orders"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "See All Orders of Customer - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/customers/customer@example.com/orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"customers",
+								"customer@example.com",
+								"orders"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:01 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\n    \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\"\n]"
+				}
+			]
+		},
+		{
+			"name": "Courier Can See All Accepted Orders Without Assigned Courier - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/deliveries/all/accepted",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"all",
+						"accepted"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier Can See All Accepted Orders Without Assigned Courier - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/deliveries/all/accepted",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"all",
+								"accepted"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:09 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"deliveryID\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n        \"courierID\": null,\n        \"restaurantID\": \"vendor@example.com\",\n        \"customerID\": \"customer@example.com\",\n        \"estimatedPrepTime\": null,\n        \"error\": {\n            \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n            \"reason\": null,\n            \"value\": null,\n            \"type\": \"NONE\"\n        },\n        \"status\": \"ACCEPTED\",\n        \"pickup_time\": null,\n        \"delivered_time\": null,\n        \"order_time\": \"2024-01-18T11:11:11.438698+01:00\",\n        \"deliveryAddress\": [\n            52.1,\n            4.39\n        ],\n        \"currentLocation\": [],\n        \"ratingCourier\": null,\n        \"ratingRestaurant\": null\n    },\n    {\n        \"deliveryID\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n        \"courierID\": null,\n        \"restaurantID\": \"vendor@example.com\",\n        \"customerID\": \"customer@example.com\",\n        \"estimatedPrepTime\": null,\n        \"error\": {\n            \"errorId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n            \"reason\": null,\n            \"value\": null,\n            \"type\": \"NONE\"\n        },\n        \"status\": \"ACCEPTED\",\n        \"pickup_time\": null,\n        \"delivered_time\": null,\n        \"order_time\": \"2024-01-18T11:11:48.085476+01:00\",\n        \"deliveryAddress\": [\n            51.9,\n            4.4\n        ],\n        \"currentLocation\": [],\n        \"ratingCourier\": null,\n        \"ratingRestaurant\": null\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Assign Courier to Next Available Order - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/couriers/courier@example.com/next-order",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"couriers",
+						"courier@example.com",
+						"next-order"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Assign Courier to Next Available Order - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/couriers/courier@example.com/next-order",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"couriers",
+								"courier@example.com",
+								"next-order"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:16 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:11.438698+01:00\",\n    \"deliveryAddress\": [\n        52.1,\n        4.39\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Rate Courier of Delivery 2 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "3",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/56761e65-7ed8-4a8f-a61a-c4bd2235c651/rating-courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+						"rating-courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Rate Courier of Delivery 2 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "3",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/56761e65-7ed8-4a8f-a61a-c4bd2235c651/rating-courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+								"rating-courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:25 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:11.438698+01:00\",\n    \"deliveryAddress\": [\n        52.1,\n        4.39\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 3,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery 4 - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery 4 - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\r\n  \"status\": \"accepted\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:38 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:12:38.9610482+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery 5 - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\r\n  \"status\": \"delivered\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery 5 - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\r\n  \"status\": \"delivered\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:47 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:47.3829508+01:00\",\n    \"order_time\": \"2024-01-18T11:12:47.3829508+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Create Delivery 6 - DELIVERY",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"orderId\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\r\n  \"status\": \"delivered\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Create Delivery 6 - DELIVERY",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"orderId\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\r\n  \"status\": \"delivered\",\r\n  \"deliveryAddress\": [\r\n    52,\r\n    4.4\r\n  ],\r\n  \"vendorId\": \"vendor@example.com\",\r\n  \"customerId\": \"customer@example.com\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:12:57 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n    \"courierID\": null,\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:57.3756926+01:00\",\n    \"order_time\": \"2024-01-18T11:12:57.3756926+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": null,\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery 5 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "courier@example.com",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/f12ca330-55a5-4d2d-97ae-70c1daea25b8/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"f12ca330-55a5-4d2d-97ae-70c1daea25b8",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery 5 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "courier@example.com",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/f12ca330-55a5-4d2d-97ae-70c1daea25b8/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"f12ca330-55a5-4d2d-97ae-70c1daea25b8",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:04 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:47.382951+01:00\",\n    \"order_time\": \"2024-01-18T11:12:47.382951+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery 6 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "courier@example.com",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/314ea705-690e-4822-a891-cb7212c8ebc9/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"314ea705-690e-4822-a891-cb7212c8ebc9",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery 6 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "courier@example.com",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/314ea705-690e-4822-a891-cb7212c8ebc9/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"314ea705-690e-4822-a891-cb7212c8ebc9",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:13 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:57.375693+01:00\",\n    \"order_time\": \"2024-01-18T11:12:57.375693+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Rate Courier of Delivery 5 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "3",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/f12ca330-55a5-4d2d-97ae-70c1daea25b8/rating-courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"f12ca330-55a5-4d2d-97ae-70c1daea25b8",
+						"rating-courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Rate Courier of Delivery 5 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "3",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/f12ca330-55a5-4d2d-97ae-70c1daea25b8/rating-courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"f12ca330-55a5-4d2d-97ae-70c1daea25b8",
+								"rating-courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:22 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"f12ca330-55a5-4d2d-97ae-70c1daea25b8\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:47.382951+01:00\",\n    \"order_time\": \"2024-01-18T11:12:47.382951+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 3,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Rate Courier of Delivery 6 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "3",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/314ea705-690e-4822-a891-cb7212c8ebc9/rating-courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"314ea705-690e-4822-a891-cb7212c8ebc9",
+						"rating-courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Rate Courier of Delivery 6 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "3",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/314ea705-690e-4822-a891-cb7212c8ebc9/rating-courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"314ea705-690e-4822-a891-cb7212c8ebc9",
+								"rating-courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:30 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"314ea705-690e-4822-a891-cb7212c8ebc9\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"DELIVERED\",\n    \"pickup_time\": null,\n    \"delivered_time\": \"2024-01-18T11:12:57.375693+01:00\",\n    \"order_time\": \"2024-01-18T11:12:57.375693+01:00\",\n    \"deliveryAddress\": [\n        52,\n        4.4\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 3,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery 2 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "courier@example.com",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/56761e65-7ed8-4a8f-a61a-c4bd2235c651/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery 2 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "courier@example.com",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/56761e65-7ed8-4a8f-a61a-c4bd2235c651/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:43 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:11.438698+01:00\",\n    \"deliveryAddress\": [\n        52.1,\n        4.39\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": 3,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier of Delivery 3 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "courier@example.com",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/deliveries/374f9b5a-eac3-4442-b59e-a2ea1c0094dc/courier",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"deliveries",
+						"374f9b5a-eac3-4442-b59e-a2ea1c0094dc",
+						"courier"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier of Delivery 3 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "courier@example.com",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/deliveries/374f9b5a-eac3-4442-b59e-a2ea1c0094dc/courier",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"deliveries",
+								"374f9b5a-eac3-4442-b59e-a2ea1c0094dc",
+								"courier"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:13:53 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryID\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n    \"courierID\": \"courier@example.com\",\n    \"restaurantID\": \"vendor@example.com\",\n    \"customerID\": \"customer@example.com\",\n    \"estimatedPrepTime\": null,\n    \"error\": {\n        \"errorId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n        \"reason\": null,\n        \"value\": null,\n        \"type\": \"NONE\"\n    },\n    \"status\": \"ACCEPTED\",\n    \"pickup_time\": null,\n    \"delivered_time\": null,\n    \"order_time\": \"2024-01-18T11:11:48.085476+01:00\",\n    \"deliveryAddress\": [\n        51.9,\n        4.4\n    ],\n    \"currentLocation\": [],\n    \"ratingCourier\": null,\n    \"ratingRestaurant\": null\n}"
+				}
+			]
+		},
+		{
+			"name": "Report Unexpected Event 2 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I don't want pizza anymore. Sorry.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/errors/56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"errors",
+						"56761e65-7ed8-4a8f-a61a-c4bd2235c651"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Report Unexpected Event 2 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I don't want pizza anymore. Sorry.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/errors/56761e65-7ed8-4a8f-a61a-c4bd2235c651",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"errors",
+								"56761e65-7ed8-4a8f-a61a-c4bd2235c651"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:14:02 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errorId\": \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\",\n    \"reason\": \"I don't want pizza anymore. Sorry.\",\n    \"value\": 0,\n    \"type\": \"CANCELLED_BY_CLIENT\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Report Unexpected Event 3 - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I cooked my own spaghetti. Take away no longer vital for life maintenance.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/errors/374f9b5a-eac3-4442-b59e-a2ea1c0094dc",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"errors",
+						"374f9b5a-eac3-4442-b59e-a2ea1c0094dc"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Report Unexpected Event 3 - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"errorId\": \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n  \"reason\": \"I cooked my own spaghetti. Take away no longer vital for life maintenance.\",\r\n  \"value\": 0,\r\n  \"type\": \"CANCELLED_BY_CLIENT\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/errors/374f9b5a-eac3-4442-b59e-a2ea1c0094dc",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"errors",
+								"374f9b5a-eac3-4442-b59e-a2ea1c0094dc"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:14:28 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"errorId\": \"374f9b5a-eac3-4442-b59e-a2ea1c0094dc\",\n    \"reason\": \"I cooked my own spaghetti. Take away no longer vital for life maintenance.\",\n    \"value\": 0,\n    \"type\": \"CANCELLED_BY_CLIENT\"\n}"
+				}
+			]
+		},
+		{
+			"name": "See All Ratings of Courier - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/couriers/courier@example.com/ratings",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"couriers",
+						"courier@example.com",
+						"ratings"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "See All Ratings of Courier - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/couriers/courier@example.com/ratings",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"couriers",
+								"courier@example.com",
+								"ratings"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:14:38 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    4,\n    3,\n    null,\n    3,\n    3\n]"
+				}
+			]
+		},
+		{
+			"name": "Vendor 2 - USERS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"vendor2@example.com\",\r\n  \"first_name\": \"Jane\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Janelicious\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"37B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/vendor/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"vendor",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Vendor 2 - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"vendor2@example.com\",\r\n  \"first_name\": \"Jane\",\r\n  \"surname\": \"Doe\",\r\n  \"restaurantName\": \"Janelicious\",\r\n  \"restaurant location\": {\r\n    \"countryCode\": \"NL\",\r\n    \"zipcode\": \"1234AB\",\r\n    \"city\": \"Amsterdam\",\r\n    \"streetName\": \"Kalverstraat\",\r\n    \"houseNumber\": \"37B\"\r\n  },\r\n  \"proof\": \"123456789\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/vendor/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"vendor",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:14:51 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Restaurant - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor2@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor2@example.com"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Restaurant - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor2@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor2@example.com"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Disposition",
+							"value": "inline;filename=f.txt"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:04 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor2@example.com\",\n    \"couriers\": [],\n    \"location\": [\n        51.99851,\n        4.371485\n    ],\n    \"deliveryZone\": 30\n}"
+				}
+			]
+		},
+		{
+			"name": "Update Location of Restaurant - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[49.98, 49.88]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor2@example.com/location",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor2@example.com",
+						"location"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update Location of Restaurant - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[49.98, 49.88]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor2@example.com/location",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor2@example.com",
+								"location"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:13 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor2@example.com\",\n    \"couriers\": [],\n    \"location\": [\n        49.98,\n        49.88\n    ],\n    \"deliveryZone\": 30\n}"
+				}
+			]
+		},
+		{
+			"name": "Update Delivery Zone of Restaurant - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "35",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor2@example.com/deliver-zone",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor2@example.com",
+						"deliver-zone"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Update Delivery Zone of Restaurant - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "35",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor2@example.com/deliver-zone",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor2@example.com",
+								"deliver-zone"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:22 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor2@example.com\",\n    \"couriers\": [],\n    \"location\": [\n        49.98,\n        49.88\n    ],\n    \"deliveryZone\": 35\n}"
+				}
+			]
+		},
+		{
+			"name": "Courier 2 - USERS",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"email\": \"courier2@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8082/account/courier/request",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8082",
+					"path": [
+						"account",
+						"courier",
+						"request"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier 2 - USERS",
+					"originalRequest": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"email\": \"courier2@example.com\",\r\n  \"first_name\": \"John\",\r\n  \"surname\": \"Doe\",\r\n  \"birthDay\": \"2002-05-16\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8082/account/courier/request",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"account",
+								"courier",
+								"request"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Length",
+							"value": "0"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:33 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": null
+				}
+			]
+		},
+		{
+			"name": "Set List of Preferred Couriers to Restaurant - DELIVERY",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[ \"courier@example.com\", \"courier2@example.com\" ]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor2@example.com/couriers",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor2@example.com",
+						"couriers"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Set List of Preferred Couriers to Restaurant - DELIVERY",
+					"originalRequest": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[ \"courier@example.com\", \"courier2@example.com\" ]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor2@example.com/couriers",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor2@example.com",
+								"couriers"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:44 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"restaurantID\": \"vendor2@example.com\",\n    \"couriers\": [\n        \"courier@example.com\",\n        \"courier2@example.com\"\n    ],\n    \"location\": [\n        49.98,\n        49.88\n    ],\n    \"deliveryZone\": 35\n}"
+				}
+			]
+		},
+		{
+			"name": "Retrieve Orders Without Courier from Restaurant - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor@example.com/new-orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor@example.com",
+						"new-orders"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Retrieve Orders Without Courier from Restaurant - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor@example.com/new-orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor@example.com",
+								"new-orders"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:15:54 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    {\n        \"deliveryID\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\n        \"courierID\": null,\n        \"restaurantID\": \"vendor@example.com\",\n        \"customerID\": \"customer@example.com\",\n        \"estimatedPrepTime\": null,\n        \"error\": {\n            \"errorId\": \"3e75ba44-93fe-4820-9cb6-3507f5200e0f\",\n            \"reason\": null,\n            \"value\": null,\n            \"type\": \"NONE\"\n        },\n        \"status\": \"ACCEPTED\",\n        \"pickup_time\": null,\n        \"delivered_time\": null,\n        \"order_time\": \"2024-01-18T11:12:38.961048+01:00\",\n        \"deliveryAddress\": [\n            52,\n            4.4\n        ],\n        \"currentLocation\": [],\n        \"ratingCourier\": null,\n        \"ratingRestaurant\": null\n    }\n]"
+				}
+			]
+		},
+		{
+			"name": "Remove Restaurant from Database. Internal Endpoint - DELIVERY",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8081/restaurants/vendor2@example.com",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"restaurants",
+						"vendor2@example.com"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Remove Restaurant from Database. Internal Endpoint - DELIVERY",
+					"originalRequest": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8081/restaurants/vendor2@example.com",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"restaurants",
+								"vendor2@example.com"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Disposition",
+							"value": "inline;filename=f.txt"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Content-Length",
+							"value": "20"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:16:04 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "Deletion Successful!"
+				}
+			]
+		},
+		{
+			"name": "Courier Overview Stats - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "courier@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/statistics/courier-overview?startTime=2023-01-16T14:10:17.109Z&endTime=2025-01-31T14:10:17.109Z",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"statistics",
+						"courier-overview"
+					],
+					"query": [
+						{
+							"key": "startTime",
+							"value": "2023-01-16T14:10:17.109Z"
+						},
+						{
+							"key": "endTime",
+							"value": "2025-01-31T14:10:17.109Z"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Courier Overview Stats - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "courier@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/statistics/courier-overview?startTime=2023-01-16T14:10:17.109Z&endTime=2025-01-31T14:10:17.109Z",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"statistics",
+								"courier-overview"
+							],
+							"query": [
+								{
+									"key": "startTime",
+									"value": "2023-01-16T14:10:17.109Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2025-01-31T14:10:17.109Z"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:16:16 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"deliveryTimeRatio\": 60,\n    \"successRate\": 1,\n    \"averageRating\": 3\n}"
+				}
+			]
+		},
+		{
+			"name": "Unexpected Event Rate Stat - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userID",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/statistics/unexpected-event-rate?startTime=2023-01-17T14:10:17.109Z&endTime=2025-01-17T14:10:17.109Z&unexpectedEvent=CANCELLED_BY_CLIENT",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"statistics",
+						"unexpected-event-rate"
+					],
+					"query": [
+						{
+							"key": "startTime",
+							"value": "2023-01-17T14:10:17.109Z"
+						},
+						{
+							"key": "endTime",
+							"value": "2025-01-17T14:10:17.109Z"
+						},
+						{
+							"key": "unexpectedEvent",
+							"value": "CANCELLED_BY_CLIENT"
+						}
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Unexpected Event Rate Stat - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userID",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/statistics/unexpected-event-rate?startTime=2023-01-17T14:10:17.109Z&endTime=2025-01-17T14:10:17.109Z&unexpectedEvent=CANCELLED_BY_CLIENT",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"statistics",
+								"unexpected-event-rate"
+							],
+							"query": [
+								{
+									"key": "startTime",
+									"value": "2023-01-17T14:10:17.109Z"
+								},
+								{
+									"key": "endTime",
+									"value": "2025-01-17T14:10:17.109Z"
+								},
+								{
+									"key": "unexpectedEvent",
+									"value": "CANCELLED_BY_CLIENT"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:16:35 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "0.5"
+				}
+			]
+		},
+		{
+			"name": "Deliveries per Hour - DELIVERY",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					},
+					{
+						"key": "vendorId",
+						"value": "vendor@example.com",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:8081/statistics/deliveries-per-hour",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"statistics",
+						"deliveries-per-hour"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Deliveries per Hour - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							},
+							{
+								"key": "vendorId",
+								"value": "vendor@example.com",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/statistics/deliveries-per-hour",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"statistics",
+								"deliveries-per-hour"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:16:52 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "[\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    2,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0,\n    0\n]"
+				}
+			]
+		},
+		{
+			"name": "Ratings for Given Orders Map - DELIVERY",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "userId",
+						"value": "admin@example.com",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n    \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\"\r\n]",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8081/statistics/ratings-for-orders",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8081",
+					"path": [
+						"statistics",
+						"ratings-for-orders"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Ratings for Given Orders Map - DELIVERY",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "userId",
+								"value": "admin@example.com",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\",\r\n    \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\"\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8081/statistics/ratings-for-orders",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"statistics",
+								"ratings-for-orders"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						},
+						{
+							"key": "Transfer-Encoding",
+							"value": "chunked"
+						},
+						{
+							"key": "Date",
+							"value": "Thu, 18 Jan 2024 10:17:38 GMT"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=60"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"fedfd66d-7f98-41ed-8942-2d46b63e7b40\": 5,\n    \"56761e65-7ed8-4a8f-a61a-c4bd2235c651\": null\n}"
+				}
+			]
+		}
+	]
+}

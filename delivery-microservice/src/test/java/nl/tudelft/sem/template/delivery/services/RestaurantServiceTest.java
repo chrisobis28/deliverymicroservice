@@ -2,6 +2,7 @@ package nl.tudelft.sem.template.delivery.services;
 
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.Restaurant;
@@ -27,11 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 public class RestaurantServiceTest {
     @Autowired
-    private RestaurantRepository rr;
-    private RestaurantService rs;
+    private transient RestaurantRepository rr;
+    private transient RestaurantService rs;
     @Autowired
-    private DeliveryRepository dr;
-    private DeliveryService ds;
+    private transient DeliveryRepository dr;
+    @Autowired
+    private transient ErrorRepository er;
+    private transient DeliveryService ds;
 
     /**
      * Set up.
@@ -39,7 +42,7 @@ public class RestaurantServiceTest {
     @BeforeEach
     public void setup() {
         rs = new RestaurantService(rr, dr);
-        ds = new DeliveryService(dr, new GPS(), rr);
+        ds = new DeliveryService(dr, new GPS(), rr, er);
     }
 
     @Test
@@ -153,6 +156,61 @@ public class RestaurantServiceTest {
         assertNotNull(rs.insert(d));
         Delivery newD = ds.getDelivery(d.getDeliveryID());
         assertEquals(newD, d);
+    }
+
+    @Test
+    public void getRestaurantNullTest() {
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1, 12.2));
+        rr.save(r);
+
+        assertThrows(RestaurantService.RestaurantNotFoundException.class,
+                () -> rs.getRestaurant(null));
+    }
+
+    @Test
+    public void setListOfCouriersTest() {
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1, 12.2));
+        List<String> list = new ArrayList<>();
+        list.add("courier1@testmail.com");
+        rr.save(r);
+        rs.setListOfCouriers("bla", list);
+        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(list);
+
+        list.add("courier2@testmail.com");
+        Restaurant rest = rs.setListOfCouriers("bla", list);
+        assertEquals(rest.getCouriers(), list);
+    }
+
+    @Test
+    public void setDeliveryZoneTest() {
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1, 12.2));
+        r.setDeliveryZone(20.0);
+        rr.save(r);
+        assertThat(rs.getRestaurant("bla").getDeliveryZone()).isEqualTo(20.0);
+
+        rs.updateDeliverZone("bla", 35.0);
+        Restaurant rest = rs.getRestaurant("bla");
+        assertEquals(rest.getDeliveryZone(), 35.0);
+    }
+
+    @Test
+    public void setLocationTest() {
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("bla");
+        r.setLocation(List.of(11.1, 12.2));
+        r.setDeliveryZone(20.0);
+        rr.save(r);
+        assertThat(rs.getRestaurant("bla").getLocation()).isEqualTo(List.of(11.1, 12.2));
+
+        rs.updateLocation("bla", List.of(133.1, 121.2));
+        Restaurant rest = rs.getRestaurant("bla");
+        assertEquals(rest.getLocation(), List.of(133.1, 121.2));
     }
 
 }

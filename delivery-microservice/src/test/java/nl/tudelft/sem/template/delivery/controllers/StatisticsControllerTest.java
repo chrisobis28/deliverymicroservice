@@ -5,7 +5,8 @@ import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.ErrorType;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,6 +26,7 @@ import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,34 +39,33 @@ import static org.mockito.Mockito.when;
 @DataJpaTest
 class StatisticsControllerTest {
     @Mock
-    private UsersAuthenticationService usersCommunication;
+    private transient UsersAuthenticationService usersCommunication;
 
-    private StatisticsController sut;
+    private transient StatisticsController sut;
 
 
-    String userId;
-    String courierId;
-    UsersAuthenticationService.AccountType userType;
-    UUID orderId1;
-    UUID orderId2;
-    UUID orderId3;
-    UUID orderId4;
-    UUID orderId5;
-    UUID orderId6;
-    List<UUID> orderIds;
+    private transient String userId;
+    private transient String courierId;
+    private transient UsersAuthenticationService.AccountType userType;
+    private transient UUID orderId1;
+    private transient UUID orderId2;
+    private transient UUID orderId3;
+    private transient UUID orderId4;
+    private transient UUID orderId5;
+    private transient UUID orderId6;
+    private transient List<UUID> orderIds;
     @Autowired
-    private DeliveryRepository repo1;
+    private transient DeliveryRepository repo1;
     @Autowired
-    private ErrorRepository repo2;
+    private transient ErrorRepository repo2;
 
-    Delivery d1 = new Delivery();
-    Delivery d2 = new Delivery();
-    Delivery d3 = new Delivery();
-    Delivery d4 = new Delivery();
-    Delivery d5 = new Delivery();
-    Delivery d6 = new Delivery();
-    Error error = new Error();
-
+    private transient Delivery d1 = new Delivery();
+    private transient Delivery d2 = new Delivery();
+    private transient Delivery d3 = new Delivery();
+    private transient Delivery d4 = new Delivery();
+    private transient Delivery d5 = new Delivery();
+    private transient Delivery d6 = new Delivery();
+    private transient Error error = new Error();
 
 
     @BeforeEach
@@ -114,11 +115,11 @@ class StatisticsControllerTest {
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
 
     @Test
@@ -128,11 +129,11 @@ class StatisticsControllerTest {
         when(usersCommunication.checkUserAccessToRestaurant(userId2, userId, "DPH"))
             .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
 
     @Test
@@ -142,11 +143,11 @@ class StatisticsControllerTest {
         when(usersCommunication.checkUserAccessToRestaurant(userId2, userId, "DPH"))
             .thenReturn(Pair.of(HttpStatus.UNAUTHORIZED, msg));
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .message()
-            .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
+                .message()
+                .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
     }
 
     @Test
@@ -255,7 +256,6 @@ class StatisticsControllerTest {
         repo1.save(d5);
         repo1.save(d6);
 
-        //when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
         when(usersCommunication.checkUserAccessToRestaurant(userId, userId, "DPH"))
             .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
@@ -456,7 +456,6 @@ class StatisticsControllerTest {
     void statisticsRatingsForUnexpectedEventNullStartDate() {
         userType = UsersAuthenticationService.AccountType.ADMIN;
         ErrorType event = ErrorType.OTHER;
-        //OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
         OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -470,7 +469,6 @@ class StatisticsControllerTest {
         userType = UsersAuthenticationService.AccountType.ADMIN;
         ErrorType event = ErrorType.OTHER;
         OffsetDateTime date1 = OffsetDateTime.of(2023, 12, 13, 14, 32, 23, 0, ZoneOffset.ofHours(0));
-        //OffsetDateTime date2 = OffsetDateTime.of(2023, 12, 13, 15, 2, 23, 0, ZoneOffset.ofHours(0));
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> sut.statisticsUnexpectedEventRateGet(userId, event, date1, null));
@@ -575,7 +573,6 @@ class StatisticsControllerTest {
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
 
     }
-
 
 
 }

@@ -1,5 +1,6 @@
 package nl.tudelft.sem.template.delivery.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
@@ -31,19 +32,6 @@ public class RestaurantService {
     public RestaurantService(RestaurantRepository restaurantRepository, DeliveryRepository deliveryRepository) {
         this.restaurantRepository = restaurantRepository;
         this.deliveryRepository = deliveryRepository;
-    }
-
-    /**
-     * Retrieve restaurant or throw an exception if not found.
-     *
-     * @param restaurantId restaurant id
-     * @return the restaurant
-     */
-    public Restaurant getRestaurant(String restaurantId) {
-        if (restaurantId == null) {
-            throw new RestaurantNotFoundException();
-        }
-        return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantNotFoundException::new);
     }
 
     /**
@@ -134,4 +122,59 @@ public class RestaurantService {
 
     }
 
+    /**
+     * Retrieve restaurant or throw an exception if not found.
+     *
+     * @param restaurantId restaurant id
+     * @return the restaurant
+     */
+    public Restaurant getRestaurant(String restaurantId) {
+        if (restaurantId == null) {
+            throw new RestaurantService.RestaurantNotFoundException();
+        }
+        return restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+    }
+
+
+    /**
+     * Updates the location.
+     *
+     * @param restaurantId the ID of the restaurant to be updated
+     * @param requestBody location
+     */
+    public void updateLocation(String restaurantId, List<Double> requestBody) {
+        Restaurant r = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        r.location(new ArrayList<>(requestBody));
+        restaurantRepository.save(r);
+    }
+
+    /**
+     * Updates the delivery zone.
+     *
+     * @param restaurantId ID of restaurant to be updated
+     * @param requestBody delivery zone
+     */
+    public void updateDeliverZone(String restaurantId, Double requestBody) {
+        Restaurant r = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        r.setDeliveryZone(requestBody);
+        restaurantRepository.save(r);
+    }
+
+    /**
+     * sets the new list of couriers or throws  an exception.
+     *
+     * @param restaurantId the id of the restaurant
+     * @param couriers     the new couriers
+     * @return the changed restaurant entity
+     */
+    public Restaurant setListOfCouriers(String restaurantId, List<String> couriers) {
+        Restaurant r = restaurantRepository.findById(restaurantId)
+                .orElseThrow(RestaurantService.RestaurantNotFoundException::new);
+        r.couriers(couriers);
+        restaurantRepository.save(r);
+        return r;
+    }
 }

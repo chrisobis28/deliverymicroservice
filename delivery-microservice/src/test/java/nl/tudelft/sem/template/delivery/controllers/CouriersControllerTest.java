@@ -1,18 +1,10 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
@@ -33,31 +25,48 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
 @DataJpaTest
 class CouriersControllerTest {
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
 
     @Autowired
-    private RestaurantRepository rr;
+    private transient RestaurantRepository rr;
 
-    private CouriersService cs;
 
-    private DeliveryService ds;
+    @Autowired
+    private transient ErrorRepository er;
 
-    private CouriersController sut;
+    private transient CouriersService cs;
+
+    private transient DeliveryService ds;
+
+    private transient CouriersController sut;
 
     @Mock
-    private UsersAuthenticationService usersAuth;
+    private transient UsersAuthenticationService usersAuth;
+
+    private transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
 
     @BeforeEach
     void setUp() {
-        ds = new DeliveryService(dr, new GPS(), rr);
+        ds = new DeliveryService(dr, new GPS(), rr, er);
         cs = new CouriersService(dr, rr);
-        sut = new CouriersController(ds, usersAuth, cs, new AvailableDeliveryProxyImplementation(ds, rr),
-            new UpdateService(dr));
+        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds, rr);
+        sut = new CouriersController(ds, usersAuth, cs, availableDeliveryProxy,
+                new UpdateService(dr));
     }
 
     @Test

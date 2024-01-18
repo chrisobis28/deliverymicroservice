@@ -6,9 +6,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
+import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
+import nl.tudelft.sem.template.model.Error;
 import nl.tudelft.sem.template.model.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -23,7 +25,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 
-
 /**
  * This class is a Service for accessing and modifying Delivery entities.
  */
@@ -36,29 +37,38 @@ public class DeliveryService {
     @Lazy
     private final transient RestaurantRepository restaurantRepository;
 
+    @Lazy
+    private final transient ErrorRepository errorRepository;
+
     /**
      * Constructor for DeliveryService.
      *
      * @param deliveryRepository   database for deliveries
+     * @param gps                  GPS service dummy implementation
      * @param restaurantRepository database for restaurants
+     * @param errorRepository      database for errors
      */
     @Autowired
-    public DeliveryService(DeliveryRepository deliveryRepository, GPS gps, RestaurantRepository restaurantRepository) {
+    public DeliveryService(DeliveryRepository deliveryRepository,
+                           GPS gps,
+                           RestaurantRepository restaurantRepository,
+                           ErrorRepository errorRepository) {
         this.deliveryRepository = deliveryRepository;
         this.gps = gps;
         this.restaurantRepository = restaurantRepository;
+        this.errorRepository = errorRepository;
     }
 
-    //    /**
-    //     * Check if restaurant uses own couriers.
-    //     *
-    //     * @param delivery - Delivery being assigned
-    //     * @return boolean value showing whether restaurant uses own couriers
-    //     */
-    //    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
-    //        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
-    //        return !(couriers == null || couriers.isEmpty());
-    //    }
+    /**
+     * Check if restaurant uses own couriers.
+     *
+     * @param delivery delivery being assigned
+     * @return boolean value showing whether restaurant uses own couriers
+     */
+    public boolean restaurantUsesOwnCouriers(Delivery delivery) {
+        List<String> couriers = getRestaurant(delivery.getRestaurantID()).getCouriers();
+        return !(couriers == null || couriers.isEmpty());
+    }
 
     public Delivery getDelivery(UUID deliveryId) {
         return deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
@@ -73,6 +83,11 @@ public class DeliveryService {
     public Delivery insert(Delivery delivery) {
         if (delivery == null || delivery.getDeliveryID() == null) {
             throw new IllegalArgumentException();
+        }
+        Error error = delivery.getError();
+        if (error != null) {
+            error.setErrorId(delivery.getDeliveryID());
+            errorRepository.save(delivery.getError());
         }
         return deliveryRepository.save(delivery);
     }
@@ -141,9 +156,16 @@ public class DeliveryService {
         }
     }
 
+    /**
+     * Retrieves all accepted deliveries without an assigned courier.
+     *
+     * @return a list of delivery objects
+     */
     public List<Delivery> getAcceptedDeliveries() {
         return deliveryRepository.findAll().stream()
-                .filter(delivery -> delivery.getCourierID() == null).collect(Collectors.toList());
+                .filter(delivery -> delivery.getCourierID() == null
+                        && delivery.getStatus().equals(DeliveryStatus.ACCEPTED))
+                .collect(Collectors.toList());
     }
 
     /**

@@ -48,28 +48,28 @@ class DeliveryControllerTest {
 
     public UsersAuthenticationService usersCommunication;
 
-    private DeliveryController sut;
-    ErrorService es;
+    private transient DeliveryController sut;
+    private transient ErrorService es;
     @Mock
-    private DeliveryStatusHandler deliveryStatusHandler;
+    private transient DeliveryStatusHandler deliveryStatusHandler;
     @Mock
-    private AvailableDeliveryProxyImplementation availableDeliveryProxy;
+    private transient AvailableDeliveryProxy availableDeliveryProxy;
     @Autowired
-    private DeliveryRepository deliveryRepository;
+    private transient DeliveryRepository deliveryRepository;
     @Autowired
-    private RestaurantRepository restaurantRepository;
-    private RestaurantController restaurantController;
+    private transient RestaurantRepository restaurantRepository;
+    private transient RestaurantController restaurantController;
 
-    DeliveryService ds;
+    private transient DeliveryService ds;
     @Autowired
-    private ErrorRepository errorRepository;
+    private transient ErrorRepository errorRepository;
 
-    String userId;
-    UsersAuthenticationService.AccountType userType;
-    UUID deliveryId;
-    Integer prepTime;
-    Delivery delivery;
-    List<Double> coords;
+    private transient String userId;
+    private transient UsersAuthenticationService.AccountType userType;
+    private transient UUID deliveryId;
+    private transient Integer prepTime;
+    private transient Delivery delivery;
+    private transient List<Double> coords;
 
     @BeforeEach
     void setUp() {
@@ -82,10 +82,11 @@ class DeliveryControllerTest {
         delivery.setEstimatedPrepTime(prepTime);
         usersCommunication = mock(UsersAuthenticationService.class);
 
-        ds = new DeliveryService(deliveryRepository, new GPS(), restaurantRepository);
+        ds = new DeliveryService(deliveryRepository, new GPS(), restaurantRepository, errorRepository);
         es = new ErrorService(errorRepository, deliveryRepository);
-        restaurantController = new RestaurantController(new RestaurantService(restaurantRepository, deliveryRepository),
-            usersCommunication);
+        restaurantController = new RestaurantController(
+                new RestaurantService(restaurantRepository, deliveryRepository),
+                usersCommunication);
         sut = new DeliveryController(ds, es, usersCommunication, deliveryStatusHandler,
             new TimeCalculationService(deliveryRepository, new GPS(), restaurantRepository), availableDeliveryProxy,
             new UpdateService(deliveryRepository));
@@ -122,8 +123,8 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(userId, delivery)).thenReturn(true);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -136,8 +137,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdPrepPut(deliveryId, userId, prepTime))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -206,8 +207,8 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(courierId, delivery)).thenReturn(true);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRatingCourierPut(deliveryId, courierId, 5))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -254,8 +255,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
         deliveryRepository.save(m);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRatingRestaurantPut(deliveryId, userId, rating))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -343,8 +344,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
         deliveryRepository.save(m);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRatingRestaurantGet(deliveryId, restaurantId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -429,8 +430,8 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(diffCourierId, m)).thenReturn(false);
         deliveryRepository.save(m);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRatingCourierGet(deliveryId, diffCourierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -481,6 +482,7 @@ class DeliveryControllerTest {
         String courierId = "courier@testmail.com";
         Delivery m1 = new Delivery();
         m1.setDeliveryID(deliveryId1);
+        m1.setStatus(DeliveryStatus.ACCEPTED);
         m1.setCourierID(null);
         m1.setRestaurantID(vendorId);
         m1.setCustomerID(customerId);
@@ -489,6 +491,7 @@ class DeliveryControllerTest {
         UUID deliveryId2 = UUID.randomUUID();
         Delivery m2 = new Delivery();
         m2.setDeliveryID(deliveryId2);
+        m2.setStatus(DeliveryStatus.DELIVERED);
         m2.setCourierID(courierId);
         m2.setRestaurantID(vendorId);
         m2.setCustomerID(customerId);
@@ -516,6 +519,7 @@ class DeliveryControllerTest {
         String courierId = "courier@testmail.com";
         Delivery m1 = new Delivery();
         m1.setDeliveryID(deliveryId1);
+        m1.setStatus(DeliveryStatus.ACCEPTED);
         m1.setCourierID(null);
         m1.setRestaurantID(vendorId);
         m1.setCustomerID(customerId);
@@ -524,6 +528,7 @@ class DeliveryControllerTest {
         UUID deliveryId2 = UUID.randomUUID();
         Delivery m2 = new Delivery();
         m2.setDeliveryID(deliveryId2);
+        m2.setStatus(DeliveryStatus.DELIVERED);
         m2.setCourierID(courierId);
         m2.setRestaurantID(vendorId);
         m2.setCustomerID(customerId);
@@ -561,7 +566,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.deliveriesAllAcceptedGet(userId));
+                () -> sut.deliveriesAllAcceptedGet(userId));
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
         assertEquals("User lacks necessary permissions.", exception.getReason());
 
@@ -586,7 +591,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.deliveriesAllAcceptedGet(userId));
+                () -> sut.deliveriesAllAcceptedGet(userId));
         assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
         assertEquals("User lacks necessary permissions.", exception.getReason());
 
@@ -611,7 +616,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.deliveriesAllAcceptedGet(userId));
+                () -> sut.deliveriesAllAcceptedGet(userId));
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
         assertEquals("User lacks valid authentication credentials.", exception.getReason());
 
@@ -667,8 +672,8 @@ class DeliveryControllerTest {
         assertEquals(res1.getBody(), courierId);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierGet(deliveryId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -689,8 +694,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierGet(deliveryId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -711,8 +716,8 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierGet(deliveryId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -734,11 +739,11 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+                .extracting("status")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .message()
-            .isEqualTo("400 BAD_REQUEST \"The person you are trying to assign to the order is not a courier.\"");
+                .message()
+                .isEqualTo("400 BAD_REQUEST \"The person you are trying to assign to the order is not a courier.\"");
         verify(usersCommunication, times(4)).getUserAccountType(any());
     }
 
@@ -761,11 +766,11 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
         verify(usersCommunication, times(4)).getUserAccountType(any());
     }
 
@@ -788,11 +793,11 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(courierId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
         verify(usersCommunication, times(4)).getUserAccountType(any());
     }
 
@@ -853,11 +858,11 @@ class DeliveryControllerTest {
         verify(usersCommunication, times(2)).getUserAccountType(any());
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, userId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, userId, userId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
         verify(usersCommunication, times(6)).getUserAccountType(any());
     }
 
@@ -893,32 +898,32 @@ class DeliveryControllerTest {
         UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
         when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
         when(usersCommunication.getUserAccountType(vendorId))
-            .thenReturn(type);
+                .thenReturn(type);
         when(usersCommunication.getUserAccountType(courierId))
-            .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
         when(usersCommunication.getUserAccountType(courierInList))
-            .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, userId, courierId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, vendorId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCourierPut(deliveryId2, vendorId, courierId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"Delivery already has a courier assigned.\"");
 
         ResponseEntity<Delivery> res4 = sut.deliveriesDeliveryIdCourierPut(deliveryId, vendorId, courierInList);
         assertEquals(HttpStatus.OK, res4.getStatusCode());
@@ -1016,9 +1021,10 @@ class DeliveryControllerTest {
 
         restaurantRepository.save(r);
 
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> sut.deliveriesPost(dpr));
-        assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
-        assertEquals(exception.getReason(), "CUSTOMER OUTSIDE THE VENDOR DELIVERY ZONE.");
+        ResponseEntity<Delivery> result = sut.deliveriesPost(dpr);
+        assertEquals(HttpStatus.OK, result.getStatusCode());
+        assertEquals(Objects.requireNonNull(result.getBody()).getDeliveryID().toString(), orderId);
+        assertEquals(result.getBody().getStatus(), DeliveryStatus.REJECTED);
     }
 
     @Test
@@ -1193,20 +1199,20 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(invalid)).thenReturn(UsersAuthenticationService.AccountType.INVALID);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdUnexpectedEventGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdUnexpectedEventGet(deliveryId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdUnexpectedEventGet(deliveryId, vendorId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdUnexpectedEventGet(deliveryId, invalid))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -1256,20 +1262,20 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(vendorId, delivery)).thenReturn(false);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRestaurantGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRestaurantGet(deliveryId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRestaurantGet(deliveryId, vendorId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdRestaurantGet(deliveryId, invalid))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -1344,20 +1350,20 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(vendorId, delivery)).thenReturn(false);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, vendorId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, invalid))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -1415,7 +1421,7 @@ class DeliveryControllerTest {
 
         deliveryRepository.save(delivery);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, customerId))
-            .extracting("status")
+                .extracting("status")
                 .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
@@ -1443,20 +1449,20 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(vendorId, delivery)).thenReturn(false);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, vendorId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, invalid))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -1496,8 +1502,8 @@ class DeliveryControllerTest {
         assertEquals(res.getBody(), clientId);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCustomerGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -1533,20 +1539,20 @@ class DeliveryControllerTest {
         when(usersCommunication.checkUserAccessToDelivery(vendorId, delivery)).thenReturn(false);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCurrentLocationGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCurrentLocationGet(deliveryId, courierId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCurrentLocationGet(deliveryId, vendorId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCurrentLocationGet(deliveryId, invalid))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 
     @Test
@@ -1587,8 +1593,8 @@ class DeliveryControllerTest {
         assertEquals(res.getBody(), coords);
 
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdCurrentLocationGet(deliveryId, clientId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -1689,8 +1695,8 @@ class DeliveryControllerTest {
         deliveryRepository.save(delivery);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdDeliveryAddressGet(delivery.getDeliveryID(), userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -1705,8 +1711,8 @@ class DeliveryControllerTest {
         deliveryRepository.save(delivery);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
         assertThatThrownBy(() -> sut.deliveriesDeliveryIdPickupLocationGet(delivery.getDeliveryID(), userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
     }
 
     @Test
@@ -1836,7 +1842,6 @@ class DeliveryControllerTest {
                 () -> sut.deliveriesDeliveryIdGet(deliveryId, customerId));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
     }
-
 
 
     @Test
@@ -2094,7 +2099,7 @@ class DeliveryControllerTest {
         when(usersCommunication.getUserAccountType(customerId)).thenReturn(UsersAuthenticationService.AccountType.CLIENT);
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-            () -> sut.deliveriesDeliveryIdGet(deliveryId, customerId));
+                () -> sut.deliveriesDeliveryIdGet(deliveryId, customerId));
         assertEquals(exception.getStatus(), HttpStatus.FORBIDDEN);
     }
 

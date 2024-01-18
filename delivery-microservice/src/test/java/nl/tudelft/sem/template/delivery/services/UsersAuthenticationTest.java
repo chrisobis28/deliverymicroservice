@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
+import java.util.Locale;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,11 +23,11 @@ import static org.mockito.Mockito.when;
 class UsersAuthenticationTest {
 
     @Mock
-    private UsersCommunication usersCommunication;
+    private transient UsersCommunication usersCommunication;
     @InjectMocks
-    private UsersAuthenticationService usersAuthentication;
+    private transient UsersAuthenticationService usersAuthentication;
 
-    private Delivery delivery;
+    private transient Delivery delivery;
 
     @BeforeEach
     public void init() {

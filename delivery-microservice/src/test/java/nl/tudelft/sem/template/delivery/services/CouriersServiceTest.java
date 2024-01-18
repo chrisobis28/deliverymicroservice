@@ -25,16 +25,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class CouriersServiceTest {
 
     @Autowired
-    private RestaurantRepository rr;
+    private transient RestaurantRepository rr;
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
 
-    private CouriersService cs;
+    private transient CouriersService cs;
 
-    UUID id = UUID.randomUUID();
-    UUID id2 = UUID.randomUUID();
+    private transient UUID id = UUID.randomUUID();
+    private transient UUID id2 = UUID.randomUUID();
 
-    UUID id3 = UUID.randomUUID();
+    private transient UUID id3 = UUID.randomUUID();
 
     @BeforeEach
     void setUp() {
