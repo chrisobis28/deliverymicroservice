@@ -6,9 +6,7 @@ import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Restaurant;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -105,7 +103,6 @@ public class TimeCalculationService {
             }
             case DELIVERED -> throw new DeliveryService.OrderAlreadyDeliveredException();
             case REJECTED -> throw new DeliveryService.OrderRejectedException();
-            default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown delivery status.");
         }
 
         Integer unexpectedDelay = delivery.getError().getValue();
