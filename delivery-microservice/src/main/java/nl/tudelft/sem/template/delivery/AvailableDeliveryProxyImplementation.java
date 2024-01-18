@@ -1,18 +1,16 @@
 package nl.tudelft.sem.template.delivery;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.UUID;
-
-import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.UUID;
 
 @Service
 @Scope("singleton")
@@ -20,19 +18,15 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
 
     private final transient DeliveryService deliveryService;
 
-    private final transient RestaurantRepository restaurantRepository;
-
-    private transient Queue<UUID> availableDeliveries = new LinkedList<>();
+    private final transient Queue<UUID> availableDeliveries = new LinkedList<>();
 
     /**
      * Constructor for Proxy design pattern that keeps track of available deliveries.
      *
      * @param deliveryService delivery service (for access to the Delivery database)
      */
-    @Autowired
-    public AvailableDeliveryProxyImplementation(DeliveryService deliveryService, RestaurantRepository restaurantRepository) {
+    public AvailableDeliveryProxyImplementation(DeliveryService deliveryService) {
         this.deliveryService = deliveryService;
-        this.restaurantRepository = restaurantRepository;
     }
 
     /**
@@ -43,26 +37,15 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
      */
     public boolean checkStatus(Delivery d) {
         DeliveryStatus status = d.getStatus();
-        if (status == null || isNullOrEmpty(d.getRestaurantID()) || !isNullOrEmpty(d.getCourierID())) {
+        if (status == null || d.getRestaurantID() == null) {
             return false;
         }
-        //boolean ownCouriers = deliveryService.restaurantUsesOwnCouriers(d);
-        boolean ownCouriers = (restaurantRepository.findRestaurantsByCouriersIsNotEmpty()).contains(d.getRestaurantID());
-        if (ownCouriers) {
+        boolean courierAssigned = d.getCourierID() != null;
+        boolean restaurantUsesOwnCouriers = deliveryService.restaurantUsesOwnCouriers(d);
+        if (courierAssigned || restaurantUsesOwnCouriers) {
             return false;
-        } else {
-            return status.equals(DeliveryStatus.ACCEPTED) || status.equals(DeliveryStatus.PREPARING);
         }
-    }
-
-    /**
-     * Checks if string is null, empty or only contains whitespace.
-     *
-     * @param str string being checked
-     * @return boolean indicating if string is null/empty/contains only whitespace
-     */
-    boolean isNullOrEmpty(String str) {
-        return str == null || str.isBlank() || str.isEmpty();
+        return status.equals(DeliveryStatus.ACCEPTED) || status.equals(DeliveryStatus.PREPARING);
     }
 
     /**
@@ -87,10 +70,10 @@ public class AvailableDeliveryProxyImplementation implements AvailableDeliveryPr
      * @return UUID of first available Delivery
      */
     public UUID getAvailableDeliveryId() {
-        Delivery delivery;
+
         while (!availableDeliveries.isEmpty()) {
             UUID deliveryId = availableDeliveries.poll();
-            delivery = deliveryService.getDelivery(deliveryId);
+            Delivery delivery = deliveryService.getDelivery(deliveryId);
             if (checkStatus(delivery)) {
                 return deliveryId;
             }

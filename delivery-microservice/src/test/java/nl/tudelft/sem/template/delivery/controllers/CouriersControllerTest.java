@@ -2,7 +2,6 @@ package nl.tudelft.sem.template.delivery.controllers;
 
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
-import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -45,26 +44,25 @@ class CouriersControllerTest {
     @Autowired
     private transient RestaurantRepository rr;
 
-
     @Autowired
     private transient ErrorRepository er;
 
     private transient CouriersService cs;
 
-    private transient DeliveryService ds;
+    private transient  DeliveryService ds;
+
+    private transient AvailableDeliveryProxy availableDeliveryProxy;
 
     private transient CouriersController sut;
 
     @Mock
     private transient UsersAuthenticationService usersAuth;
 
-    private transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
-
     @BeforeEach
     void setUp() {
-        ds = new DeliveryService(dr, new GPS(), rr, er);
+        ds = new DeliveryService(dr, rr, er);
         cs = new CouriersService(dr, rr);
-        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds, rr);
+        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds);
         sut = new CouriersController(ds, usersAuth, cs, availableDeliveryProxy,
                 new UpdateService(dr));
     }
@@ -100,7 +98,7 @@ class CouriersControllerTest {
         Restaurant r = new Restaurant();
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
-        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
+        deliveries.forEach(x -> availableDeliveryProxy.insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))
@@ -152,7 +150,7 @@ class CouriersControllerTest {
         r.setRestaurantID("vendor@testmail.com");
         rr.save(r);
 
-        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
+        deliveries.forEach(x -> availableDeliveryProxy.insertDelivery(x));
         dr.saveAll(deliveries);
 
         when(usersAuth.getUserAccountType("courier@testmail.com"))

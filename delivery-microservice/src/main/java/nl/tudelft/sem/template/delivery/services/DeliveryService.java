@@ -1,10 +1,5 @@
 package nl.tudelft.sem.template.delivery.services;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
@@ -18,11 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.transaction.Transactional;
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 
 /**
@@ -32,8 +26,6 @@ import java.util.stream.Collectors;
 public class DeliveryService {
 
     private final transient DeliveryRepository deliveryRepository;
-
-    private final transient GPS gps;
     @Lazy
     private final transient RestaurantRepository restaurantRepository;
 
@@ -44,17 +36,14 @@ public class DeliveryService {
      * Constructor for DeliveryService.
      *
      * @param deliveryRepository   database for deliveries
-     * @param gps                  GPS service dummy implementation
      * @param restaurantRepository database for restaurants
      * @param errorRepository      database for errors
      */
     @Autowired
     public DeliveryService(DeliveryRepository deliveryRepository,
-                           GPS gps,
                            RestaurantRepository restaurantRepository,
                            ErrorRepository errorRepository) {
         this.deliveryRepository = deliveryRepository;
-        this.gps = gps;
         this.restaurantRepository = restaurantRepository;
         this.errorRepository = errorRepository;
     }
@@ -90,22 +79,6 @@ public class DeliveryService {
             errorRepository.save(delivery.getError());
         }
         return deliveryRepository.save(delivery);
-    }
-
-    public DeliveryStatus getDeliveryStatus(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(Delivery::getStatus).orElseThrow(DeliveryNotFoundException::new);
-    }
-
-    /**
-     * Function that returns the address where the food needs to be delivered.
-     *
-     * @param deliveryId the delivery entity
-     * @return the address
-     */
-    public List<Double> getDeliveryAddress(UUID deliveryId) {
-        Optional<Delivery> delivery = deliveryRepository.findById(deliveryId);
-        return delivery.map(Delivery::getDeliveryAddress).orElseThrow(DeliveryNotFoundException::new);
     }
 
     /**
@@ -176,6 +149,6 @@ public class DeliveryService {
      */
     public Restaurant getRestaurant(String restaurantId) {
         return restaurantRepository.findById(restaurantId).orElseThrow(RestaurantService.RestaurantNotFoundException::new);
-    }
 
+    }
 }

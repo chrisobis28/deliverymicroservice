@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
@@ -49,7 +48,7 @@ public class DeliveryStatusHandlerTest {
      */
     @BeforeEach
     public void init() {
-        DeliveryService deliveryService = new DeliveryService(deliveryRepository, new GPS(), null, errorRepository);
+        DeliveryService deliveryService = new DeliveryService(deliveryRepository, null, errorRepository);
         statusHandler = new DeliveryStatusHandler(deliveryService, usersAuthentication, usersCommunication,
             new UpdateService(deliveryRepository));
     }

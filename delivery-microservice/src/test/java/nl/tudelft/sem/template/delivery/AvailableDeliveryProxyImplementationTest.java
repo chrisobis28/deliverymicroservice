@@ -40,8 +40,7 @@ class AvailableDeliveryProxyImplementationTest {
 
     @BeforeEach
     void setUp() {
-
-        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, new GPS(), rr, er), rr);
+        sut = new AvailableDeliveryProxyImplementation(new DeliveryService(dr, rr, er));
     }
 
     List<Delivery> getMockData() {
@@ -97,13 +96,6 @@ class AvailableDeliveryProxyImplementationTest {
         dr.save(d5);
 
         return List.of(d1, d2, d3, d4, d5);
-    }
-
-    @Test
-    void isNullOrEmpty() {
-        assertTrue(sut.isNullOrEmpty(""));
-        assertTrue(sut.isNullOrEmpty(null));
-        assertTrue(sut.isNullOrEmpty("      "));
     }
 
     @Test
