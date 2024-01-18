@@ -85,7 +85,7 @@ public class UsersAuthenticationService {
      */
     public Pair<HttpStatus, String> courierAndClientRestaurantAccess(String fieldName) {
         switch (fieldName) {
-            case "Couriers", "DPH": {
+            case "Couriers", "DPH", "New Order": {
                 return Pair.of(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             }
             case "Delivery Zone": {

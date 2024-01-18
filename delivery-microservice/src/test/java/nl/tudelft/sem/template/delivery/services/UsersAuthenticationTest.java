@@ -192,4 +192,36 @@ class UsersAuthenticationTest {
         assertEquals(HttpStatus.FORBIDDEN, result.getLeft());
         assertEquals(expected, result.getRight());
     }
+
+    @Test
+    public void returnsDphForbiddenWhenCourierClient() {
+        String expected = "User lacks necessary permissions.";
+        when(usersCommunication.getAccountType("courier")).thenReturn("courier");
+        when(usersCommunication.getAccountType("client")).thenReturn("customer");
+        Pair<HttpStatus, String> result = usersAuthentication.checkUserAccessToRestaurant("courier",
+            "right_vendor", "DPH");
+        assertEquals(HttpStatus.FORBIDDEN, result.getLeft());
+        assertEquals(expected, result.getRight());
+
+        result = usersAuthentication.checkUserAccessToRestaurant("client",
+            "right_vendor", "DPH");
+        assertEquals(HttpStatus.FORBIDDEN, result.getLeft());
+        assertEquals(expected, result.getRight());
+    }
+
+    @Test
+    public void returnsNewOrderForbiddenWhenCourierClient() {
+        String expected = "User lacks necessary permissions.";
+        when(usersCommunication.getAccountType("courier")).thenReturn("courier");
+        when(usersCommunication.getAccountType("client")).thenReturn("customer");
+        Pair<HttpStatus, String> result = usersAuthentication.checkUserAccessToRestaurant("courier",
+            "right_vendor", "New Order");
+        assertEquals(HttpStatus.FORBIDDEN, result.getLeft());
+        assertEquals(expected, result.getRight());
+
+        result = usersAuthentication.checkUserAccessToRestaurant("client",
+            "right_vendor", "New Order");
+        assertEquals(HttpStatus.FORBIDDEN, result.getLeft());
+        assertEquals(expected, result.getRight());
+    }
 }

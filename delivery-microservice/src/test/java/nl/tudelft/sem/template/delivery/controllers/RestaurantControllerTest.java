@@ -21,7 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -232,8 +231,8 @@ class RestaurantControllerTest {
         sut.insert(d3);
 
         String userId = "user_admin@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+        when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseEntity<List<Delivery>> res = sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId);
         assertEquals(HttpStatus.OK, res.getStatusCode());
@@ -276,8 +275,8 @@ class RestaurantControllerTest {
         d3.setCourierID("courier@testmail.com");
         sut.insert(d3);
 
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
-        when(usersCommunication.getUserAccountType(restaurantId)).thenReturn(type);
+        when(usersCommunication.checkUserAccessToRestaurant(restaurantId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseEntity<List<Delivery>> res = sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, restaurantId);
         assertEquals(HttpStatus.OK, res.getStatusCode());
@@ -322,8 +321,9 @@ class RestaurantControllerTest {
         d3.setCourierID("courier@testmail.com");
         sut.insert(d3);
 
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.VENDOR;
-        when(usersCommunication.getUserAccountType(other_restaurant)).thenReturn(type);
+        String msg = "User lacks necessary permissions.";
+        when(usersCommunication.checkUserAccessToRestaurant(other_restaurant, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, other_restaurant));
@@ -348,8 +348,9 @@ class RestaurantControllerTest {
         sut.insert(d1);
 
         String userId = "user_admin@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.CLIENT;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+        String msg = "User lacks necessary permissions.";
+        when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
@@ -374,8 +375,9 @@ class RestaurantControllerTest {
         sut.insert(d1);
 
         String userId = "user_admin@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.COURIER;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+        String msg = "User lacks necessary permissions.";
+        when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.FORBIDDEN, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
@@ -395,8 +397,8 @@ class RestaurantControllerTest {
         sut.insert(d1);
 
         String userId = "user_admin@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.ADMIN;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+        when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.OK, "OK"));
 
         ResponseStatusException exception = assertThrows(RestaurantService.RestaurantNotFoundException.class,
                 () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));
@@ -421,8 +423,9 @@ class RestaurantControllerTest {
         sut.insert(d1);
 
         String userId = "user_admin@testmail.com";
-        UsersAuthenticationService.AccountType type = UsersAuthenticationService.AccountType.INVALID;
-        when(usersCommunication.getUserAccountType(userId)).thenReturn(type);
+        String msg = "User lacks valid authentication credentials.";
+        when(usersCommunication.checkUserAccessToRestaurant(userId, restaurantId, "New Order"))
+            .thenReturn(Pair.of(HttpStatus.UNAUTHORIZED, msg));
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> sut.restaurantsRestaurantIdNewOrdersGet(restaurantId, userId));

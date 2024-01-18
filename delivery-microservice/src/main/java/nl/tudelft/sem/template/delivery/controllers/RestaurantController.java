@@ -136,22 +136,12 @@ public class RestaurantController implements RestaurantsApi {
     @Override
     public ResponseEntity<List<Delivery>> restaurantsRestaurantIdNewOrdersGet(@PathVariable String restaurantId,
                                                                               @RequestHeader String userId) {
-        UsersAuthenticationService.AccountType accountType = usersCommunication.getUserAccountType(userId);
-        switch (accountType) {
-            case ADMIN -> {
-                return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-            }
-            case VENDOR -> {
-                if (userId.equals(restaurantId)) {
-                    return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
-                }
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            }
-            case COURIER, CLIENT ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
-            default ->
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+        Pair<HttpStatus, String> result = usersCommunication.checkUserAccessToRestaurant(userId,
+            restaurantId, "New Order");
+        if (!(result.getLeft()).equals(HttpStatus.OK)) {
+            throw new ResponseStatusException(result.getLeft(), result.getRight());
         }
+        return ResponseEntity.ok(restaurantService.getAllNewOrders(restaurantId));
     }
 
 
