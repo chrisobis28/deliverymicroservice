@@ -118,8 +118,7 @@ public class AvailableDeliveryProxyIntegrationTest {
                 .containsExactlyInAnyOrderElementsOf(insertedDeliveries
                         .stream()
                         .map(x -> Tuple.tuple(x.getDeliveryID(), x.getCourierID()))
-                        .collect(Collectors.toList())
-                );
+                        .collect(Collectors.toList()));
     }
 
     @Test
@@ -149,12 +148,14 @@ public class AvailableDeliveryProxyIntegrationTest {
                 .isEqualTo(HttpStatus.NOT_FOUND);
 
         // Courier cannot assign themselves an order from restaurant with own couriers
-        assertThatThrownBy(() -> deliveryController.deliveriesDeliveryIdCourierPut(delivery.getDeliveryID(), "courier-id", "courier-id"))
+        assertThatThrownBy(() -> deliveryController.deliveriesDeliveryIdCourierPut(
+                delivery.getDeliveryID(), "courier-id", "courier-id"))
                 .extracting("status")
                 .isEqualTo(HttpStatus.FORBIDDEN);
 
         // Vendor can assign their courier to the delivery
-        assertThat(deliveryController.deliveriesDeliveryIdCourierPut(delivery.getDeliveryID(), "restaurant-id", "own-courier-id").getBody())
+        assertThat(deliveryController.deliveriesDeliveryIdCourierPut(delivery.getDeliveryID(),
+                "restaurant-id", "own-courier-id").getBody())
                 .extracting("deliveryID", "courierID")
                 .containsExactly(delivery.getDeliveryID(), "own-courier-id");
     }
