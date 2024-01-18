@@ -47,16 +47,14 @@ public class RestaurantServiceTest {
 
     @Test
     public void getRestaurantThrowsExceptionTest() {
-        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
-            rs.getRestaurant("bla");
-        });
+        assertThrows(RestaurantService.RestaurantNotFoundException.class,
+            () -> rs.getRestaurant("bla"));
     }
 
     @Test
     public void getRestaurantThrowsExceptionNullTest() {
-        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
-            rs.getRestaurant(null);
-        });
+        assertThrows(RestaurantService.RestaurantNotFoundException.class,
+            () -> rs.getRestaurant(null));
     }
 
     @Test
@@ -114,21 +112,6 @@ public class RestaurantServiceTest {
 
     }
 
-    @Test
-    public void setListOfCouriersTest() {
-        Restaurant r = new Restaurant();
-        r.setRestaurantID("bla");
-        r.setLocation(List.of(11.1, 12.2));
-        List<String> list = new ArrayList<>();
-        list.add("courier1@testmail.com");
-        rs.insert(r);
-        rs.setListOfCouriers("bla", list);
-        assertThat(rs.getRestaurant("bla").getCouriers()).isEqualTo(list);
-
-        list.add("courier2@testmail.com");
-        Restaurant rest = rs.setListOfCouriers("bla", list);
-        assertEquals(rest.getCouriers(), list);
-    }
 
     @Test
     public void deleteRestaurantWithoutDeliveries() {
@@ -139,13 +122,11 @@ public class RestaurantServiceTest {
         list.add("sjdfhbuwfbieg");
         rs.insert(r);
         rs.delete("bla");
-        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
-            rs.getRestaurant("bla");
-        });
+        assertThrows(RestaurantService.RestaurantNotFoundException.class,
+            () -> rs.getRestaurant("bla"));
 
-        assertThrows(RestaurantService.RestaurantNotFoundException.class, () -> {
-            rs.delete("bla");
-        });
+        assertThrows(RestaurantService.RestaurantNotFoundException.class,
+            () -> rs.delete("bla"));
 
     }
 

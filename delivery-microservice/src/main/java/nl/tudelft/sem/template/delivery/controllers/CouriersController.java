@@ -1,18 +1,13 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
-import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.INVALID;
-
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import nl.tudelft.sem.template.api.CouriersApi;
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import org.springframework.http.HttpStatus;
@@ -22,26 +17,41 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.COURIER;
+import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType.INVALID;
+
 @RestController
 public class CouriersController implements CouriersApi {
 
     private final transient UsersAuthenticationService usersCommunication;
     private final transient DeliveryService deliveryService;
     private final transient CouriersService couriersService;
-    private final transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
+    private final transient AvailableDeliveryProxy availableDeliveryProxy;
+    private final transient UpdateService updateService;
 
     /**
      * Constructor.
      *
-     * @param deliveryService    the delivery service
-     * @param usersCommunication mock for users authorization
+     * @param deliveryService        the delivery service
+     * @param usersCommunication     mock for users authorization
+     * @param couriersService        the service for assigning orders to couriers
+     * @param availableDeliveryProxy the proxy that creates a cache for deliveries without courier
+     * @param updateService          service of all updates
      */
     public CouriersController(DeliveryService deliveryService, UsersAuthenticationService usersCommunication,
-                              CouriersService couriersService, AvailableDeliveryProxyImplementation availableDeliveryProxy) {
+                              CouriersService couriersService,
+                              AvailableDeliveryProxyImplementation availableDeliveryProxy,
+                              UpdateService updateService) {
         this.deliveryService = deliveryService;
         this.couriersService = couriersService;
         this.usersCommunication = usersCommunication;
         this.availableDeliveryProxy = availableDeliveryProxy;
+        this.updateService = updateService;
     }
 
     /**
@@ -70,7 +80,7 @@ public class CouriersController implements CouriersApi {
     }
 
     public AvailableDeliveryProxyImplementation testMethod() {
-        return availableDeliveryProxy;
+        return (AvailableDeliveryProxyImplementation) availableDeliveryProxy;
     }
 
     /**
@@ -90,7 +100,7 @@ public class CouriersController implements CouriersApi {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This courier works for a specific restaurant");
         }
         UUID id = availableDeliveryProxy.getAvailableDeliveryId();
-        deliveryService.updateDeliveryCourier(id, courierId);
+        updateService.updateDeliveryCourier(id, courierId);
         Delivery delivery = deliveryService.getDelivery(id);
         availableDeliveryProxy.insertDelivery(delivery);
 

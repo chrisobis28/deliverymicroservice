@@ -1,15 +1,6 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxyImplementation;
 import nl.tudelft.sem.template.delivery.GPS;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
@@ -17,6 +8,7 @@ import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.CouriersService;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
+import nl.tudelft.sem.template.delivery.services.UpdateService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
 import nl.tudelft.sem.template.model.Delivery;
 import nl.tudelft.sem.template.model.DeliveryStatus;
@@ -32,6 +24,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
 @ExtendWith(MockitoExtension.class)
@@ -62,8 +64,9 @@ class CouriersControllerTest {
     void setUp() {
         ds = new DeliveryService(dr, new GPS(), rr, er);
         cs = new CouriersService(dr, rr);
-        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds);
-        sut = new CouriersController(ds, usersAuth, cs, availableDeliveryProxy);
+        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds, rr);
+        sut = new CouriersController(ds, usersAuth, cs, availableDeliveryProxy,
+                new UpdateService(dr));
     }
 
     @Test
