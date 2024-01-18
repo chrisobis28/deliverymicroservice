@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomerHelplineServiceMock implements CustomerHelplineService {
 
-    private final Log logger = LogFactory.getLog(CustomerHelplineServiceMock.class);
+    private static final Log logger = LogFactory.getLog(CustomerHelplineServiceMock.class);
 
     @Override
     public void sendRequest(Delivery delivery, String message) {

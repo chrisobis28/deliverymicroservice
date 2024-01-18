@@ -19,11 +19,11 @@ import static org.mockito.Mockito.when;
 class UsersAuthenticationTest {
 
     @Mock
-    private UsersCommunication usersCommunication;
+    private transient UsersCommunication usersCommunication;
     @InjectMocks
-    private UsersAuthenticationService usersAuthentication;
+    private transient UsersAuthenticationService usersAuthentication;
 
-    private Delivery delivery;
+    private transient Delivery delivery;
 
     @BeforeEach
     public void init() {

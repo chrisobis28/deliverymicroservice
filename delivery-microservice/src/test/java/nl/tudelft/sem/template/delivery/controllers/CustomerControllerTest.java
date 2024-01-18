@@ -29,11 +29,11 @@ import org.springframework.http.HttpStatus;
 public class CustomerControllerTest {
 
     @Autowired
-    private DeliveryRepository deliveryRepository;
+    private transient DeliveryRepository deliveryRepository;
     @Mock
-    private UsersAuthenticationService usersAuth;
-    private CustomersService customersService;
-    private CustomerController customerController;
+    private transient UsersAuthenticationService usersAuth;
+    private transient CustomersService customersService;
+    private transient CustomerController customerController;
 
     @BeforeEach
     public void init() {

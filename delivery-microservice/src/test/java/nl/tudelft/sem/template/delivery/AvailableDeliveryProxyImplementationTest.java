@@ -27,16 +27,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AvailableDeliveryProxyImplementationTest {
 
-    private AvailableDeliveryProxyImplementation sut;
+    private transient AvailableDeliveryProxyImplementation sut;
 
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
 
     @Autowired
-    private ErrorRepository er;
+    private transient ErrorRepository er;
 
     @Autowired
-    private RestaurantRepository rr;
+    private transient RestaurantRepository rr;
 
     @BeforeEach
     void setUp() {

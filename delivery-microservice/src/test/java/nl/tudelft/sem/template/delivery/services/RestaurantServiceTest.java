@@ -28,13 +28,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 public class RestaurantServiceTest {
     @Autowired
-    private RestaurantRepository rr;
-    private RestaurantService rs;
+    private transient RestaurantRepository rr;
+    private transient RestaurantService rs;
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
     @Autowired
-    private ErrorRepository er;
-    private DeliveryService ds;
+    private transient ErrorRepository er;
+    private transient DeliveryService ds;
 
     /**
      * Set up.

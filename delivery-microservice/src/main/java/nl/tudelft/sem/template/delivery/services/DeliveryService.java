@@ -14,13 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.Valid;
 import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 
 
 /**
@@ -47,7 +45,10 @@ public class DeliveryService {
      * @param errorRepository      database for errors
      */
     @Autowired
-    public DeliveryService(DeliveryRepository deliveryRepository, GPS gps, RestaurantRepository restaurantRepository, ErrorRepository errorRepository) {
+    public DeliveryService(DeliveryRepository deliveryRepository,
+                           GPS gps,
+                           RestaurantRepository restaurantRepository,
+                           ErrorRepository errorRepository) {
         this.deliveryRepository = deliveryRepository;
         this.gps = gps;
         this.restaurantRepository = restaurantRepository;
@@ -90,13 +91,13 @@ public class DeliveryService {
     /**
      * Updates the delivery status.
      *
-     * @param deliveryId a delivery to update the status of
+     * @param deliveryId     a delivery to update the status of
      * @param deliveryStatus new status
      */
     public void updateDeliveryStatus(UUID deliveryId, DeliveryStatus deliveryStatus) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
         delivery.setStatus(deliveryStatus);
-        if(delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
+        if (delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
             delivery.setDeliveredTime(OffsetDateTime.now());
         }
         deliveryRepository.save(delivery);
@@ -121,7 +122,7 @@ public class DeliveryService {
      * Update the rating of a courier.
      *
      * @param deliveryId delivery to update
-     * @param rating new rating score
+     * @param rating     new rating score
      */
     public void updateCourierRating(UUID deliveryId, Integer rating) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
@@ -133,7 +134,7 @@ public class DeliveryService {
      * Update the rating of a restaurant.
      *
      * @param deliveryId the delivery to be updated
-     * @param rating new rating of restaurant
+     * @param rating     new rating of restaurant
      */
     public void updateRestaurantRating(UUID deliveryId, Integer rating) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);
@@ -175,6 +176,11 @@ public class DeliveryService {
         }
     }
 
+    /**
+     * Retrieves all accepted deliveries without an assigned courier.
+     *
+     * @return a list of delivery objects
+     */
     public List<Delivery> getAcceptedDeliveries() {
         return deliveryRepository.findAll().stream()
                 .filter(delivery -> delivery.getCourierID() == null
@@ -186,7 +192,7 @@ public class DeliveryService {
      * Given a new courier ID, assign it to a given delivery.
      *
      * @param deliveryId ID of a delivery to be updated
-     * @param courierId ID of a courier to be assigned
+     * @param courierId  ID of a courier to be assigned
      */
     public void updateDeliveryCourier(UUID deliveryId, String courierId) {
         Delivery delivery = deliveryRepository.findById(deliveryId).orElseThrow(DeliveryNotFoundException::new);

@@ -24,9 +24,9 @@ public class CustomExceptionHandlerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
     @Autowired
-    private TestRestTemplate restTemplate;
+    private transient TestRestTemplate restTemplate;
     @SpyBean
-    private CustomExceptionHandler exceptionHandler;
+    private transient CustomExceptionHandler exceptionHandler;
 
     @Test
     void whenResponseStatusExceptionWithClientSideErrorIsThrownThenApiErrorWithFullMessageShouldBeReturned()

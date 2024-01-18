@@ -5,8 +5,10 @@ import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.model.Delivery;
+import nl.tudelft.sem.template.model.DeliveryStatus;
 import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.ErrorType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +25,7 @@ import javax.transaction.Transactional;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
+
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,34 +38,33 @@ import static org.mockito.Mockito.when;
 @DataJpaTest
 class StatisticsControllerTest {
     @Mock
-    private UsersAuthenticationService usersCommunication;
+    private transient UsersAuthenticationService usersCommunication;
 
-    private StatisticsController sut;
+    private transient StatisticsController sut;
 
 
-    String userId;
-    String courierId;
-    UsersAuthenticationService.AccountType userType;
-    UUID orderId1;
-    UUID orderId2;
-    UUID orderId3;
-    UUID orderId4;
-    UUID orderId5;
-    UUID orderId6;
-    List<UUID> orderIds;
+    private transient String userId;
+    private transient String courierId;
+    private transient UsersAuthenticationService.AccountType userType;
+    private transient UUID orderId1;
+    private transient UUID orderId2;
+    private transient UUID orderId3;
+    private transient UUID orderId4;
+    private transient UUID orderId5;
+    private transient UUID orderId6;
+    private transient List<UUID> orderIds;
     @Autowired
-    private DeliveryRepository repo1;
+    private transient DeliveryRepository repo1;
     @Autowired
-    private ErrorRepository repoe;
+    private transient ErrorRepository repoe;
 
-    Delivery d1 = new Delivery();
-    Delivery d2 = new Delivery();
-    Delivery d3 = new Delivery();
-    Delivery d4 = new Delivery();
-    Delivery d5 = new Delivery();
-    Delivery d6 = new Delivery();
-    Error error = new Error();
-
+    private transient Delivery d1 = new Delivery();
+    private transient Delivery d2 = new Delivery();
+    private transient Delivery d3 = new Delivery();
+    private transient Delivery d4 = new Delivery();
+    private transient Delivery d5 = new Delivery();
+    private transient Delivery d6 = new Delivery();
+    private transient Error error = new Error();
 
 
     @BeforeEach
@@ -94,25 +96,28 @@ class StatisticsControllerTest {
     @Test
     void testForDeliveriesPerHrEmptyID() {
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet("", ""))
-            .extracting("status")
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+                .extracting("status")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet("", ""))
-            .message()
-            .isEqualTo("400 BAD_REQUEST \"User ID or restaurant ID is invalid.\"");
+                .message()
+                .isEqualTo("400 BAD_REQUEST \"User ID or restaurant ID is invalid.\"");
     }
 
     @Test
     void testForIsNull() {
         assertTrue(sut.isNullOrEmpty(null));
     }
+
     @Test
     void testForIsEmpty() {
         assertTrue(sut.isNullOrEmpty(""));
     }
+
     @Test
     void testForIsEmptyNot() {
         assertTrue(sut.isNullOrEmpty(" "));
     }
+
     @Test
     void testForIsTrue() {
         assertFalse(sut.isNullOrEmpty("wkbkbfee"));
@@ -124,11 +129,11 @@ class StatisticsControllerTest {
         when(usersCommunication.getUserAccountType(userId)).thenReturn(UsersAuthenticationService.AccountType.COURIER);
 
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId, userId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
 
     @Test
@@ -136,11 +141,11 @@ class StatisticsControllerTest {
         String userId2 = userId.concat("impostor");
         when(usersCommunication.getUserAccountType(userId2)).thenReturn(UsersAuthenticationService.AccountType.VENDOR);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.FORBIDDEN);
+                .extracting("status")
+                .isEqualTo(HttpStatus.FORBIDDEN);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .message()
-            .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
+                .message()
+                .isEqualTo("403 FORBIDDEN \"User lacks necessary permissions.\"");
     }
 
     @Test
@@ -148,12 +153,13 @@ class StatisticsControllerTest {
         String userId2 = "impostor";
         when(usersCommunication.getUserAccountType(any())).thenReturn(UsersAuthenticationService.AccountType.INVALID);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .extracting("status")
-            .isEqualTo(HttpStatus.UNAUTHORIZED);
+                .extracting("status")
+                .isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThatThrownBy(() -> sut.statisticsDeliveriesPerHourGet(userId2, userId))
-            .message()
-            .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
+                .message()
+                .isEqualTo("401 UNAUTHORIZED \"User lacks valid authentication credentials.\"");
     }
+
     @Test
     void testForDeliveriesPerHrBadRequestNull() {
 
@@ -161,6 +167,7 @@ class StatisticsControllerTest {
                 () -> sut.statisticsDeliveriesPerHourGet(null, userId));
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
     }
+
     @Test
     void testForDeliveriesPerHrBadRequestEmpty1() {
 
@@ -169,6 +176,7 @@ class StatisticsControllerTest {
         assertEquals(exception.getStatus(), HttpStatus.BAD_REQUEST);
 
     }
+
     @Test
     void testForDeliveriesPerHrBadRequestNullt() {
 
@@ -224,11 +232,11 @@ class StatisticsControllerTest {
         ResponseEntity<Void> result = sut.insert(d1);
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertThatThrownBy(() -> sut.insert(null))
-            .extracting("status")
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+                .extracting("status")
+                .isEqualTo(HttpStatus.BAD_REQUEST);
         assertThatThrownBy(() -> sut.insert(null))
-            .message()
-            .isEqualTo("400 BAD_REQUEST \"Delivery is invalid.\"");
+                .message()
+                .isEqualTo("400 BAD_REQUEST \"Delivery is invalid.\"");
 
         sut.insert(d2);
         sut.insert(d3);
@@ -555,11 +563,12 @@ class StatisticsControllerTest {
         repo1.save(d1);
         when(usersCommunication.getUserAccountType(userId)).thenReturn(userType);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsCourierOverviewGet(userId,userId, date1, date2));
+                () -> sut.statisticsCourierOverviewGet(userId, userId, date1, date2));
 
         assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
 
     }
+
     @Test
     void unauthorize() {
         userType = UsersAuthenticationService.AccountType.INVALID;
@@ -574,12 +583,11 @@ class StatisticsControllerTest {
         when(usersCommunication.getUserAccountType(courierId))
                 .thenReturn(UsersAuthenticationService.AccountType.COURIER);
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> sut.statisticsCourierOverviewGet(userId,courierId, date1, date2));
+                () -> sut.statisticsCourierOverviewGet(userId, courierId, date1, date2));
 
         assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
 
     }
-
 
 
 }

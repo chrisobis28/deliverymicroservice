@@ -33,15 +33,15 @@ import static org.mockito.Mockito.*;
 public class DeliveryStatusHandlerTest {
 
     @Autowired
-    private DeliveryRepository deliveryRepository;
+    private transient DeliveryRepository deliveryRepository;
 
     @Autowired
-    private ErrorRepository errorRepository;
+    private transient ErrorRepository errorRepository;
     @Mock
-    private UsersAuthenticationService usersAuthentication;
+    private transient UsersAuthenticationService usersAuthentication;
     @Mock
-    private UsersCommunication usersCommunication;
-    private DeliveryStatusHandler statusHandler;
+    private transient UsersCommunication usersCommunication;
+    private transient DeliveryStatusHandler statusHandler;
 
     @BeforeEach
     public void init() {

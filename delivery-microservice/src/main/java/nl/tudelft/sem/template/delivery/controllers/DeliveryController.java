@@ -3,14 +3,13 @@ package nl.tudelft.sem.template.delivery.controllers;
 import io.swagger.v3.oas.annotations.Parameter;
 import nl.tudelft.sem.template.api.DeliveriesApi;
 import nl.tudelft.sem.template.delivery.AvailableDeliveryProxy;
-import nl.tudelft.sem.template.delivery.domain.ErrorRepository;
 import nl.tudelft.sem.template.delivery.services.DeliveryService;
 import nl.tudelft.sem.template.delivery.services.ErrorService;
 import nl.tudelft.sem.template.delivery.services.RestaurantService;
-import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.*;
 import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService;
-import nl.tudelft.sem.template.model.*;
+import nl.tudelft.sem.template.delivery.services.UsersAuthenticationService.AccountType;
 import nl.tudelft.sem.template.model.Error;
+import nl.tudelft.sem.template.model.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -39,9 +38,9 @@ public class DeliveryController implements DeliveriesApi {
     /**
      * Constructor.
      *
-     * @param deliveryService       the delivery service
-     * @param usersAuthenticationService    mock for users authorization
-     * @param deliveryStatusHandler Handles the status of Delivery entities
+     * @param deliveryService            the delivery service
+     * @param usersAuthenticationService mock for users authorization
+     * @param deliveryStatusHandler      Handles the status of Delivery entities
      */
     public DeliveryController(DeliveryService deliveryService,
                               ErrorService errorService,
@@ -169,7 +168,7 @@ public class DeliveryController implements DeliveriesApi {
 
         if (isNullOrEmpty(orderId) || isNullOrEmpty(customerId) || isNullOrEmpty(vendorId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "Restaurant ID, customer ID or Delivery ID is invalid.");
+                    "Restaurant ID, customer ID or Delivery ID is invalid.");
         }
 
         if (address == null || address.size() != 2) {
@@ -205,7 +204,7 @@ public class DeliveryController implements DeliveriesApi {
                 .currentLocation(r.getLocation());
 
 
-        if(delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
+        if (delivery.getStatus().equals(DeliveryStatus.DELIVERED)) {
             delivery.setDeliveredTime(OffsetDateTime.now());
         }
 
@@ -320,7 +319,7 @@ public class DeliveryController implements DeliveriesApi {
      *
      * @param deliveryId ID of the Delivery entity (required)
      * @param userId     User ID for authorization (required)
-     * @param rating       Update rating of delivery (required)
+     * @param rating     Update rating of delivery (required)
      * @return Response entity containing the updated Delivery object
      */
     @Override
@@ -386,9 +385,9 @@ public class DeliveryController implements DeliveriesApi {
         return switch (accountType) {
             case ADMIN, COURIER -> ResponseEntity.ok(deliveryService.getAcceptedDeliveries());
             case VENDOR, CLIENT -> throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "User lacks necessary permissions.");
+                    "User lacks necessary permissions.");
             default -> throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
-                "User lacks valid authentication credentials.");
+                    "User lacks valid authentication credentials.");
         };
     }
 
@@ -424,7 +423,7 @@ public class DeliveryController implements DeliveriesApi {
 
         if (!courier.equals(AccountType.COURIER)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                "The person you are trying to assign to the order is not a courier.");
+                    "The person you are trying to assign to the order is not a courier.");
         }
         if (userType.equals(AccountType.ADMIN)) {
             deliveryService.updateDeliveryCourier(deliveryId, courierId);
@@ -432,13 +431,13 @@ public class DeliveryController implements DeliveriesApi {
         }
         if (delivery.getCourierID() != null) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
-                "Delivery already has a courier assigned.");
+                    "Delivery already has a courier assigned.");
         }
         switch (userType) {
-            case CLIENT ->
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
+            case CLIENT -> throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User lacks necessary permissions.");
             case INVALID ->
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User lacks valid authentication credentials.");
+                    throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                            "User lacks valid authentication credentials.");
             case COURIER -> {
                 if (userId.equals(courierId)) {
                     deliveryService.updateDeliveryCourier(deliveryId, courierId);
@@ -532,9 +531,9 @@ public class DeliveryController implements DeliveriesApi {
     /**
      * Updates the delivery address of an order.
      *
-     * @param deliveryId  ID of the Delivery entity (required)
-     * @param userId      ID of the User for authorization (required)
-     * @param address new address to be used in the future (required)
+     * @param deliveryId ID of the Delivery entity (required)
+     * @param userId     ID of the User for authorization (required)
+     * @param address    new address to be used in the future (required)
      * @return a Delivery Object with the updates that took place
      */
     @Override
@@ -558,12 +557,18 @@ public class DeliveryController implements DeliveriesApi {
 
 
     static public class InvalidUserException extends ResponseStatusException {
+
+        private static final long serialVersionUID = 1L;
+
         public InvalidUserException() {
             super(HttpStatus.UNAUTHORIZED, "User is not known to the system");
         }
     }
 
     static public class NotAuthenticatedException extends ResponseStatusException {
+
+        private static final long serialVersionUID = 1L;
+
         public NotAuthenticatedException() {
             super(HttpStatus.FORBIDDEN, "User could not be authorized");
         }

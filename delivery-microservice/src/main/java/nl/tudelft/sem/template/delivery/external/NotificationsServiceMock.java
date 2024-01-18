@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class NotificationsServiceMock implements NotificationService {
 
-    private final Log logger = LogFactory.getLog(NotificationsServiceMock.class);
+    private static final Log logger = LogFactory.getLog(NotificationsServiceMock.class);
 
     @Override
     public void sendNotification(String userId, String notification) {

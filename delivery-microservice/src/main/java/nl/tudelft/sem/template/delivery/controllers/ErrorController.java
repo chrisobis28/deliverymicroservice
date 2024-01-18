@@ -21,10 +21,10 @@ import java.util.UUID;
 @RestController
 public class ErrorController implements ErrorsApi {
 
-    private final ErrorService errorService;
-    private final DeliveryService deliveryService;
-    private final UsersAuthenticationService usersAuthentication;
-    private final DeliveryErrorAction errorHandlingChain;
+    private final transient ErrorService errorService;
+    private final transient DeliveryService deliveryService;
+    private final transient UsersAuthenticationService usersAuthentication;
+    private final transient DeliveryErrorAction errorHandlingChain;
 
     /**
      * Constructor.

@@ -38,31 +38,31 @@ import org.springframework.web.server.ResponseStatusException;
 @DataJpaTest
 class CouriersControllerTest {
     @Autowired
-    private DeliveryRepository dr;
+    private transient DeliveryRepository dr;
 
     @Autowired
-    private RestaurantRepository rr;
+    private transient RestaurantRepository rr;
 
 
     @Autowired
-    private ErrorRepository er;
+    private transient ErrorRepository er;
 
-    private CouriersService cs;
+    private transient CouriersService cs;
 
-    private DeliveryService ds;
+    private transient DeliveryService ds;
 
-    private CouriersController sut;
-
-    @Mock
-    private UsersAuthenticationService usersAuth;
+    private transient CouriersController sut;
 
     @Mock
-    AvailableDeliveryProxyImplementation availableDeliveryProxy;
+    private transient UsersAuthenticationService usersAuth;
+
+    private transient AvailableDeliveryProxyImplementation availableDeliveryProxy;
 
     @BeforeEach
     void setUp() {
         ds = new DeliveryService(dr, new GPS(), rr, er);
         cs = new CouriersService(dr, rr);
+        availableDeliveryProxy = new AvailableDeliveryProxyImplementation(ds);
         sut = new CouriersController(ds, usersAuth, cs, availableDeliveryProxy);
     }
 
@@ -84,56 +84,56 @@ class CouriersControllerTest {
                 .message()
                 .isEqualTo("400 BAD_REQUEST \"There is no such courier\"");
     }
-//
-//    @Test
-//    void couriersCourierIdNextOrderPut() {
-//        List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-//        List<Delivery> deliveries = deliveryUUIDs
-//                .stream()
-//                .map(x -> new Delivery().deliveryID(x))
-//                .collect(Collectors.toList());
-//        deliveries.forEach(y -> y.setStatus(DeliveryStatus.ACCEPTED));
-//        deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
-//        Restaurant r = new Restaurant();
-//        r.setRestaurantID("vendor@testmail.com");
-//        rr.save(r);
-//        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
-//        dr.saveAll(deliveries);
-//
-//        when(usersAuth.getUserAccountType("courier@testmail.com"))
-//                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
-//
-//        ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
-//        assertEquals(HttpStatus.OK, res.getStatusCode());
-//
-//        res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
-//        assertEquals(HttpStatus.OK, res.getStatusCode());
-//    }
-//
-//    @Test
-//    void couriersCourierIdNextOrderPut_NotFound() {
-//        List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
-//        List<Delivery> deliveries = deliveryUUIDs
-//                .stream()
-//                .map(x -> new Delivery().deliveryID(x))
-//                .collect(Collectors.toList());
-//        deliveries.forEach(y -> y.setStatus(DeliveryStatus.DELIVERED));
-//        deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
-//        dr.saveAll(deliveries);
-//
-//        Restaurant r = new Restaurant();
-//        r.setRestaurantID("vendor@testmail.com");
-//        rr.save(r);
-//        when(usersAuth.getUserAccountType("courier@testmail.com"))
-//                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
-//
-//        assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
-//                .extracting("status")
-//                .isEqualTo(HttpStatus.NOT_FOUND);
-//        assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
-//                .message()
-//                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment.\"");
-//    }
+
+    @Test
+    void couriersCourierIdNextOrderPut() {
+        List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
+        List<Delivery> deliveries = deliveryUUIDs
+                .stream()
+                .map(x -> new Delivery().deliveryID(x))
+                .collect(Collectors.toList());
+        deliveries.forEach(y -> y.setStatus(DeliveryStatus.ACCEPTED));
+        deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("vendor@testmail.com");
+        rr.save(r);
+        deliveries.forEach(x -> sut.testMethod().insertDelivery(x));
+        dr.saveAll(deliveries);
+
+        when(usersAuth.getUserAccountType("courier@testmail.com"))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        ResponseEntity<Delivery> res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+
+        res = sut.couriersCourierIdNextOrderPut("courier@testmail.com");
+        assertEquals(HttpStatus.OK, res.getStatusCode());
+    }
+
+    @Test
+    void couriersCourierIdNextOrderPut_NotFound() {
+        List<UUID> deliveryUUIDs = Stream.generate(UUID::randomUUID).limit(3).collect(Collectors.toList());
+        List<Delivery> deliveries = deliveryUUIDs
+                .stream()
+                .map(x -> new Delivery().deliveryID(x))
+                .collect(Collectors.toList());
+        deliveries.forEach(y -> y.setStatus(DeliveryStatus.DELIVERED));
+        deliveries.forEach(x -> x.setRestaurantID("vendor@testmail.com"));
+        dr.saveAll(deliveries);
+
+        Restaurant r = new Restaurant();
+        r.setRestaurantID("vendor@testmail.com");
+        rr.save(r);
+        when(usersAuth.getUserAccountType("courier@testmail.com"))
+                .thenReturn(UsersAuthenticationService.AccountType.COURIER);
+
+        assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+                .extracting("status")
+                .isEqualTo(HttpStatus.NOT_FOUND);
+        assertThatThrownBy(() -> sut.couriersCourierIdNextOrderPut("courier@testmail.com"))
+                .message()
+                .isEqualTo("404 NOT_FOUND \"There are no available deliveries at the moment.\"");
+    }
 
     @Test
     void couriersCourierIdNextOrderPut_CourierBelongsToRestaurant() {

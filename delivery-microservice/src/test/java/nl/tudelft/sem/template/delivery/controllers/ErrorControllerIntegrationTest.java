@@ -31,19 +31,19 @@ import static org.mockito.Mockito.*;
 @DataJpaTest
 class ErrorControllerIntegrationTest {
     @Mock
-    private UsersAuthenticationService usersAuth;
+    private transient UsersAuthenticationService usersAuth;
     @Mock
-    private DeliveryService deliveryService;
+    private transient DeliveryService deliveryService;
     @Mock
-    private DeliveryErrorAction errorHandlingChain;
+    private transient DeliveryErrorAction errorHandlingChain;
 
     @Autowired
-    private ErrorRepository errorRepository;
+    private transient ErrorRepository errorRepository;
     @Autowired
-    private DeliveryRepository deliveryRepository;
+    private transient DeliveryRepository deliveryRepository;
 
-    private ErrorService errorService;
-    private ErrorController errorController;
+    private transient ErrorService errorService;
+    private transient ErrorController errorController;
 
     private Delivery insertSampleDeliveryAndError() {
 

@@ -29,15 +29,15 @@ import static org.mockito.Mockito.*;
 class DeliveryServiceTest {
 
     @Mock
-    public DeliveryRepository deliveryRepositoryMock;
+    public transient DeliveryRepository deliveryRepositoryMock;
     @Mock
-    public RestaurantRepository restaurantRepositoryMock;
+    public transient RestaurantRepository restaurantRepositoryMock;
 
     @Mock
-    public GPS gpsMock;
+    public transient GPS gpsMock;
 
     @InjectMocks
-    public DeliveryService deliveryService;
+    public transient DeliveryService deliveryService;
 
     @Test
     void updatesStatusWhenUpdateDeliveryStatusCalled() {

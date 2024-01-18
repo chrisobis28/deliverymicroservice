@@ -1,6 +1,5 @@
 package nl.tudelft.sem.template.delivery.controllers;
 
-import nl.tudelft.sem.template.delivery.communication.UsersCommunication;
 import nl.tudelft.sem.template.delivery.domain.DeliveryRepository;
 import nl.tudelft.sem.template.delivery.domain.RestaurantRepository;
 import nl.tudelft.sem.template.delivery.services.StatisticsService;
@@ -28,7 +27,6 @@ import static nl.tudelft.sem.template.delivery.services.UsersAuthenticationServi
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @EntityScan("nl.tudelft.sem.template.*")
@@ -36,15 +34,15 @@ import static org.mockito.Mockito.when;
 @Transactional
 @DataJpaTest
 public class StatisticsControllerTestWithRepo {
-    private StatisticsService statisticsService;
+    private transient StatisticsService statisticsService;
 
     @Mock
-    private UsersAuthenticationService usersAuthenticationService;
+    private transient UsersAuthenticationService usersAuthenticationService;
     @Autowired
-    private DeliveryRepository repo1;
+    private transient DeliveryRepository repo1;
     @Autowired
-    private RestaurantRepository repo2;
-    private StatisticsController sut;
+    private transient RestaurantRepository repo2;
+    private transient StatisticsController sut;
 
     @BeforeEach
     void setUp() {
@@ -95,6 +93,7 @@ public class StatisticsControllerTestWithRepo {
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(userID, courierId, start, end).getBody())
                 .getDeliveryTimeRatio()).isEqualTo(0);
     }
+
     @Test
     void authorizedEmptyTestAdmin() {
         String userID = "user@user.com";
@@ -255,13 +254,13 @@ public class StatisticsControllerTestWithRepo {
         assertThat(sut.statisticsCourierOverviewGet(userID, courierId, start_interval, second_end_interval)
                 .getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getAverageRating()).isEqualTo(4.5);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getSuccessRate()).isEqualTo(1);
         assertThat(Objects.requireNonNull(sut.statisticsCourierOverviewGet(
-                userID, courierId, start_interval, second_end_interval)
+                        userID, courierId, start_interval, second_end_interval)
                 .getBody()).getDeliveryTimeRatio()).isEqualTo(20);
 
     }

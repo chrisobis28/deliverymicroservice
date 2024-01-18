@@ -30,13 +30,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @DataJpaTest
 class StatisticsServiceTest {
     @Autowired
-    public DeliveryRepository deliveryRepository;
+    public transient DeliveryRepository deliveryRepository;
     @Autowired
-    private ErrorRepository errorRepository;
-    private StatisticsService statisticsService;
-    Error error = new Error();
-    Delivery delivery1 = new Delivery();
-    OffsetDateTime date0;
+    private transient ErrorRepository errorRepository;
+    private transient StatisticsService statisticsService;
+    private transient Error error = new Error();
+    private transient Delivery delivery1 = new Delivery();
+    private transient OffsetDateTime date0;
 
     @BeforeEach
     void setUp() {
